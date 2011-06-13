@@ -1,0 +1,241 @@
+/*
+ * Copyright (C) 2011  Southern Storm Software, Pty Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "tvchannel.h"
+#include "tvprogramme.h"
+
+TvChannel::TvChannel(TvChannelList *channelList)
+    : m_channelList(channelList)
+    , m_programmes(0)
+{
+}
+
+TvChannel::~TvChannel()
+{
+    TvProgramme *prog = m_programmes;
+    TvProgramme *next;
+    while (prog != 0) {
+        next = prog->m_next;
+        delete prog;
+        prog = next;
+    }
+}
+
+QString TvChannel::dayUrl(const QDate &date) const
+{
+    // http://www.oztivo.net/twiki/bin/view/TVGuide/StaticXMLGuideAPI
+    //
+    // URL has the form: baseUrl/channelid_YYYY-MM-DD.xml.gz
+    //
+    // If there is more than one baseUrl, then pick a random one
+    // to help spread out the server load.
+    QString url;
+    if (m_baseUrls.isEmpty() || m_id.isEmpty())
+        return QString();
+    if (m_baseUrls.size() == 1)
+        url = m_baseUrls.at(0);
+    else
+        url = m_baseUrls.at(qrand() % m_baseUrls.size());
+    if (!url.endsWith(QLatin1Char('/')))
+        url += QLatin1Char('/');
+    url += m_id;
+    url += QLatin1Char('_');
+    url += date.toString(QLatin1String("yyyy-MM-dd"));
+    url += QLatin1String(".xml.gz");
+    return url;
+}
+
+QDateTime TvChannel::dayLastModified(const QDate &date) const
+{
+    for (int index = 0; index < m_dates.size(); ++index) {
+        if (m_dates.at(index) == date)
+            return m_modifiedTimes.at(index);
+    }
+    return QDateTime();
+}
+
+void TvChannel::addDataFor(const QDate &date, const QDateTime &lastModified)
+{
+    for (int index = 0; index < m_dates.size(); ++index) {
+        if (m_dates.at(index) == date) {
+            m_modifiedTimes[index] = lastModified;
+            return;
+        }
+    }
+    m_dates.append(date);
+    m_modifiedTimes.append(lastModified);
+}
+
+bool TvChannel::hasDataFor(const QDate &date) const
+{
+    // If there are no "datafor" declarations, then use +/- 2 weeks.
+    if (m_dates.isEmpty()) {
+        QDate current = QDate::currentDate();
+        QDate start = current.addDays(-14);
+        QDate stop = current.addDays(14);
+        return date >= start && date <= stop;
+    }
+    for (int index = 0; index < m_dates.size(); ++index) {
+        if (m_dates.at(index) == date)
+            return true;
+    }
+    return false;
+}
+
+bool TvChannel::load(QXmlStreamReader *reader)
+{
+    // Will leave the XML stream positioned on </channel>.
+    Q_ASSERT(reader->isStartElement());
+    Q_ASSERT(reader->name() == QLatin1String("channel"));
+    bool changed = false;
+    QStringList baseUrls;
+    QList<QDate> dates(m_dates);
+    QList<QDateTime> modifiedTimes(m_modifiedTimes);
+    m_id = reader->attributes().value(QLatin1String("id")).toString();
+    m_dates.clear();
+    m_modifiedTimes.clear();
+    while (!reader->hasError()) {
+        QXmlStreamReader::TokenType token = reader->readNext();
+        if (token == QXmlStreamReader::StartElement) {
+            if (reader->name() == QLatin1String("display-name")) {
+                QString name = reader->readElementText
+                    (QXmlStreamReader::SkipChildElements);
+                if (m_name != name) {
+                    m_name = name;
+                    changed = true;
+                }
+            } else if (reader->name() == QLatin1String("base-url")) {
+                baseUrls += reader->readElementText
+                    (QXmlStreamReader::SkipChildElements);
+            } else if (reader->name() == QLatin1String("datafor")) {
+                QString lastmod = reader->attributes().value
+                    (QLatin1String("lastmodified")).toString();
+                QString date = reader->readElementText
+                    (QXmlStreamReader::SkipChildElements);
+                addDataFor(QDate::fromString(date, QLatin1String("yyyy-MM-dd")),
+                           QDateTime::fromString(lastmod, QLatin1String("yyyyMMddHHmmss")));
+            }
+        } else if (token == QXmlStreamReader::EndElement) {
+            if (reader->name() == QLatin1String("channel"))
+                break;
+        }
+    }
+    if (baseUrls != m_baseUrls) {
+        m_baseUrls = baseUrls;
+        changed = true;
+    }
+    if (m_dates != dates || m_modifiedTimes != modifiedTimes)
+        changed = true;
+    if (m_name.isEmpty()) {
+        m_name = m_id;
+        changed = true;
+    }
+    return changed;
+}
+
+void TvChannel::addProgramme(TvProgramme *programme)
+{
+    TvProgramme *prog = m_programmes;
+    TvProgramme *prev = 0;
+    TvProgramme *next;
+    while (prog != 0) {
+        next = prog->m_next;
+        if (programme->start() >= prog->stop()) {
+            // Haven't found the insertion point yet.
+            prev = prog;
+            prog = next;
+        } else if (programme->stop() <= prog->start()) {
+            // Insertion point found.
+            break;
+        } else {
+            // Original programme overlaps with new one, so this
+            // is probably an update for the same timeslot.
+            // Remove the original entry and replace it.
+            if (prev)
+                prev->m_next = next;
+            else
+                m_programmes = next;
+            delete prog;
+            prog = next;
+        }
+    }
+    programme->m_next = prog;
+    if (prev)
+        prev->m_next = programme;
+    else
+        m_programmes = programme;
+}
+
+// Trim any programmes that do not apply to dates in "datafor" decls.
+bool TvChannel::trimProgrammes()
+{
+    // Get the list of dates that are covered by "datafor" decls.
+    // If there are no "datafor" decls, then use +/- 2 weeks.
+    QDate start;
+    QDate stop;
+    if (m_dates.isEmpty()) {
+        QDate current = QDate::currentDate();
+        start = current.addDays(-14);
+        stop = current.addDays(14);
+    } else {
+        start = stop = m_dates[0];
+        for (int index = 1; index < m_dates.size(); ++index) {
+            QDate current = m_dates[index];
+            if (current < start)
+                start = current;
+            if (current > stop)
+                stop = current;
+        }
+    }
+
+    // Trim the list of programmes outside the date range.
+    TvProgramme *prog = m_programmes;
+    TvProgramme *prev = 0;
+    TvProgramme *next;
+    bool changed = false;
+    m_programmes = 0;
+    while (prog != 0) {
+        next = prog->m_next;
+        if (start <= prog->stop().date() &&
+                stop >= prog->start().date()) {
+            if (prev)
+                prev->m_next = prog;
+            else
+                m_programmes = prog;
+            prog->m_next = 0;
+            prev = prog;
+        } else {
+            delete prog;
+            changed = true;
+        }
+        prog = next;
+    }
+    return changed;
+}
+
+QList<TvProgramme *> TvChannel::programmesForDay(const QDate &date) const
+{
+    QList<TvProgramme *> list;
+    TvProgramme *prog = m_programmes;
+    while (prog != 0) {
+        if (prog->start().date() <= date &&
+                prog->stop().date() >= date)
+            list.append(prog);
+        prog = prog->m_next;
+    }
+    return list;
+}
