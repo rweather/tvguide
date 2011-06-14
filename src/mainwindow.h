@@ -15,39 +15,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TVDATABASE_H
-#define _TVDATABASE_H
+#ifndef _MAINWINDOW_H
+#define _MAINWINDOW_H
 
-#include <QtCore/qobject.h>
-#include <QtCore/qurl.h>
-#include <QtNetwork/qnetworkaccessmanager.h>
-#include <QtNetwork/qnetworkreply.h>
+#include <QtGui/qmainwindow.h>
+#include <QtGui/qprogressbar.h>
+#include "ui_mainwindow.h"
+#include "tvchannellist.h"
 
-class TvDatabase : public QObject
+class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 public:
-    explicit TvDatabase(QObject *parent = 0);
-    ~TvDatabase();
-
-    QUrl startUrl() const { return m_startUrl; }
-    void setStartUrl(const QUrl &url);
-
-public Q_SLOTS:
-    void refresh();
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
 
 private Q_SLOTS:
-    void authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);
-#ifndef QT_NO_OPENSSL
-    void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
-#endif
-    void startReadyRead();
-    void startFinished();
-    void startError(QNetworkReply::NetworkError);
+    void busyChanged(bool value);
+    void progressChanged(qreal progress);
 
 private:
-    QNetworkAccessManager m_nam;
-    QUrl m_startUrl;
+    TvChannelList *m_channelList;
+    QProgressBar *m_progress;
+    QTimer *m_hideProgressTimer;
 };
 
 #endif

@@ -36,3 +36,4 @@ libtool
 moc_*.cpp
 *.moc
 qrc_*.cpp
+ui_*.h

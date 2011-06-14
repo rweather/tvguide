@@ -16,12 +16,12 @@
  */
 
 #include <QtGui/qapplication.h>
-#include "tvdatabase.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    TvDatabase db;
-    db.refresh();
+    MainWindow mw;
+    mw.show();
     return app.exec();
 }

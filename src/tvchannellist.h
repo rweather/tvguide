@@ -42,6 +42,7 @@ public:
 
     bool busy() const { return m_busy; }
     qreal progress() const { return m_progress; }
+    bool useSimpleProgress() const { return m_requestsToDo <= 3; }
 
 public Q_SLOTS:
     void refreshChannels();
