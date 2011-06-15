@@ -78,6 +78,7 @@ private:
     QList<QUrl> m_pending;
     QUrl m_currentRequest;
     QTimer *m_throttleTimer;
+    bool m_firstIsDayUI;
     bool m_hasDataFor;
     bool m_throttled;
     bool m_busy;

@@ -24,6 +24,7 @@
 
 TvChannelList::TvChannelList(QObject *parent)
     : QObject(parent)
+    , m_firstIsDayUI(false)
     , m_hasDataFor(false)
     , m_throttled(false)
     , m_busy(false)
@@ -158,8 +159,10 @@ void TvChannelList::refreshChannels()
 {
     // Add the start URL to the front of the queue to fetch
     // it as soon as the current request completes.
-    if (m_startUrl.isValid())
+    if (m_startUrl.isValid()) {
+        m_firstIsDayUI = false;
         prependPending(m_startUrl);
+    }
 }
 
 // Request a particular day's data based on user selections.
@@ -177,6 +180,17 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date)
     QString url = channel->dayUrl(date);
     if (url.isEmpty())
         return;
+    if (!m_pending.isEmpty() && m_firstIsDayUI && m_pending.at(0) != url) {
+        // Remove the first element which is a pending request
+        // for day information for the UI.  There's no point
+        // retrieving it now given that we are about to request a
+        // completely different day's data.  This can help reduce
+        // network load when the user is scrolling rapidly through
+        // channels or days.
+        m_pending.takeFirst();
+        --m_requestsToDo;
+    }
+    m_firstIsDayUI = true;
     prependPending(QUrl(url));
 }
 
@@ -195,6 +209,8 @@ void TvChannelList::enqueueChannelDay(TvChannel *channel, const QDate &date)
     QString url = channel->dayUrl(date);
     if (url.isEmpty())
         return;
+    if (m_pending.isEmpty())
+        m_firstIsDayUI = false;
     appendPending(QUrl(url));
 }
 
