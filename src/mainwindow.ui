@@ -43,6 +43,7 @@
     </property>
     <addaction name="actionReload"/>
     <addaction name="action_Stop"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>

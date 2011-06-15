@@ -40,6 +40,8 @@ public:
     QList<TvChannel *> channels() const { return m_channels.values(); }
     QStringList channelIds() const { return m_channels.keys(); }
 
+    QList<TvChannel *> activeChannels() const { return m_activeChannels; }
+
     bool busy() const { return m_busy; }
     qreal progress() const { return m_progress; }
     bool useSimpleProgress() const { return m_requestsToDo <= 3; }
@@ -70,11 +72,13 @@ Q_SIGNALS:
 
 private:
     QMap<QString, TvChannel *> m_channels;
+    QList<TvChannel *> m_activeChannels;
     QNetworkAccessManager m_nam;
     QUrl m_startUrl;
     QList<QUrl> m_pending;
     QUrl m_currentRequest;
     QTimer *m_throttleTimer;
+    bool m_hasDataFor;
     bool m_throttled;
     bool m_busy;
     qreal m_progress;

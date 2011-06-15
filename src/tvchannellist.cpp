@@ -24,6 +24,7 @@
 
 TvChannelList::TvChannelList(QObject *parent)
     : QObject(parent)
+    , m_hasDataFor(false)
     , m_throttled(false)
     , m_busy(false)
     , m_progress(1.0f)
@@ -62,6 +63,11 @@ TvChannel *TvChannelList::channel(const QString &id) const
     return m_channels.value(id, 0);
 }
 
+static bool sortActiveChannels(TvChannel *c1, TvChannel *c2)
+{
+    return c1->name().compare(c2->name(), Qt::CaseInsensitive) < 0;
+}
+
 void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
 {
     QString channelId;
@@ -92,6 +98,8 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
                     m_channels.insert(channelId, channel);
                     newChannels = true;
                 }
+                if (channel->hasDataFor())
+                    m_hasDataFor = true;
             } else if (reader->name() == QLatin1String("programme")) {
                 channelId = reader->attributes().value
                         (QLatin1String("channel")).toString();
@@ -115,8 +123,26 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
     }
 
     // Emit pending signals.
-    if (newChannels)
+    if (newChannels) {
+        // Construct the sorted "active channels" list.  If we have
+        // "datafor" declarations in the channel list, then omit
+        // any channels that have no information recorded.
+        if (m_hasDataFor) {
+            QMap<QString, TvChannel *>::ConstIterator it;
+            m_activeChannels.clear();
+            for (it = m_channels.constBegin();
+                    it != m_channels.constEnd(); ++it) {
+                TvChannel *channel = it.value();
+                if (channel->hasDataFor())
+                    m_activeChannels.append(channel);
+            }
+        } else {
+            m_activeChannels = m_channels.values();
+        }
+        qSort(m_activeChannels.begin(),
+              m_activeChannels.end(), sortActiveChannels);
         emit channelsChanged();
+    }
     if (!newProgrammes.isEmpty()) {
         QSet<TvChannel *>::ConstIterator it;
         for (it = newProgrammes.constBegin();

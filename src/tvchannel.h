@@ -44,6 +44,7 @@ public:
     QString dayUrl(const QDate &date) const;
     QDateTime dayLastModified(const QDate &date) const;
     bool hasDataFor(const QDate &date) const;
+    bool hasDataFor() const { return !m_dates.isEmpty(); }
 
     bool load(QXmlStreamReader *reader);
 

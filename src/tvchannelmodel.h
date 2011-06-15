@@ -15,33 +15,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MAINWINDOW_H
-#define _MAINWINDOW_H
+#ifndef _TVCHANNELMODEL_H
+#define _TVCHANNELMODEL_H
 
-#include <QtGui/qmainwindow.h>
-#include <QtGui/qprogressbar.h>
-#include "ui_mainwindow.h"
 #include "tvchannellist.h"
-#include "tvchannelmodel.h"
+#include <QtCore/qabstractitemmodel.h>
 
-class MainWindow : public QMainWindow, private Ui::MainWindow
+class TvChannelModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit TvChannelModel(TvChannelList *channelList, QObject *parent = 0);
+    ~TvChannelModel();
+
+    QModelIndex index(int row, int column, const QModelIndex &parent) const;
+    QModelIndex parent(const QModelIndex &child) const;
+    int columnCount(const QModelIndex &parent) const;
+    int rowCount(const QModelIndex &parent) const;
+    QVariant data(const QModelIndex &index, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 private Q_SLOTS:
-    void busyChanged(bool value);
-    void progressChanged(qreal progress);
-    void dateChanged();
-    void channelChanged(const QModelIndex &index);
+    void channelsChanged();
 
 private:
     TvChannelList *m_channelList;
-    TvChannelModel *m_channelModel;
-    QProgressBar *m_progress;
-    QTimer *m_hideProgressTimer;
 };
 
 #endif

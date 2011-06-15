@@ -16,6 +16,8 @@
  */
 
 #include "mainwindow.h"
+#include <QtCore/qdebug.h>
+#include <QtGui/qitemselectionmodel.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -44,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(busyChanged(bool)));
     connect(m_channelList, SIGNAL(progressChanged(qreal)),
             this, SLOT(progressChanged(qreal)));
+    m_channelModel = new TvChannelModel(m_channelList, this);
+    channels->setModel(m_channelModel);
 
     QTimer::singleShot(1000, m_channelList, SLOT(refreshChannels()));
 
@@ -57,6 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(action_Stop, SIGNAL(triggered()),
             m_channelList, SLOT(abort()));
     action_Stop->setEnabled(false);
+
+    connect(calendar, SIGNAL(selectionChanged()),
+            this, SLOT(dateChanged()));
+    connect(channels->selectionModel(),
+            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(channelChanged(QModelIndex)));
 }
 
 MainWindow::~MainWindow()
@@ -84,4 +94,15 @@ void MainWindow::progressChanged(qreal progress)
         m_progress->setValue(0);
         m_progress->setMaximum(0);
     }
+}
+
+void MainWindow::dateChanged()
+{
+    qWarning() << "date changed:" << calendar->selectedDate();
+}
+
+void MainWindow::channelChanged(const QModelIndex &index)
+{
+    TvChannel *channel = static_cast<TvChannel *>(index.internalPointer());
+    qWarning() << "channel changed:" << channel->name();
 }
