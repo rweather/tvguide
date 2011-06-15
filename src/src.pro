@@ -6,6 +6,8 @@ SOURCES += \
     tvchannellist.cpp \
     tvchannelmodel.cpp \
     tvprogramme.cpp \
+    tvprogrammedelegate.cpp \
+    tvprogrammemodel.cpp \
 
 HEADERS += \
     mainwindow.h \
@@ -13,6 +15,8 @@ HEADERS += \
     tvchannellist.h \
     tvchannelmodel.h \
     tvprogramme.h \
+    tvprogrammedelegate.h \
+    tvprogrammemodel.h \
 
 RESOURCES += \
 

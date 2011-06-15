@@ -50,6 +50,9 @@ public:
 
     void load(QXmlStreamReader *reader);
 
+    QString shortDescription() const;
+    QString longDescription() const;
+
 private:
     TvChannel *m_channel;
     QDateTime m_start;
@@ -67,6 +70,8 @@ private:
     QString m_language;
     QString m_originalLanguage;
     QString m_country;
+    mutable QString m_shortDescription;
+    mutable QString m_longDescription;
     TvProgramme *m_next;
 
     friend class TvChannel;

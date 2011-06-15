@@ -1,0 +1,45 @@
+/*
+ * Copyright (C) 2011  Southern Storm Software, Pty Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef _TVPROGRAMMEMODEL_H
+#define _TVPROGRAMMEMODEL_H
+
+#include "tvprogramme.h"
+#include <QtCore/qabstractitemmodel.h>
+
+class TvProgrammeModel : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    explicit TvProgrammeModel(QObject *parent = 0);
+    ~TvProgrammeModel();
+
+    void clear();
+    void setProgrammes(const QList<TvProgramme *> &programmes);
+
+    QModelIndex index(int row, int column, const QModelIndex &parent) const;
+    QModelIndex parent(const QModelIndex &child) const;
+    int columnCount(const QModelIndex &parent) const;
+    int rowCount(const QModelIndex &parent) const;
+    QVariant data(const QModelIndex &index, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+private:
+    QList<TvProgramme *> m_programmes;
+};
+
+#endif

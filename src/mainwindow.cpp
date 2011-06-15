@@ -16,6 +16,7 @@
  */
 
 #include "mainwindow.h"
+#include "tvprogrammedelegate.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qitemselectionmodel.h>
 
@@ -50,8 +51,17 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(busyChanged(bool)));
     connect(m_channelList, SIGNAL(progressChanged(qreal)),
             this, SLOT(progressChanged(qreal)));
+    connect(m_channelList, SIGNAL(programmesChanged(TvChannel *)),
+            this, SLOT(programmesChanged(TvChannel *)));
     m_channelModel = new TvChannelModel(m_channelList, this);
     channels->setModel(m_channelModel);
+
+    m_programmeModel = new TvProgrammeModel(this);
+    programmes->setModel(m_programmeModel);
+    programmes->verticalHeader()->hide();
+    programmes->horizontalHeader()->setStretchLastSection(true);
+    programmes->setSelectionBehavior(QTableView::SelectRows);
+    programmes->setItemDelegate(new TvProgrammeDelegate(programmes));
 
     QTimer::singleShot(1000, m_channelList, SLOT(refreshChannels()));
 
@@ -120,6 +130,20 @@ void MainWindow::channelChanged(const QModelIndex &index)
     setDay(index, calendar->selectedDate());
 }
 
+void MainWindow::programmesChanged(TvChannel *channel)
+{
+    QModelIndex index = channels->selectionModel()->currentIndex();
+    if (index.isValid()) {
+        TvChannel *indexChannel = static_cast<TvChannel *>(index.internalPointer());
+        if (channel == indexChannel) {
+            QList<TvProgramme *> programmes;
+            programmes = channel->programmesForDay(calendar->selectedDate());
+            m_programmeModel->setProgrammes(programmes);
+            this->programmes->resizeRowsToContents();
+        }
+    }
+}
+
 void MainWindow::showToday()
 {
     calendar->setSelectedDate(QDate::currentDate());
@@ -148,9 +172,18 @@ void MainWindow::showPreviousWeek()
 void MainWindow::setDay(const QModelIndex &index, const QDate &date)
 {
     TvChannel *channel;
-    if (index.isValid())
+    if (index.isValid()) {
+        // Display the current programmes for the channel and day.
         channel = static_cast<TvChannel *>(index.internalPointer());
-    else
+        QList<TvProgramme *> programmes;
+        programmes = channel->programmesForDay(date);
+        m_programmeModel->setProgrammes(programmes);
+        this->programmes->resizeRowsToContents();
+
+        // Explicitly request and update of the data.
+        m_channelList->requestChannelDay(channel, date);
+    } else {
         channel = 0;
-    qWarning() << "change day:" << (!channel ? "nochan" : channel->name()) << date;
+        m_programmeModel->clear();
+    }
 }

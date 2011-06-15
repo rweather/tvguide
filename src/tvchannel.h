@@ -53,6 +53,8 @@ public:
 
     QList<TvProgramme *> programmesForDay(const QDate &date) const;
 
+    static QDateTime stringToDateTime(const QString &str);
+
 private:
     TvChannelList *m_channelList;
     QString m_id;

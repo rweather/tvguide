@@ -23,6 +23,7 @@
 #include "ui_mainwindow.h"
 #include "tvchannellist.h"
 #include "tvchannelmodel.h"
+#include "tvprogrammemodel.h"
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -36,6 +37,7 @@ private Q_SLOTS:
     void progressChanged(qreal progress);
     void dateChanged();
     void channelChanged(const QModelIndex &index);
+    void programmesChanged(TvChannel *channel);
 
     void showToday();
     void showNextDay();
@@ -46,6 +48,7 @@ private Q_SLOTS:
 private:
     TvChannelList *m_channelList;
     TvChannelModel *m_channelModel;
+    TvProgrammeModel *m_programmeModel;
     QProgressBar *m_progress;
     QTimer *m_hideProgressTimer;
 

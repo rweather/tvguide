@@ -17,6 +17,7 @@
 
 #include "tvchannel.h"
 #include "tvprogramme.h"
+#include <QtCore/qdebug.h>
 
 TvChannel::TvChannel(TvChannelList *channelList)
     : m_channelList(channelList)
@@ -127,7 +128,7 @@ bool TvChannel::load(QXmlStreamReader *reader)
                 QString date = reader->readElementText
                     (QXmlStreamReader::SkipChildElements);
                 addDataFor(QDate::fromString(date, QLatin1String("yyyy-MM-dd")),
-                           QDateTime::fromString(lastmod, QLatin1String("yyyyMMddHHmmss")));
+                           stringToDateTime(lastmod));
             }
         } else if (token == QXmlStreamReader::EndElement) {
             if (reader->name() == QLatin1String("channel"))
@@ -232,10 +233,56 @@ QList<TvProgramme *> TvChannel::programmesForDay(const QDate &date) const
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
     while (prog != 0) {
-        if (prog->start().date() <= date &&
-                prog->stop().date() >= date)
-            list.append(prog);
+        if (prog->start().date() <= date) {
+            QDateTime stop = prog->stop();
+            if (stop.date() >= date && stop.time() != QTime(0, 0, 0))
+                list.append(prog);
+        }
         prog = prog->m_next;
     }
     return list;
+}
+
+static int fetchField(const QString &str, int *posn, int size)
+{
+    int value = 0;
+    while (size > 0 && *posn < str.length()) {
+        uint ch = str.at((*posn)++).unicode();
+        if (ch >= '0' && ch <= '9')
+            value = value * 10 + int(ch - '0');
+        --size;
+    }
+    return value;
+}
+
+// Format is "yyyyMMddhhmmss (+/-)zzzz" but isn't easily parseable
+// by QDateTime::fromString().  So do it the long way.
+QDateTime TvChannel::stringToDateTime(const QString &str)
+{
+    int posn = 0;
+    int year = fetchField(str, &posn, 4);
+    int month = fetchField(str, &posn, 2);
+    int day = fetchField(str, &posn, 2);
+    int hour = fetchField(str, &posn, 2);
+    int min = fetchField(str, &posn, 2);
+    int sec = fetchField(str, &posn, 2);
+    int tz = 0;
+    while (posn < str.length()) {
+        uint ch = str.at(posn++).unicode();
+        if (ch == '+') {
+            tz = fetchField(str, &posn, 4);
+            tz = (tz / 100) * 60 + (tz % 100);
+            break;
+        } else if (ch == '-') {
+            tz = fetchField(str, &posn, 4);
+            tz = -((tz / 100) * 60 + (tz % 100));
+            break;
+        } else if (ch != ' ') {
+            break;
+        }
+    }
+    QDateTime dt(QDate(year, month, day), QTime(hour, min, sec));
+    dt.setUtcOffset(tz * 60);
+    // Converting from a UTC offset to local must go via UTC.
+    return dt.toTimeSpec(Qt::UTC).toTimeSpec(Qt::LocalTime);
 }
