@@ -37,11 +37,19 @@ private Q_SLOTS:
     void dateChanged();
     void channelChanged(const QModelIndex &index);
 
+    void showToday();
+    void showNextDay();
+    void showPreviousDay();
+    void showNextWeek();
+    void showPreviousWeek();
+
 private:
     TvChannelList *m_channelList;
     TvChannelModel *m_channelModel;
     QProgressBar *m_progress;
     QTimer *m_hideProgressTimer;
+
+    void setDay(const QModelIndex &index, const QDate &date);
 };
 
 #endif

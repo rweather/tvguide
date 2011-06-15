@@ -27,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
     action_Open->setShortcuts(QKeySequence::Open);
     action_Quit->setShortcuts(QKeySequence::Quit);
     actionReload->setShortcuts(QKeySequence::Refresh);
+    actionNextDay->setShortcuts(QKeySequence::MoveToNextPage);
+    actionPreviousDay->setShortcuts(QKeySequence::MoveToPreviousPage);
+    actionNextWeek->setShortcuts(QKeySequence::MoveToNextWord);
+    actionPreviousWeek->setShortcuts(QKeySequence::MoveToPreviousWord);
 
     connect(action_Quit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -61,6 +65,16 @@ MainWindow::MainWindow(QWidget *parent)
     connect(action_Stop, SIGNAL(triggered()),
             m_channelList, SLOT(abort()));
     action_Stop->setEnabled(false);
+    connect(actionToday, SIGNAL(triggered()),
+            this, SLOT(showToday()));
+    connect(actionNextDay, SIGNAL(triggered()),
+            this, SLOT(showNextDay()));
+    connect(actionPreviousDay, SIGNAL(triggered()),
+            this, SLOT(showPreviousDay()));
+    connect(actionNextWeek, SIGNAL(triggered()),
+            this, SLOT(showNextWeek()));
+    connect(actionPreviousWeek, SIGNAL(triggered()),
+            this, SLOT(showPreviousWeek()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
@@ -98,11 +112,45 @@ void MainWindow::progressChanged(qreal progress)
 
 void MainWindow::dateChanged()
 {
-    qWarning() << "date changed:" << calendar->selectedDate();
+    setDay(channels->selectionModel()->currentIndex(), calendar->selectedDate());
 }
 
 void MainWindow::channelChanged(const QModelIndex &index)
 {
-    TvChannel *channel = static_cast<TvChannel *>(index.internalPointer());
-    qWarning() << "channel changed:" << channel->name();
+    setDay(index, calendar->selectedDate());
+}
+
+void MainWindow::showToday()
+{
+    calendar->setSelectedDate(QDate::currentDate());
+}
+
+void MainWindow::showNextDay()
+{
+    calendar->setSelectedDate(calendar->selectedDate().addDays(1));
+}
+
+void MainWindow::showPreviousDay()
+{
+    calendar->setSelectedDate(calendar->selectedDate().addDays(-1));
+}
+
+void MainWindow::showNextWeek()
+{
+    calendar->setSelectedDate(calendar->selectedDate().addDays(7));
+}
+
+void MainWindow::showPreviousWeek()
+{
+    calendar->setSelectedDate(calendar->selectedDate().addDays(-7));
+}
+
+void MainWindow::setDay(const QModelIndex &index, const QDate &date)
+{
+    TvChannel *channel;
+    if (index.isValid())
+        channel = static_cast<TvChannel *>(index.internalPointer());
+    else
+        channel = 0;
+    qWarning() << "change day:" << (!channel ? "nochan" : channel->name()) << date;
 }

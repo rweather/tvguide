@@ -31,7 +31,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="action_Open"/>
     <addaction name="separator"/>
@@ -39,10 +39,16 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>View</string>
+     <string>&amp;View</string>
     </property>
     <addaction name="actionReload"/>
     <addaction name="action_Stop"/>
+    <addaction name="separator"/>
+    <addaction name="actionToday"/>
+    <addaction name="actionNextDay"/>
+    <addaction name="actionPreviousDay"/>
+    <addaction name="actionNextWeek"/>
+    <addaction name="actionPreviousWeek"/>
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
@@ -100,6 +106,31 @@
   <action name="action_Stop">
    <property name="text">
     <string>&amp;Stop</string>
+   </property>
+  </action>
+  <action name="actionNextDay">
+   <property name="text">
+    <string>&amp;Next Day</string>
+   </property>
+  </action>
+  <action name="actionPreviousDay">
+   <property name="text">
+    <string>&amp;Previous Day</string>
+   </property>
+  </action>
+  <action name="actionNextWeek">
+   <property name="text">
+    <string>Next &amp;Week</string>
+   </property>
+  </action>
+  <action name="actionPreviousWeek">
+   <property name="text">
+    <string>Pre&amp;vious Week</string>
+   </property>
+  </action>
+  <action name="actionToday">
+   <property name="text">
+    <string>&amp;Today</string>
    </property>
   </action>
  </widget>
