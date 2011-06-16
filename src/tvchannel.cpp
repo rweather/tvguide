@@ -97,6 +97,25 @@ bool TvChannel::hasDataFor(const QDate &date) const
     return false;
 }
 
+void TvChannel::dataForRange(QDate *first, QDate *last)
+{
+    // If there are no "datafor" declarations, then use +/- 2 weeks.
+    if (m_dates.isEmpty()) {
+        QDate current = QDate::currentDate();
+        *first = current.addDays(-14);
+        *last = current.addDays(14);
+    } else {
+        *first = *last = m_dates.at(0);
+        for (int index = 1; index < m_dates.size(); ++index) {
+            QDate date = m_dates.at(index);
+            if (date < *first)
+                *first = date;
+            if (date > *last)
+                *last = date;
+        }
+    }
+}
+
 bool TvChannel::load(QXmlStreamReader *reader)
 {
     // Will leave the XML stream positioned on </channel>.

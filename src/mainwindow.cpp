@@ -139,6 +139,17 @@ void MainWindow::dateChanged()
 
 void MainWindow::channelChanged(const QModelIndex &index)
 {
+    TvChannel *channel;
+    if (index.isValid()) {
+        channel = static_cast<TvChannel *>(index.internalPointer());
+        QDate first, last;
+        channel->dataForRange(&first, &last);
+        calendar->setMinimumDate(first);
+        calendar->setMaximumDate(last);
+    } else {
+        calendar->setMinimumDate(QDate::fromJulianDay(1));
+        calendar->setMaximumDate(QDate(7999, 12, 31));
+    }
     setDay(index, calendar->selectedDate());
 }
 

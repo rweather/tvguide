@@ -46,6 +46,8 @@ public:
     bool hasDataFor(const QDate &date) const;
     bool hasDataFor() const { return !m_dates.isEmpty(); }
 
+    void dataForRange(QDate *first, QDate *last);
+
     bool load(QXmlStreamReader *reader);
 
     void addProgramme(TvProgramme *programme);
