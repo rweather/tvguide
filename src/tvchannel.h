@@ -51,7 +51,18 @@ public:
     void addProgramme(TvProgramme *programme);
     bool trimProgrammes();
 
-    QList<TvProgramme *> programmesForDay(const QDate &date) const;
+    enum TimePeriod
+    {
+        Morning     = 0x0001,
+        Afternoon   = 0x0002,
+        Night       = 0x0004,
+        LateNight   = 0x0008,
+        AllPeriods  = 0xFFFF
+    };
+    Q_DECLARE_FLAGS(TimePeriods, TimePeriod)
+
+    QList<TvProgramme *> programmesForDay
+        (const QDate &date, TimePeriods periods = AllPeriods) const;
 
     static QDateTime stringToDateTime(const QString &str);
 
@@ -66,5 +77,7 @@ private:
 
     void addDataFor(const QDate &date, const QDateTime &lastModified);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(TvChannel::TimePeriods)
 
 #endif

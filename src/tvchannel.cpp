@@ -228,16 +228,41 @@ bool TvChannel::trimProgrammes()
     return changed;
 }
 
-QList<TvProgramme *> TvChannel::programmesForDay(const QDate &date) const
+QList<TvProgramme *> TvChannel::programmesForDay
+    (const QDate &date, TimePeriods periods) const
 {
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
+    QDateTime morningStart = QDateTime(date, QTime(6, 0, 0));
+    QDateTime afternoonStart = QDateTime(date, QTime(12, 0, 0));
+    QDateTime nightStart = QDateTime(date, QTime(18, 0, 0));
+    QDateTime lateNightStart = QDateTime(date.addDays(1), QTime(0, 0, 0));
+    QDateTime lateNightEnd = QDateTime(date.addDays(1), QTime(6, 0, 0));
+    bool candidate;
     while (prog != 0) {
-        if (prog->start().date() <= date) {
-            QDateTime stop = prog->stop();
-            if (stop.date() >= date && stop.time() != QTime(0, 0, 0))
-                list.append(prog);
+        candidate = false;
+        if (periods & TvChannel::Morning) {
+            if (prog->start() < afternoonStart &&
+                    prog->stop() > morningStart)
+                candidate = true;
         }
+        if (periods & TvChannel::Afternoon) {
+            if (prog->start() < nightStart &&
+                    prog->stop() > afternoonStart)
+                candidate = true;
+        }
+        if (periods & TvChannel::Night) {
+            if (prog->start() < lateNightStart &&
+                    prog->stop() > nightStart)
+                candidate = true;
+        }
+        if (periods & TvChannel::LateNight) {
+            if (prog->start() < lateNightEnd &&
+                    prog->stop() > lateNightStart)
+                candidate = true;
+        }
+        if (candidate)
+            list.append(prog);
         prog = prog->m_next;
     }
     return list;

@@ -85,6 +85,14 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(showNextWeek()));
     connect(actionPreviousWeek, SIGNAL(triggered()),
             this, SLOT(showPreviousWeek()));
+    connect(actionMorning, SIGNAL(toggled(bool)),
+            this, SLOT(updateTimePeriods()));
+    connect(actionAfternoon, SIGNAL(toggled(bool)),
+            this, SLOT(updateTimePeriods()));
+    connect(actionNight, SIGNAL(toggled(bool)),
+            this, SLOT(updateTimePeriods()));
+    connect(actionLateNight, SIGNAL(toggled(bool)),
+            this, SLOT(updateTimePeriods()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
@@ -137,7 +145,8 @@ void MainWindow::programmesChanged(TvChannel *channel)
         TvChannel *indexChannel = static_cast<TvChannel *>(index.internalPointer());
         if (channel == indexChannel) {
             QList<TvProgramme *> programmes;
-            programmes = channel->programmesForDay(calendar->selectedDate());
+            programmes = channel->programmesForDay
+                (calendar->selectedDate(), timePeriods());
             m_programmeModel->setProgrammes(programmes);
             this->programmes->resizeRowsToContents();
         }
@@ -169,6 +178,25 @@ void MainWindow::showPreviousWeek()
     calendar->setSelectedDate(calendar->selectedDate().addDays(-7));
 }
 
+void MainWindow::updateTimePeriods()
+{
+    setDay(channels->selectionModel()->currentIndex(), calendar->selectedDate());
+}
+
+TvChannel::TimePeriods MainWindow::timePeriods() const
+{
+    TvChannel::TimePeriods periods(0);
+    if (actionMorning->isChecked())
+        periods |= TvChannel::Morning;
+    if (actionAfternoon->isChecked())
+        periods |= TvChannel::Afternoon;
+    if (actionNight->isChecked())
+        periods |= TvChannel::Night;
+    if (actionLateNight->isChecked())
+        periods |= TvChannel::LateNight;
+    return periods;
+}
+
 void MainWindow::setDay(const QModelIndex &index, const QDate &date)
 {
     TvChannel *channel;
@@ -176,7 +204,7 @@ void MainWindow::setDay(const QModelIndex &index, const QDate &date)
         // Display the current programmes for the channel and day.
         channel = static_cast<TvChannel *>(index.internalPointer());
         QList<TvProgramme *> programmes;
-        programmes = channel->programmesForDay(date);
+        programmes = channel->programmesForDay(date, timePeriods());
         m_programmeModel->setProgrammes(programmes);
         this->programmes->resizeRowsToContents();
 

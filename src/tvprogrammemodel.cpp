@@ -90,6 +90,21 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
     } else if (role == Qt::ToolTipRole) {
         if (index.column() == MODEL_COL_TITLE)
             return prog->longDescription();
+    } else if (role == Qt::BackgroundRole) {
+        // Paint the times for different parts of the day
+        // in different colors to make it easier to find
+        // things like Afternoon, Prime Time, etc.
+        if (index.column() == MODEL_COL_TIME) {
+            int hour = prog->start().time().hour();
+            if (hour < 6)
+                return QBrush(Qt::magenta);
+            else if (hour < 12)
+                return QBrush(Qt::green);
+            else if (hour < 18)
+                return QBrush(Qt::cyan);
+            else
+                return QBrush(Qt::yellow);
+        }
     }
     return QVariant();
 }

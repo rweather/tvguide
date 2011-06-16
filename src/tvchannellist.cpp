@@ -192,6 +192,12 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date)
     }
     m_firstIsDayUI = true;
     prependPending(QUrl(url));
+
+    // Also queue up the next day, to populate "Late Night"
+    // timeslots, which are actually "Early Morning" the next day.
+    url = channel->dayUrl(date.addDays(1));
+    if (!url.isEmpty())
+        appendPending(QUrl(url));
 }
 
 // Enqueue a request for a day in the background for bulk
