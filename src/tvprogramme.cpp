@@ -128,6 +128,31 @@ QString TvProgramme::shortDescription() const
         desc += QLatin1String(", ") +
                 Qt::escape(QObject::tr("Director: %1").arg(m_directors.at(0)));
     }
+    if (!m_starRating.isEmpty()) {
+        QStringList list = m_starRating.split(QLatin1String("/"));
+        if (list.size() >= 2) {
+            int numer = list.at(0).toInt();
+            int denom = list.at(1).toInt();
+            if (numer > 0 && denom > 0) {
+                qreal stars = numer * 5.0f / denom;
+                if (stars < 0.0f)
+                    stars = 0.0f;
+                else if (stars > 5.0f)
+                    stars = 5.0f;
+                desc += QLatin1Char(' ');
+                int istars = int(stars);
+                qreal leftOver = stars - istars;
+                for (int black = 0; black < istars; ++black)
+                    desc += QChar(0x2605);  // Black star.
+                if (leftOver >= 0.5f) {
+                    desc += QChar(0x272D);  // Black outlined star.
+                    ++istars;
+                }
+                for (int white = istars; white < 5; ++white)
+                    desc += QChar(0x2606);  // White star.
+            }
+        }
+    }
     if (!m_subTitle.isEmpty()) {
         desc += QLatin1String("<br><i>") +
                 Qt::escape(m_subTitle) +
