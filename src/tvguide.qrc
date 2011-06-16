@@ -1,0 +1,12 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/application-exit.png</file>
+    <file>images/go-down.png</file>
+    <file>images/go-next.png</file>
+    <file>images/go-previous.png</file>
+    <file>images/go-up.png</file>
+    <file>images/process-stop.png</file>
+    <file>images/today.png</file>
+    <file>images/view-refresh.png</file>
+</qresource>
+</RCC>

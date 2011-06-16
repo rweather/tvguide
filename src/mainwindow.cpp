@@ -33,6 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
     actionNextWeek->setShortcuts(QKeySequence::MoveToNextWord);
     actionPreviousWeek->setShortcuts(QKeySequence::MoveToPreviousWord);
 
+    actionToday->setEnabled(false); // Calendar starts on today.
+
     connect(action_Quit, SIGNAL(triggered()), this, SLOT(close()));
 
     menuView->addAction(channelDock->toggleViewAction());
@@ -130,7 +132,9 @@ void MainWindow::progressChanged(qreal progress)
 
 void MainWindow::dateChanged()
 {
-    setDay(channels->selectionModel()->currentIndex(), calendar->selectedDate());
+    QDate date = calendar->selectedDate();
+    actionToday->setEnabled(date != QDate::currentDate());
+    setDay(channels->selectionModel()->currentIndex(), date);
 }
 
 void MainWindow::channelChanged(const QModelIndex &index)

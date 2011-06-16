@@ -19,6 +19,7 @@ HEADERS += \
     tvprogrammemodel.h \
 
 RESOURCES += \
+    tvguide.qrc \
 
 FORMS += \
     mainwindow.ui \

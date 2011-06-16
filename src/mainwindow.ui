@@ -101,47 +101,98 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionPreviousDay"/>
+   <addaction name="actionNextDay"/>
+   <addaction name="actionPreviousWeek"/>
+   <addaction name="actionNextWeek"/>
+   <addaction name="actionToday"/>
+   <addaction name="separator"/>
+   <addaction name="actionReload"/>
+   <addaction name="action_Stop"/>
+  </widget>
   <action name="action_Open">
    <property name="text">
     <string>&amp;Open data source ...</string>
    </property>
   </action>
   <action name="action_Quit">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Quit</string>
    </property>
   </action>
   <action name="actionReload">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/view-refresh.png</normaloff>:/images/view-refresh.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Reload</string>
    </property>
   </action>
   <action name="action_Stop">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/process-stop.png</normaloff>:/images/process-stop.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Stop</string>
    </property>
   </action>
   <action name="actionNextDay">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/go-next.png</normaloff>:/images/go-next.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Next Day</string>
    </property>
   </action>
   <action name="actionPreviousDay">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/go-previous.png</normaloff>:/images/go-previous.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Previous Day</string>
    </property>
   </action>
   <action name="actionNextWeek">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/go-down.png</normaloff>:/images/go-down.png</iconset>
+   </property>
    <property name="text">
     <string>Next &amp;Week</string>
    </property>
   </action>
   <action name="actionPreviousWeek">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/go-up.png</normaloff>:/images/go-up.png</iconset>
+   </property>
    <property name="text">
     <string>Pre&amp;vious Week</string>
    </property>
   </action>
   <action name="actionToday">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/today.png</normaloff>:/images/today.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Today</string>
    </property>
@@ -191,6 +242,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="tvguide.qrc"/>
+ </resources>
  <connections/>
 </ui>
