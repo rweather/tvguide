@@ -16,12 +16,14 @@
  */
 
 #include "tvprogrammemodel.h"
+#include "tvchannel.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qfont.h>
 #include <QtGui/qwidget.h>
 
 TvProgrammeModel::TvProgrammeModel(QObject *parent)
     : QAbstractItemModel(parent)
+    , m_channel(0)
 {
 }
 
@@ -37,9 +39,11 @@ void TvProgrammeModel::clear()
     }
 }
 
-void TvProgrammeModel::setProgrammes(const QList<TvProgramme *> &programmes)
+void TvProgrammeModel::setProgrammes(const QList<TvProgramme *> &programmes, TvChannel *channel, const QDate &date)
 {
     m_programmes = programmes;
+    m_channel = channel;
+    m_date = date;
     reset();
 }
 
@@ -114,8 +118,19 @@ QVariant TvProgrammeModel::headerData(int section, Qt::Orientation orientation, 
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
         if (section == MODEL_COL_TIME)
             return tr("Time");
-        if (section == MODEL_COL_TITLE)
-            return tr("Title");
+        if (section == MODEL_COL_TITLE) {
+            if (m_date.isValid()) {
+                QString title;
+                if (m_channel) {
+                    title += m_channel->name();
+                    title += QLatin1String(" - ");
+                }
+                title += m_date.toString(Qt::DefaultLocaleLongDate);
+                return title;
+            } else {
+                return tr("Description");
+            }
+        }
     }
     return QVariant();
 }

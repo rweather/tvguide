@@ -186,9 +186,9 @@ void MainWindow::programmesChanged(TvChannel *channel)
         TvChannel *indexChannel = static_cast<TvChannel *>(index.internalPointer());
         if (channel == indexChannel) {
             QList<TvProgramme *> programmes;
-            programmes = channel->programmesForDay
-                (calendar->selectedDate(), timePeriods());
-            m_programmeModel->setProgrammes(programmes);
+            QDate date = calendar->selectedDate();
+            programmes = channel->programmesForDay(date, timePeriods());
+            m_programmeModel->setProgrammes(programmes, channel, date);
             this->programmes->resizeRowsToContents();
         }
     }
@@ -252,7 +252,7 @@ void MainWindow::setDay(const QModelIndex &index, const QDate &date)
         channel = static_cast<TvChannel *>(index.internalPointer());
         QList<TvProgramme *> programmes;
         programmes = channel->programmesForDay(date, timePeriods());
-        m_programmeModel->setProgrammes(programmes);
+        m_programmeModel->setProgrammes(programmes, channel, date);
         this->programmes->resizeRowsToContents();
 
         // Explicitly request and update of the data.

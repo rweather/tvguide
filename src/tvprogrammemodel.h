@@ -29,7 +29,7 @@ public:
     ~TvProgrammeModel();
 
     void clear();
-    void setProgrammes(const QList<TvProgramme *> &programmes);
+    void setProgrammes(const QList<TvProgramme *> &programmes, TvChannel *channel, const QDate &date);
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex parent(const QModelIndex &child) const;
@@ -40,6 +40,8 @@ public:
 
 private:
     QList<TvProgramme *> m_programmes;
+    TvChannel *m_channel;
+    QDate m_date;
 };
 
 #endif
