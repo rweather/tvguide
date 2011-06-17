@@ -2,6 +2,7 @@ TARGET = tvguide
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    channeleditor.cpp \
     tvchannel.cpp \
     tvchannellist.cpp \
     tvchannelmodel.cpp \
@@ -11,6 +12,7 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
+    channeleditor.h \
     tvchannel.h \
     tvchannellist.h \
     tvchannelmodel.h \
@@ -23,5 +25,6 @@ RESOURCES += \
 
 FORMS += \
     mainwindow.ui \
+    channeleditor.ui \
 
 QT += network

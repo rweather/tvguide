@@ -23,6 +23,9 @@ TvChannelModel::TvChannelModel(TvChannelList *channelList, QObject *parent)
 {
     connect(channelList, SIGNAL(channelsChanged()),
             this, SLOT(channelsChanged()));
+    connect(channelList, SIGNAL(hiddenChannelsChanged()),
+            this, SLOT(channelsChanged()));
+    loadVisibleChannels();
 }
 
 TvChannelModel::~TvChannelModel()
@@ -31,10 +34,9 @@ TvChannelModel::~TvChannelModel()
 
 QModelIndex TvChannelModel::index(int row, int column, const QModelIndex &) const
 {
-    QList<TvChannel *> channels = m_channelList->activeChannels();
-    if (column != 0 || row < 0 || row >= channels.size())
+    if (column != 0 || row < 0 || row >= m_visibleChannels.size())
         return QModelIndex();
-    return createIndex(row, column, channels.at(row));
+    return createIndex(row, column, m_visibleChannels.at(row));
 }
 
 QModelIndex TvChannelModel::parent(const QModelIndex &) const
@@ -49,7 +51,7 @@ int TvChannelModel::columnCount(const QModelIndex &) const
 
 int TvChannelModel::rowCount(const QModelIndex &) const
 {
-    return m_channelList->activeChannels().size();
+    return m_visibleChannels.size();
 }
 
 QVariant TvChannelModel::data(const QModelIndex &index, int role) const
@@ -57,10 +59,9 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
     if (index.column() == 0 && role == Qt::DisplayRole) {
-        QList<TvChannel *> channels = m_channelList->activeChannels();
         int row = index.row();
-        if (row >= 0 && row < channels.size())
-            return channels.at(row)->name();
+        if (row >= 0 && row < m_visibleChannels.size())
+            return m_visibleChannels.at(row)->name();
     }
     return QVariant();
 }
@@ -76,5 +77,17 @@ QVariant TvChannelModel::headerData(int section, Qt::Orientation orientation, in
 
 void TvChannelModel::channelsChanged()
 {
+    loadVisibleChannels();
     reset();
+}
+
+void TvChannelModel::loadVisibleChannels()
+{
+    QList<TvChannel *> channels = m_channelList->activeChannels();
+    m_visibleChannels.clear();
+    for (int index = 0; index < channels.size(); ++index) {
+        TvChannel *channel = channels.at(index);
+        if (!channel->isHidden())
+            m_visibleChannels.append(channel);
+    }
 }

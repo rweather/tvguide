@@ -37,6 +37,9 @@ public:
     QString id() const { return m_id; }
     void setId(const QString &id) { m_id = id; }
 
+    bool isHidden() const { return m_hidden; }
+    void setHidden(bool value) { m_hidden = value; }
+
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
 
@@ -76,6 +79,7 @@ private:
     QList<QDate> m_dates;
     QList<QDateTime> m_modifiedTimes;
     TvProgramme *m_programmes;
+    bool m_hidden;
 
     void addDataFor(const QDate &date, const QDateTime &lastModified);
 };

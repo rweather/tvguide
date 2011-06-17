@@ -52,6 +52,7 @@ public Q_SLOTS:
     void enqueueChannelDay(TvChannel *channel, const QDate &date);
     void abort();
     void reload();
+    void updateHidden();
 
 private Q_SLOTS:
     void authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);
@@ -66,6 +67,7 @@ private Q_SLOTS:
 Q_SIGNALS:
     void channelIndexLoaded();
     void channelsChanged();
+    void hiddenChannelsChanged();
     void programmesChanged(TvChannel *channel);
     void busyChanged(bool value);
     void progressChanged(qreal value);
@@ -73,6 +75,7 @@ Q_SIGNALS:
 private:
     QMap<QString, TvChannel *> m_channels;
     QList<TvChannel *> m_activeChannels;
+    QStringList m_hiddenChannelIds;
     QNetworkAccessManager m_nam;
     QUrl m_startUrl;
     QList<QUrl> m_pending;

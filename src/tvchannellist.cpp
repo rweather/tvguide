@@ -98,6 +98,8 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
                     channel->load(reader);
                     m_channels.insert(channelId, channel);
                     newChannels = true;
+                    if (m_hiddenChannelIds.contains(channelId))
+                        channel->setHidden(true);
                 }
                 if (channel->hasDataFor())
                     m_hasDataFor = true;
@@ -111,6 +113,8 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
                     channel->setName(channelId);
                     m_channels.insert(channelId, channel);
                     newChannels = true;
+                    if (m_hiddenChannelIds.contains(channelId))
+                        channel->setHidden(true);
                 }
                 programme = new TvProgramme(channel);
                 programme->load(reader);
@@ -253,6 +257,20 @@ void TvChannelList::reload()
     // but we want to know if the cache is up to date on reload.
     m_lastFetch.clear();
     refreshChannels();
+}
+
+void TvChannelList::updateHidden()
+{
+    QStringList hidden;
+    for (int index = 0; index < m_activeChannels.size(); ++index) {
+        TvChannel *channel = m_activeChannels.at(index);
+        if (channel->isHidden())
+            hidden.append(channel->id());
+    }
+    if (m_hiddenChannelIds != hidden) {
+        m_hiddenChannelIds = hidden;
+        emit hiddenChannelsChanged();
+    }
 }
 
 void TvChannelList::authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator)

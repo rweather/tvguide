@@ -47,6 +47,8 @@ private Q_SLOTS:
 
     void updateTimePeriods();
 
+    void editChannels();
+
 private:
     TvChannelList *m_channelList;
     TvChannelModel *m_channelModel;

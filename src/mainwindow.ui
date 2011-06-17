@@ -38,6 +38,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_Open"/>
+    <addaction name="actionEditChannels"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -239,6 +240,11 @@
    </property>
    <property name="text">
     <string>&amp;Late Night</string>
+   </property>
+  </action>
+  <action name="actionEditChannels">
+   <property name="text">
+    <string>&amp;Edit Channels ...</string>
    </property>
   </action>
  </widget>

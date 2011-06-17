@@ -17,6 +17,7 @@
 
 #include "mainwindow.h"
 #include "tvprogrammedelegate.h"
+#include "channeleditor.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qitemselectionmodel.h>
 
@@ -95,6 +96,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(updateTimePeriods()));
     connect(actionLateNight, SIGNAL(toggled(bool)),
             this, SLOT(updateTimePeriods()));
+    connect(actionEditChannels, SIGNAL(triggered()),
+            this, SLOT(editChannels()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
@@ -196,6 +199,12 @@ void MainWindow::showPreviousWeek()
 void MainWindow::updateTimePeriods()
 {
     setDay(channels->selectionModel()->currentIndex(), calendar->selectedDate());
+}
+
+void MainWindow::editChannels()
+{
+    ChannelEditor ce(m_channelList, this);
+    ce.exec();
 }
 
 TvChannel::TimePeriods MainWindow::timePeriods() const

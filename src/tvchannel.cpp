@@ -22,6 +22,7 @@
 TvChannel::TvChannel(TvChannelList *channelList)
     : m_channelList(channelList)
     , m_programmes(0)
+    , m_hidden(false)
 {
 }
 

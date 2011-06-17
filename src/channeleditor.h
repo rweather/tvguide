@@ -15,34 +15,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TVCHANNELMODEL_H
-#define _TVCHANNELMODEL_H
+#ifndef _CHANNELEDITOR_H
+#define _CHANNELEDITOR_H
 
-#include "tvchannellist.h"
-#include <QtCore/qabstractitemmodel.h>
+#include <QtGui/qdialog.h>
+#include "ui_channeleditor.h"
 
-class TvChannelModel : public QAbstractItemModel
+class TvChannelList;
+
+class ChannelEditor : public QDialog, private Ui::ChannelEditor
 {
     Q_OBJECT
 public:
-    explicit TvChannelModel(TvChannelList *channelList, QObject *parent = 0);
-    ~TvChannelModel();
+    explicit ChannelEditor(TvChannelList *channelList, QWidget *parent = 0);
+    ~ChannelEditor();
 
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    QModelIndex parent(const QModelIndex &child) const;
-    int columnCount(const QModelIndex &parent) const;
-    int rowCount(const QModelIndex &parent) const;
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+public Q_SLOTS:
+    void accept();
 
 private Q_SLOTS:
-    void channelsChanged();
+    void moveToInactive();
+    void moveToActive();
+    void moveToInactiveAll();
+    void moveToActiveAll();
+    void updateMakeInactive();
+    void updateMakeActive();
+    void itemDoubleClicked(QListWidgetItem *item);
 
 private:
     TvChannelList *m_channelList;
-    QList<TvChannel *> m_visibleChannels;
-
-    void loadVisibleChannels();
 };
 
 #endif
