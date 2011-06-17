@@ -24,6 +24,7 @@
 TvProgrammeModel::TvProgrammeModel(QObject *parent)
     : QAbstractItemModel(parent)
     , m_channel(0)
+    , m_bookmarkIcon(QLatin1String(":/images/bookmark.png"))
 {
 }
 
@@ -94,6 +95,11 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
     } else if (role == Qt::ToolTipRole) {
         if (index.column() == MODEL_COL_TITLE)
             return prog->longDescription();
+    } else if (role == Qt::DecorationRole) {
+        if (index.column() == MODEL_COL_TIME) {
+            if (prog->color().isValid())
+                return m_bookmarkIcon;
+        }
     } else if (role == Qt::BackgroundRole) {
         // Paint the times for different parts of the day
         // in different colors to make it easier to find

@@ -18,6 +18,8 @@
 #include "mainwindow.h"
 #include "tvprogrammedelegate.h"
 #include "channeleditor.h"
+#include "bookmarkitemeditor.h"
+#include "bookmarklisteditor.h"
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
 #include <QtGui/qitemselectionmodel.h>
@@ -54,6 +56,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(progressChanged(qreal)));
     connect(m_channelList, SIGNAL(programmesChanged(TvChannel *)),
             this, SLOT(programmesChanged(TvChannel *)));
+    connect(m_channelList, SIGNAL(bookmarksChanged()),
+            this, SLOT(updateTimePeriods()));
     m_channelModel = new TvChannelModel(m_channelList, this);
     channels->setModel(m_channelModel);
 
@@ -96,6 +100,10 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(updateTimePeriods()));
     connect(actionEditChannels, SIGNAL(triggered()),
             this, SLOT(editChannels()));
+    connect(actionAddBookmark, SIGNAL(triggered()),
+            this, SLOT(addBookmark()));
+    connect(actionOrganizeBookmarks, SIGNAL(triggered()),
+            this, SLOT(organizeBookmarks()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
@@ -228,6 +236,43 @@ void MainWindow::editChannels()
 {
     ChannelEditor ce(m_channelList, this);
     ce.exec();
+}
+
+void MainWindow::addBookmark()
+{
+    BookmarkItemEditor bookmarkDlg(m_channelList, this);
+    bookmarkDlg.setWindowTitle(tr("Add Bookmark"));
+    QModelIndex index = channels->selectionModel()->currentIndex();
+    if (index.isValid()) {
+        TvChannel *channel = static_cast<TvChannel *>(index.internalPointer());
+        bookmarkDlg.setChannelId(channel->id());
+    }
+    index = programmes->selectionModel()->currentIndex();
+    if (index.isValid()) {
+        TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
+        bookmarkDlg.setTitle(programme->title());
+        bookmarkDlg.setStartTime(programme->start().time());
+        bookmarkDlg.setStopTime(programme->stop().time());
+        bookmarkDlg.setDayOfWeek(programme->start().date().dayOfWeek());
+    } else {
+        bookmarkDlg.setDayOfWeek(calendar->selectedDate().dayOfWeek());
+    }
+    if (bookmarkDlg.exec() == QDialog::Accepted) {
+        TvBookmark *bookmark = new TvBookmark();
+        bookmark->setTitle(bookmarkDlg.title());
+        bookmark->setChannelId(bookmarkDlg.channelId());
+        bookmark->setStartTime(bookmarkDlg.startTime());
+        bookmark->setStopTime(bookmarkDlg.stopTime());
+        bookmark->setDayOfWeek(bookmarkDlg.dayOfWeek());
+        bookmark->setColor(bookmarkDlg.color());
+        m_channelList->addBookmark(bookmark);
+    }
+}
+
+void MainWindow::organizeBookmarks()
+{
+    BookmarkListEditor dialog(m_channelList, this);
+    dialog.exec();
 }
 
 TvChannel::TimePeriods MainWindow::timePeriods() const

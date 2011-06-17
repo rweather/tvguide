@@ -48,6 +48,8 @@ private Q_SLOTS:
     void updateTimePeriods();
 
     void editChannels();
+    void addBookmark();
+    void organizeBookmarks();
 
 private:
     TvChannelList *m_channelList;

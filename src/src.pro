@@ -2,7 +2,11 @@ TARGET = tvguide
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    bookmarkitemeditor.cpp \
+    bookmarklisteditor.cpp \
     channeleditor.cpp \
+    tvbookmark.cpp \
+    tvbookmarkmodel.cpp \
     tvchannel.cpp \
     tvchannellist.cpp \
     tvchannelmodel.cpp \
@@ -12,7 +16,11 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
+    bookmarkitemeditor.h \
+    bookmarklisteditor.h \
     channeleditor.h \
+    tvbookmark.h \
+    tvbookmarkmodel.h \
     tvchannel.h \
     tvchannellist.h \
     tvchannelmodel.h \
@@ -25,6 +33,8 @@ RESOURCES += \
 
 FORMS += \
     mainwindow.ui \
+    bookmarkitemeditor.ui \
+    bookmarklisteditor.ui \
     channeleditor.ui \
 
 QT += network

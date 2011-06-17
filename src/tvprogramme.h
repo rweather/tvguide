@@ -22,6 +22,7 @@
 #include <QtCore/qstringlist.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qxmlstream.h>
+#include <QtGui/qcolor.h>
 
 class TvChannel;
 
@@ -50,6 +51,9 @@ public:
 
     void load(QXmlStreamReader *reader);
 
+    QColor color() const { return m_color; }
+    void setColor(const QColor &color);
+
     QString shortDescription() const;
     QString longDescription() const;
 
@@ -72,6 +76,7 @@ private:
     QString m_country;
     mutable QString m_shortDescription;
     mutable QString m_longDescription;
+    QColor m_color;
     TvProgramme *m_next;
 
     friend class TvChannel;

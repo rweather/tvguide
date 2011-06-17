@@ -15,22 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TVPROGRAMMEMODEL_H
-#define _TVPROGRAMMEMODEL_H
+#ifndef _TVBOOKMARKMODEL_H
+#define _TVBOOKMARKMODEL_H
 
-#include "tvprogramme.h"
+#include "tvbookmark.h"
 #include <QtCore/qabstractitemmodel.h>
-#include <QtGui/qicon.h>
 
-class TvProgrammeModel : public QAbstractItemModel
+class TvChannelList;
+
+class TvBookmarkModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit TvProgrammeModel(QObject *parent = 0);
-    ~TvProgrammeModel();
-
-    void clear();
-    void setProgrammes(const QList<TvProgramme *> &programmes, TvChannel *channel, const QDate &date);
+    explicit TvBookmarkModel(TvChannelList *channelList, QObject *parent = 0);
+    ~TvBookmarkModel();
 
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex parent(const QModelIndex &child) const;
@@ -38,12 +36,18 @@ public:
     int rowCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    void sort(int column, Qt::SortOrder order);
+
+    void addBookmark(TvBookmark *bookmark);
+    void updateBookmark(int index);
+    void removeBookmark(int index);
+    QList<TvBookmark *> detachBookmarks();
+
+    TvBookmark *bookmarkAt(int index) const { return m_bookmarks.at(index); }
 
 private:
-    QList<TvProgramme *> m_programmes;
-    TvChannel *m_channel;
-    QDate m_date;
-    QIcon m_bookmarkIcon;
+    TvChannelList *m_channelList;
+    QList<TvBookmark *> m_bookmarks;
 };
 
 #endif

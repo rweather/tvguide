@@ -68,6 +68,7 @@ TvChannelList::TvChannelList(QObject *parent)
 TvChannelList::~TvChannelList()
 {
     qDeleteAll(m_channels);
+    qDeleteAll(m_bookmarks);
 }
 
 TvChannel *TvChannelList::channel(const QString &id) const
@@ -280,7 +281,7 @@ void TvChannelList::updateHidden()
     }
     if (m_hiddenChannelIds != hidden) {
         m_hiddenChannelIds = hidden;
-        saveSettings();
+        saveChannelSettings();
         emit hiddenChannelsChanged();
     }
 }
@@ -494,31 +495,95 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
     }
     settings->endArray();
     settings->endGroup();
-}
 
-void TvChannelList::saveServiceSettings(QSettings *settings)
-{
-    settings->beginGroup(m_serviceName);
-    settings->beginWriteArray(QLatin1String("channels"));
-    int aindex = 0;
-    for (int index = 0; index < m_activeChannels.size(); ++index) {
-        TvChannel *channel = m_activeChannels.at(index);
-        if (!channel->isHidden())
-            continue;
-        settings->setArrayIndex(aindex++);
-        settings->setValue(QLatin1String("id"), channel->id());
-        settings->setValue(QLatin1String("hidden"), channel->isHidden());
+    qDeleteAll(m_bookmarks);
+    m_bookmarks.clear();
+    m_indexedBookmarks.clear();
+    settings->beginGroup(QLatin1String("Bookmarks"));
+    size = settings->beginReadArray(QLatin1String("bookmarks"));
+    for (int index = 0; index < size; ++index) {
+        settings->setArrayIndex(index);
+        TvBookmark *bookmark = new TvBookmark();
+        bookmark->load(settings);
+        m_bookmarks.append(bookmark);
+        m_indexedBookmarks.insert(bookmark->title().toLower(), bookmark);
     }
     settings->endArray();
     settings->endGroup();
 }
 
-void TvChannelList::saveSettings()
+void TvChannelList::saveChannelSettings()
 {
     if (m_serviceName.isEmpty())
         return;
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
-    saveServiceSettings(&settings);
+    settings.beginGroup(m_serviceName);
+    settings.beginWriteArray(QLatin1String("channels"));
+    int aindex = 0;
+    for (int index = 0; index < m_activeChannels.size(); ++index) {
+        TvChannel *channel = m_activeChannels.at(index);
+        if (!channel->isHidden())
+            continue;
+        settings.setArrayIndex(aindex++);
+        settings.setValue(QLatin1String("id"), channel->id());
+        settings.setValue(QLatin1String("hidden"), channel->isHidden());
+    }
+    settings.endArray();
+    settings.endGroup();
     settings.sync();
+}
+
+void TvChannelList::saveBookmarks()
+{
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("Bookmarks"));
+    settings.beginWriteArray(QLatin1String("bookmarks"));
+    for (int index = 0; index < m_bookmarks.size(); ++index) {
+        TvBookmark *bookmark = m_bookmarks.at(index);
+        settings.setArrayIndex(index);
+        bookmark->save(&settings);
+    }
+    settings.endArray();
+    settings.endGroup();
+    settings.sync();
+}
+
+void TvChannelList::addBookmark(TvBookmark *bookmark)
+{
+    Q_ASSERT(bookmark);
+    m_bookmarks.append(bookmark);
+    m_indexedBookmarks.insert(bookmark->title().toLower(), bookmark);
+    emit bookmarksChanged();
+    saveBookmarks();
+}
+
+TvBookmark::Match TvChannelList::matchBookmarks
+    (const TvProgramme *programme, TvBookmark **bookmark) const
+{
+    QMultiMap<QString, TvBookmark *>::ConstIterator it;
+    it = m_indexedBookmarks.constFind(programme->title().toLower());
+    while (it != m_indexedBookmarks.constEnd()) {
+        TvBookmark::Match match = it.value()->match(programme);
+        if (match != TvBookmark::NoMatch) {
+            *bookmark = it.value();
+            return match;
+        }
+        ++it;
+    }
+    return TvBookmark::NoMatch;
+}
+
+void TvChannelList::replaceBookmarks(const QList<TvBookmark *> &bookmarks)
+{
+    qDeleteAll(m_bookmarks);
+    m_bookmarks = bookmarks;
+    m_indexedBookmarks.clear();
+    for (int index = 0; index < bookmarks.size(); ++index) {
+        TvBookmark *bookmark = bookmarks.at(index);
+        m_indexedBookmarks.insert(bookmark->title().toLower(), bookmark);
+    }
+    emit bookmarksChanged();
+    saveBookmarks();
 }

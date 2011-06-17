@@ -38,7 +38,6 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_Open"/>
-    <addaction name="actionEditChannels"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -60,8 +59,18 @@
     <addaction name="actionNight"/>
     <addaction name="actionLateNight"/>
    </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="actionAddBookmark"/>
+    <addaction name="actionOrganizeBookmarks"/>
+    <addaction name="separator"/>
+    <addaction name="actionEditChannels"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
+   <addaction name="menu_Tools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="channelDock">
@@ -125,6 +134,8 @@
    <addaction name="separator"/>
    <addaction name="actionReload"/>
    <addaction name="action_Stop"/>
+   <addaction name="separator"/>
+   <addaction name="actionAddBookmark"/>
   </widget>
   <action name="action_Open">
    <property name="text">
@@ -247,9 +258,26 @@
     <string>&amp;Late Night</string>
    </property>
   </action>
+  <action name="actionAddBookmark">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/bookmark-new.png</normaloff>:/images/bookmark-new.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add &amp;Bookmark ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
   <action name="actionEditChannels">
    <property name="text">
-    <string>&amp;Edit Channels ...</string>
+    <string>Edit &amp;Channels ...</string>
+   </property>
+  </action>
+  <action name="actionOrganizeBookmarks">
+   <property name="text">
+    <string>&amp;Organize Bookmarks ...</string>
    </property>
   </action>
  </widget>

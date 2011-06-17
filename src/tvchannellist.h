@@ -19,6 +19,7 @@
 #define _TVCHANNELLIST_H
 
 #include "tvchannel.h"
+#include "tvbookmark.h"
 #include <QtCore/qmap.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qtimer.h>
@@ -47,6 +48,13 @@ public:
     qreal progress() const { return m_progress; }
     bool useSimpleProgress() const { return m_requestsToDo <= 3; }
 
+    void addBookmark(TvBookmark *bookmark);
+    TvBookmark::Match matchBookmarks
+        (const TvProgramme *programme, TvBookmark **bookmark) const;
+
+    QList<TvBookmark *> bookmarks() const { return m_bookmarks; }
+    void replaceBookmarks(const QList<TvBookmark *> &bookmarks);
+
 public Q_SLOTS:
     void refreshChannels();
     void requestChannelDay(TvChannel *channel, const QDate &date);
@@ -72,6 +80,7 @@ Q_SIGNALS:
     void programmesChanged(TvChannel *channel);
     void busyChanged(bool value);
     void progressChanged(qreal value);
+    void bookmarksChanged();
 
 private:
     QMap<QString, TvChannel *> m_channels;
@@ -93,6 +102,8 @@ private:
     QNetworkReply *m_reply;
     QByteArray m_contents;
     QMap<QUrl, QDateTime> m_lastFetch;
+    QList<TvBookmark *> m_bookmarks;
+    QMultiMap<QString, TvBookmark *> m_indexedBookmarks;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
     void appendPending(const QUrl &url);
@@ -100,8 +111,8 @@ private:
     void nextPending();
     void forceProgressUpdate();
     void loadServiceSettings(QSettings *settings);
-    void saveServiceSettings(QSettings *settings);
-    void saveSettings();
+    void saveChannelSettings();
+    void saveBookmarks();
 };
 
 #endif

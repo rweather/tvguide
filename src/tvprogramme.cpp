@@ -102,13 +102,29 @@ void TvProgramme::load(QXmlStreamReader *reader)
     m_longDescription = QString();
 }
 
+void TvProgramme::setColor(const QColor &color)
+{
+    if (m_color != color) {
+        m_color = color;
+        m_shortDescription = QString();
+    }
+}
+
 QString TvProgramme::shortDescription() const
 {
     if (!m_shortDescription.isEmpty())
         return m_shortDescription;
-    QString desc = QLatin1String("<b>") +
-                   Qt::escape(m_title) +
-                   QLatin1String("</b>");
+    QString desc;
+    if (m_color.isValid()) {
+        desc += QLatin1String("<font color=\"") +
+                m_color.name() +
+                QLatin1String("\">");
+    }
+    desc += QLatin1String("<b>") +
+            Qt::escape(m_title) +
+            QLatin1String("</b>");
+    if (m_color.isValid())
+        desc += QLatin1String("</font>");
     if (!m_date.isEmpty() && m_date != QLatin1String("0")) {
         desc += QLatin1String(" (") +
                 Qt::escape(m_date) + QLatin1String(")");

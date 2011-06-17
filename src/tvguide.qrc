@@ -1,6 +1,8 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>images/application-exit.png</file>
+    <file>images/bookmark.png</file>
+    <file>images/bookmark-new.png</file>
     <file>images/go-down.png</file>
     <file>images/go-first.png</file>
     <file>images/go-last.png</file>

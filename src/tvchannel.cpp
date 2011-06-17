@@ -16,7 +16,9 @@
  */
 
 #include "tvchannel.h"
+#include "tvchannellist.h"
 #include "tvprogramme.h"
+#include "tvbookmark.h"
 #include <QtCore/qdebug.h>
 
 TvChannel::TvChannel(TvChannelList *channelList)
@@ -281,8 +283,16 @@ QList<TvProgramme *> TvChannel::programmesForDay
                     prog->stop() > lateNightStart)
                 candidate = true;
         }
-        if (candidate)
+        if (candidate) {
+            TvBookmark *bookmark = 0;
+            TvBookmark::Match match;
+            match = channelList()->matchBookmarks(prog, &bookmark);
+            if (match == TvBookmark::NoMatch)
+                prog->setColor(QColor());
+            else
+                prog->setColor(bookmark->color());
             list.append(prog);
+        }
         prog = prog->m_next;
     }
     return list;

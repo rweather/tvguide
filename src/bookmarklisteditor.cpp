@@ -1,0 +1,123 @@
+/*
+ * Copyright (C) 2011  Southern Storm Software, Pty Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "bookmarklisteditor.h"
+#include "bookmarkitemeditor.h"
+#include "tvchannellist.h"
+#include <QtCore/qdebug.h>
+
+BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *parent)
+    : QDialog(parent)
+    , m_channelList(channelList)
+{
+    setupUi(this);
+    m_model = new TvBookmarkModel(channelList, this);
+    bookmarkView->setModel(m_model);
+    bookmarkView->verticalHeader()->hide();
+    bookmarkView->horizontalHeader()->setStretchLastSection(true);
+    bookmarkView->setSelectionBehavior(QTableView::SelectRows);
+
+    connect(bookmarkView->selectionModel(),
+            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(currentChanged(QModelIndex)));
+
+    connect(editButton, SIGNAL(clicked()), this, SLOT(editBookmark()));
+    connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteBookmark()));
+    connect(newButton, SIGNAL(clicked()), this, SLOT(newBookmark()));
+
+    editButton->setEnabled(false);
+    deleteButton->setEnabled(false);
+
+    bookmarkView->setSortingEnabled(true);
+}
+
+BookmarkListEditor::~BookmarkListEditor()
+{
+}
+
+void BookmarkListEditor::accept()
+{
+    m_channelList->replaceBookmarks(m_model->detachBookmarks());
+    QDialog::accept();
+}
+
+void BookmarkListEditor::editBookmark()
+{
+    QModelIndex index = bookmarkView->selectionModel()->currentIndex();
+    if (!index.isValid())
+        return;
+    TvBookmark *bookmark = m_model->bookmarkAt(index.row());
+
+    BookmarkItemEditor bookmarkDlg(m_channelList, this);
+    bookmarkDlg.setTitle(bookmark->title());
+    bookmarkDlg.setChannelId(bookmark->channelId());
+    bookmarkDlg.setStartTime(bookmark->startTime());
+    bookmarkDlg.setStopTime(bookmark->stopTime());
+    bookmarkDlg.setDayOfWeek(bookmark->dayOfWeek());
+    bookmarkDlg.setColor(bookmark->color());
+
+    if (bookmarkDlg.exec() == QDialog::Accepted) {
+        bookmark->setTitle(bookmarkDlg.title());
+        bookmark->setChannelId(bookmarkDlg.channelId());
+        bookmark->setStartTime(bookmarkDlg.startTime());
+        bookmark->setStopTime(bookmarkDlg.stopTime());
+        bookmark->setDayOfWeek(bookmarkDlg.dayOfWeek());
+        bookmark->setColor(bookmarkDlg.color());
+        m_model->updateBookmark(index.row());
+        bookmarkView->sortByColumn
+            (bookmarkView->horizontalHeader()->sortIndicatorSection(),
+             bookmarkView->horizontalHeader()->sortIndicatorOrder());
+    }
+}
+
+void BookmarkListEditor::deleteBookmark()
+{
+    QModelIndex index = bookmarkView->selectionModel()->currentIndex();
+    if (!index.isValid())
+        return;
+    m_model->removeBookmark(index.row());
+}
+
+void BookmarkListEditor::newBookmark()
+{
+    BookmarkItemEditor bookmarkDlg(m_channelList, this);
+    bookmarkDlg.setWindowTitle(tr("New Bookmark"));
+    if (bookmarkDlg.exec() == QDialog::Accepted) {
+        TvBookmark *bookmark = new TvBookmark();
+        bookmark->setTitle(bookmarkDlg.title());
+        bookmark->setChannelId(bookmarkDlg.channelId());
+        bookmark->setStartTime(bookmarkDlg.startTime());
+        bookmark->setStopTime(bookmarkDlg.stopTime());
+        bookmark->setDayOfWeek(bookmarkDlg.dayOfWeek());
+        bookmark->setColor(bookmarkDlg.color());
+        m_model->addBookmark(bookmark);
+        bookmarkView->sortByColumn
+            (bookmarkView->horizontalHeader()->sortIndicatorSection(),
+             bookmarkView->horizontalHeader()->sortIndicatorOrder());
+    }
+}
+
+void BookmarkListEditor::currentChanged(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        editButton->setEnabled(true);
+        deleteButton->setEnabled(true);
+    } else {
+        editButton->setEnabled(false);
+        deleteButton->setEnabled(false);
+    }
+}
