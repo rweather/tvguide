@@ -97,11 +97,11 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
         if (index.column() == MODEL_COL_TIME) {
             int hour = prog->start().time().hour();
             if (hour < 6)
-                return QBrush(Qt::magenta);
+                return QBrush(Qt::gray);
             else if (hour < 12)
-                return QBrush(Qt::green);
+                return QBrush(QColor(0, 192, 64));
             else if (hour < 18)
-                return QBrush(Qt::cyan);
+                return QBrush(QColor(192, 192, 64));
             else
                 return QBrush(Qt::yellow);
         }
