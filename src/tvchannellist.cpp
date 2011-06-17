@@ -46,12 +46,23 @@ TvChannelList::TvChannelList(QObject *parent)
             this, SLOT(sslErrors(QNetworkReply*,QList<QSslError>)));
 #endif
 
-    m_startUrl = QUrl(QLatin1String("http://xml.oztivo.net/xmltv/datalist.xml.gz"));
-
     m_throttleTimer = new QTimer(this);
     m_throttleTimer->setSingleShot(true);
     connect(m_throttleTimer, SIGNAL(timeout()),
             this, SLOT(throttleTimeout()));
+
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("Service"));
+    m_serviceName = settings.value
+        (QLatin1String("name"), QLatin1String("OzTivo")).toString();
+    QString url = settings.value
+        (QLatin1String("url"),
+         QLatin1String("http://xml.oztivo.net/xmltv/datalist.xml.gz")).toString();
+    if (!url.isEmpty())
+        m_startUrl = QUrl(url);
+    settings.endGroup();
+    loadServiceSettings(&settings);
 }
 
 TvChannelList::~TvChannelList()
@@ -269,6 +280,7 @@ void TvChannelList::updateHidden()
     }
     if (m_hiddenChannelIds != hidden) {
         m_hiddenChannelIds = hidden;
+        saveSettings();
         emit hiddenChannelsChanged();
     }
 }
@@ -464,4 +476,49 @@ void TvChannelList::forceProgressUpdate()
     else
         m_progress = 1.0f;
     emit progressChanged(m_progress);
+}
+
+void TvChannelList::loadServiceSettings(QSettings *settings)
+{
+    settings->beginGroup(m_serviceName);
+    m_hiddenChannelIds.clear();
+    int size = settings->beginReadArray(QLatin1String("channels"));
+    for (int index = 0; index < size; ++index) {
+        settings->setArrayIndex(index);
+        QString id = settings->value(QLatin1String("id")).toString();
+        if (id.isEmpty())
+            continue;
+        bool hidden = settings->value(QLatin1String("hidden"), false).toBool();
+        if (hidden)
+            m_hiddenChannelIds.append(id);
+    }
+    settings->endArray();
+    settings->endGroup();
+}
+
+void TvChannelList::saveServiceSettings(QSettings *settings)
+{
+    settings->beginGroup(m_serviceName);
+    settings->beginWriteArray(QLatin1String("channels"));
+    int aindex = 0;
+    for (int index = 0; index < m_activeChannels.size(); ++index) {
+        TvChannel *channel = m_activeChannels.at(index);
+        if (!channel->isHidden())
+            continue;
+        settings->setArrayIndex(aindex++);
+        settings->setValue(QLatin1String("id"), channel->id());
+        settings->setValue(QLatin1String("hidden"), channel->isHidden());
+    }
+    settings->endArray();
+    settings->endGroup();
+}
+
+void TvChannelList::saveSettings()
+{
+    if (m_serviceName.isEmpty())
+        return;
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    saveServiceSettings(&settings);
+    settings.sync();
 }

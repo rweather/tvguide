@@ -22,6 +22,7 @@
 #include <QtCore/qmap.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qtimer.h>
+#include <QtCore/qsettings.h>
 #include <QtNetwork/qnetworkaccessmanager.h>
 #include <QtNetwork/qnetworkreply.h>
 
@@ -77,6 +78,7 @@ private:
     QList<TvChannel *> m_activeChannels;
     QStringList m_hiddenChannelIds;
     QNetworkAccessManager m_nam;
+    QString m_serviceName;
     QUrl m_startUrl;
     QList<QUrl> m_pending;
     QUrl m_currentRequest;
@@ -97,6 +99,9 @@ private:
     void prependPending(const QUrl &url);
     void nextPending();
     void forceProgressUpdate();
+    void loadServiceSettings(QSettings *settings);
+    void saveServiceSettings(QSettings *settings);
+    void saveSettings();
 };
 
 #endif

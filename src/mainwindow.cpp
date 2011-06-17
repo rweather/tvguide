@@ -19,6 +19,7 @@
 #include "tvprogrammedelegate.h"
 #include "channeleditor.h"
 #include <QtCore/qdebug.h>
+#include <QtCore/qsettings.h>
 #include <QtGui/qitemselectionmodel.h>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -37,9 +38,6 @@ MainWindow::MainWindow(QWidget *parent)
     actionToday->setEnabled(false); // Calendar starts on today.
 
     connect(action_Quit, SIGNAL(triggered()), this, SLOT(close()));
-
-    menuView->addAction(channelDock->toggleViewAction());
-    menuView->addAction(calendarDock->toggleViewAction());
 
     m_progress = new QProgressBar(this);
     m_progress->setVisible(false);
@@ -104,10 +102,35 @@ MainWindow::MainWindow(QWidget *parent)
     connect(channels->selectionModel(),
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(channelChanged(QModelIndex)));
+
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("TimePeriods"));
+    actionMorning->setChecked(settings.value(QLatin1String("morning"), true).toBool());
+    actionAfternoon->setChecked(settings.value(QLatin1String("afternoon"), true).toBool());
+    actionNight->setChecked(settings.value(QLatin1String("night"), true).toBool());
+    actionLateNight->setChecked(settings.value(QLatin1String("latenight"), true).toBool());
+    settings.endGroup();
 }
 
 MainWindow::~MainWindow()
 {
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+
+    settings.beginGroup(QLatin1String("TimePeriods"));
+    TvChannel::TimePeriods periods = timePeriods();
+    settings.setValue(QLatin1String("morning"),
+                      (periods & TvChannel::Morning) != 0);
+    settings.setValue(QLatin1String("afternoon"),
+                      (periods & TvChannel::Afternoon) != 0);
+    settings.setValue(QLatin1String("night"),
+                      (periods & TvChannel::Night) != 0);
+    settings.setValue(QLatin1String("latenight"),
+                      (periods & TvChannel::LateNight) != 0);
+    settings.endGroup();
+
+    settings.sync();
 }
 
 void MainWindow::busyChanged(bool value)
