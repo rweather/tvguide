@@ -39,28 +39,36 @@ TvChannel::~TvChannel()
     }
 }
 
-QString TvChannel::dayUrl(const QDate &date) const
+QList<QUrl> TvChannel::dayUrls(const QDate &date) const
 {
     // http://www.oztivo.net/twiki/bin/view/TVGuide/StaticXMLGuideAPI
     //
     // URL has the form: baseUrl/channelid_YYYY-MM-DD.xml.gz
     //
-    // If there is more than one baseUrl, then pick a random one
+    // If there is more than one baseUrl, then randomize the list
     // to help spread out the server load.
+    QList<QUrl> urls;
     QString url;
     if (m_baseUrls.isEmpty() || m_id.isEmpty())
-        return QString();
-    if (m_baseUrls.size() == 1)
-        url = m_baseUrls.at(0);
-    else
-        url = m_baseUrls.at(qrand() % m_baseUrls.size());
-    if (!url.endsWith(QLatin1Char('/')))
-        url += QLatin1Char('/');
-    url += m_id;
-    url += QLatin1Char('_');
-    url += date.toString(QLatin1String("yyyy-MM-dd"));
-    url += QLatin1String(".xml.gz");
-    return url;
+        return urls;
+    for (int index = 0; index < m_baseUrls.size(); ++index) {
+        url = m_baseUrls.at(index);
+        if (!url.endsWith(QLatin1Char('/')))
+            url += QLatin1Char('/');
+        url += m_id;
+        url += QLatin1Char('_');
+        url += date.toString(QLatin1String("yyyy-MM-dd"));
+        url += QLatin1String(".xml.gz");
+        urls.append(QUrl(url));
+    }
+    if (urls.size() > 1) {
+        for (int index = 1; index < urls.size(); ++index) {
+            int other = qrand() % urls.size();
+            if (index != other)
+                qSwap(urls[index], urls[other]);
+        }
+    }
+    return urls;
 }
 
 QDateTime TvChannel::dayLastModified(const QDate &date) const

@@ -22,6 +22,7 @@
 #include <QtCore/qstringlist.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qxmlstream.h>
+#include <QtCore/qurl.h>
 
 class TvChannelList;
 class TvProgramme;
@@ -44,7 +45,7 @@ public:
     void setName(const QString &name) { m_name = name; }
 
     QStringList baseUrls() const { return m_baseUrls; }
-    QString dayUrl(const QDate &date) const;
+    QList<QUrl> dayUrls(const QDate &date) const;
     QDateTime dayLastModified(const QDate &date) const;
     bool hasDataFor(const QDate &date) const;
     bool hasDataFor() const { return !m_dates.isEmpty(); }

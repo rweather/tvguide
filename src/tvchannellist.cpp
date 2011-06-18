@@ -22,9 +22,11 @@
 #include <QtCore/qdebug.h>
 #include <QtNetwork/qnetworkdiskcache.h>
 
+//#define DEBUG_NETWORK 1
+
 TvChannelList::TvChannelList(QObject *parent)
     : QObject(parent)
-    , m_firstIsDayUI(false)
+    , m_startUrlRefresh(24)
     , m_hasDataFor(false)
     , m_throttled(false)
     , m_busy(false)
@@ -61,6 +63,9 @@ TvChannelList::TvChannelList(QObject *parent)
          QLatin1String("http://xml.oztivo.net/xmltv/datalist.xml.gz")).toString();
     if (!url.isEmpty())
         m_startUrl = QUrl(url);
+    m_startUrlRefresh = settings.value(QLatin1String("refresh"), 24).toInt();
+    if (m_startUrlRefresh < 1)
+        m_startUrlRefresh = 1;
     settings.endGroup();
     loadServiceSettings(&settings);
 }
@@ -171,13 +176,15 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
         emit channelIndexLoaded();
 }
 
-void TvChannelList::refreshChannels()
+void TvChannelList::refreshChannels(bool forceReload)
 {
     // Add the start URL to the front of the queue to fetch
     // it as soon as the current request completes.
     if (m_startUrl.isValid()) {
-        m_firstIsDayUI = false;
-        prependPending(m_startUrl);
+        QList<QUrl> urls;
+        urls += m_startUrl;
+        requestData(urls, QDateTime(), 0,
+                    forceReload ? -1 : m_startUrlRefresh);
     }
 }
 
@@ -190,32 +197,25 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date)
     if (!channel->hasDataFor(date))
         return;
 
-    // Fetch the day URL and start a request for it.  We bump it to
-    // the front of the queue since it is the most recent date the user
-    // selected in the UI, and hence the one needed most urgently.
-    QString url = channel->dayUrl(date);
-    if (url.isEmpty())
+    // Trim requests for priority 1 and 2, which are the requests
+    // for the current day and the next day.  Since we are about
+    // to request a different day for the UI, there's no point
+    // retrieving the previous day's data any more.
+    trimRequests(1, 2);
+
+    // Fetch the day URL and start a request for it.
+    QList<QUrl> urls = channel->dayUrls(date);
+    if (urls.isEmpty())
         return;
-    if (!m_pending.isEmpty() && m_firstIsDayUI && m_pending.at(0) != url) {
-        // Remove the first element which is a pending request
-        // for day information for the UI.  There's no point
-        // retrieving it now given that we are about to request a
-        // completely different day's data.  This can help reduce
-        // network load when the user is scrolling rapidly through
-        // channels or days.
-        m_pending.takeFirst();
-        --m_requestsToDo;
-    }
-    m_firstIsDayUI = true;
-    prependPending(QUrl(url));
+    requestData(urls, channel->dayLastModified(date), 1);
 
     // Also queue up the next day, to populate "Late Night"
     // timeslots, which are actually "Early Morning" the next day.
     QDate nextDay = date.addDays(1);
     if (channel->hasDataFor(nextDay)) {
-        url = channel->dayUrl(nextDay);
-        if (!url.isEmpty())
-            appendPending(QUrl(url));
+        urls = channel->dayUrls(nextDay);
+        if (!urls.isEmpty())
+            requestData(urls, channel->dayLastModified(nextDay), 2);
     }
 }
 
@@ -231,18 +231,16 @@ void TvChannelList::enqueueChannelDay(TvChannel *channel, const QDate &date)
 
     // Fetch the day URL and start a request for it.  Add the URL
     // to the end of the queue since timeliness is not important.
-    QString url = channel->dayUrl(date);
-    if (url.isEmpty())
+    QList<QUrl> urls = channel->dayUrls(date);
+    if (urls.isEmpty())
         return;
-    if (m_pending.isEmpty())
-        m_firstIsDayUI = false;
-    appendPending(QUrl(url));
+    requestData(urls, channel->dayLastModified(date), 3);
 }
 
 void TvChannelList::abort()
 {
     m_currentRequest = QUrl();
-    m_pending.clear();
+    m_requests.clear();
     m_contents.clear();
     m_busy = false;
     m_progress = 1.0f;
@@ -268,7 +266,7 @@ void TvChannelList::reload()
     // If-Modified-Since to reuse the local disk copy if possible,
     // but we want to know if the cache is up to date on reload.
     m_lastFetch.clear();
-    refreshChannels();
+    refreshChannels(true);
 }
 
 void TvChannelList::updateHidden()
@@ -325,6 +323,9 @@ void TvChannelList::requestFinished()
     m_reply->deleteLater();
     m_reply = 0;
     if (!m_contents.isEmpty()) {
+#ifdef DEBUG_NETWORK
+        qWarning() << "fetch succeeded:" << m_currentRequest << "size:" << m_contents.size();
+#endif
         m_lastFetch.insert(m_currentRequest, QDateTime::currentDateTime());
         QXmlStreamReader reader(m_contents);
         while (!reader.hasError()) {
@@ -337,6 +338,20 @@ void TvChannelList::requestFinished()
             }
         }
         m_contents = QByteArray();
+    } else {
+#ifdef DEBUG_NETWORK
+        qWarning() << "fetch failed:" << m_currentRequest;
+#endif
+    }
+    int index = 0;
+    while (index < m_requests.size()) {
+        // Remove repeated entries for the same URL at other priorities.
+        if (m_requests.at(index).urls.contains(m_currentRequest)) {
+            m_requests.removeAt(index);
+            --m_requestsToDo;
+        } else {
+            ++index;
+        }
     }
     m_currentRequest = QUrl();
     ++m_requestsDone;
@@ -358,84 +373,142 @@ void TvChannelList::requestError(QNetworkReply::NetworkError error)
                << m_currentRequest << "failed, error =" << int(error);
 }
 
-void TvChannelList::appendPending(const QUrl &url)
+void TvChannelList::requestData
+    (const QList<QUrl> &urls, const QDateTime &lastmod,
+     int priority, int refreshAge)
 {
-    if (m_currentRequest == url)
+    // Bail out if the url is currently being requested.
+    if (m_currentRequest.isValid() && urls.contains(m_currentRequest))
         return;
-    if (!m_pending.contains(url)) {
-        m_pending.append(url);
-        ++m_requestsToDo;
+
+    // Look in the cache to see if the data is fresh enough.
+    // Check all URL's in the list in case the same data is
+    // fresh under a different URL.  We assume that the data is
+    // fresh if the Last-Modified time matches what we expect
+    // or if the last time we fetched it within this process
+    // was less than an hour ago.
+    QUrl url;
+    QIODevice *device = 0;
+    QDateTime age = QDateTime::currentDateTime().addSecs(-(60 * 60));
+    QDateTime refAge = QDateTime::currentDateTime().addSecs(-(60 * 60 * refreshAge));
+    QDateTime lastFetch;
+    for (int index = 0; index < urls.size(); ++index) {
+        url = urls.at(index);
+        if (lastmod.isValid()) {
+            QNetworkCacheMetaData meta = m_nam.cache()->metaData(url);
+            if (meta.isValid() && meta.lastModified() == lastmod) {
+                device = m_nam.cache()->data(url);
+                if (device) {
+#ifdef DEBUG_NETWORK
+                    qWarning() << "using cache for:" << url
+                               << "last modified:" << lastmod.toLocalTime();
+#endif
+                    break;
+                }
+            }
+        } else if (refreshAge != -1) {
+            QNetworkCacheMetaData meta = m_nam.cache()->metaData(url);
+            if (meta.isValid() && meta.lastModified() >= refAge) {
+                device = m_nam.cache()->data(url);
+                if (device) {
+#ifdef DEBUG_NETWORK
+                    qWarning() << "using cache for:" << url
+                               << "last modified:" << meta.lastModified().toLocalTime()
+                               << "refresh: every" << refreshAge << "hours";
+#endif
+                    break;
+                }
+            }
+        }
+        lastFetch = m_lastFetch.value(url, QDateTime());
+        if (lastFetch.isValid() && lastFetch >= age) {
+            device = m_nam.cache()->data(url);
+            if (device) {
+#ifdef DEBUG_NETWORK
+                qWarning() << "using cache for:" << url
+                           << "last fetched:" << lastFetch;
+#endif
+                break;
+            }
+        }
     }
+    if (device) {
+        QXmlStreamReader *reader = new QXmlStreamReader(device);
+        while (!reader->hasError()) {
+            QXmlStreamReader::TokenType tokenType = reader->readNext();
+            if (tokenType == QXmlStreamReader::StartElement) {
+                if (reader->name() == QLatin1String("tv"))
+                    load(reader, url);
+            } else if (tokenType == QXmlStreamReader::EndDocument) {
+                break;
+            }
+        }
+        delete reader;
+        delete device;
+        return;
+    }
+
+    // Add the request to the queue, in priority order.
+    int index = 0;
+    url = urls.at(0);
+    while (index < m_requests.size()) {
+        const Request &r = m_requests.at(index);
+        if (r.priority == priority && r.urls.contains(url))
+            return;     // We have already queued this request.
+        if (r.priority > priority)
+            break;
+        ++index;
+    }
+    Request req;
+    req.urls = urls;
+    req.priority = priority;
+    m_requests.insert(index, req);
+    ++m_requestsToDo;
+
+    // Start the first request if nothing else is active.
     nextPending();
 }
 
-void TvChannelList::prependPending(const QUrl &url)
+void TvChannelList::trimRequests(int first, int last)
 {
-    if (m_currentRequest == url)
-        return;
-    if (m_pending.contains(url)) {
-        m_pending.removeAll(url);
-        --m_requestsToDo;
+    int index = 0;
+    bool removed = false;
+    while (index < m_requests.size()) {
+        const Request &r = m_requests.at(index);
+        if (r.priority >= first && r.priority <= last) {
+            m_requests.removeAt(index);
+            --m_requestsToDo;
+            removed = true;
+        } else {
+            ++index;
+        }
     }
-    m_pending.prepend(url);
-    ++m_requestsToDo;
-    nextPending();
+    if (removed) {
+        if (m_requests.isEmpty() && !m_currentRequest.isValid()) {
+            m_busy = false;
+            m_progress = 1.0f;
+            m_requestsToDo = 0;
+            m_requestsDone = 0;
+            emit busyChanged(m_busy);
+            emit progressChanged(m_progress);
+        } else {
+            forceProgressUpdate();
+        }
+    }
 }
 
 void TvChannelList::nextPending()
 {
     // Bail out if already processing a request, there are no
     // pending requests, or we are currently throttled.
-    if (m_currentRequest.isValid() || m_pending.isEmpty() || m_throttled) {
+    if (m_currentRequest.isValid() || m_requests.isEmpty() || m_throttled) {
         forceProgressUpdate();
         return;
     }
 
-    // Serve requests directly from the disk cache if possible.
-    // Anything that is less than 1 hour old is used as-is.
-    // Data that is older is re-requested from the server using
-    // If-Modified-Since to check for a more up to date copy.
-    QUrl url;
-    QDateTime age = QDateTime::currentDateTime().addSecs(-(60 * 60));
-    for (;;) {
-        if (m_pending.isEmpty()) {
-            // All pending requests have been served from the cache.
-            if (m_busy) {
-                m_busy = false;
-                m_progress = 1.0f;
-                m_requestsToDo = 0;
-                m_requestsDone = 0;
-                emit busyChanged(m_busy);
-                emit progressChanged(m_progress);
-            }
-            return;
-        }
-        url = m_pending.takeFirst();
-        QDateTime lastFetch = m_lastFetch.value(url, QDateTime());
-        if (lastFetch.isValid() && lastFetch >= age) {
-            QIODevice *device = m_nam.cache()->data(url);
-            if (device) {
-                QXmlStreamReader *reader = new QXmlStreamReader(device);
-                while (!reader->hasError()) {
-                    QXmlStreamReader::TokenType tokenType = reader->readNext();
-                    if (tokenType == QXmlStreamReader::StartElement) {
-                        if (reader->name() == QLatin1String("tv"))
-                            load(reader, url);
-                    } else if (tokenType == QXmlStreamReader::EndDocument) {
-                        break;
-                    }
-                }
-                delete reader;
-                delete device;
-                ++m_requestsDone;
-                continue;
-            }
-        }
-        break;
-    }
-
     // Initiate a GET request for the next pending URL.
-    m_currentRequest = url;
+    Request req = m_requests.takeFirst();
+    m_currentRequest = req.urls.at(0);
     QNetworkRequest request;
     request.setUrl(m_currentRequest);
     request.setRawHeader("User-Agent", "qtvguide/0.0.1");
@@ -445,7 +518,10 @@ void TvChannelList::nextPending()
     connect(m_reply, SIGNAL(finished()), this, SLOT(requestFinished()));
     connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
             this, SLOT(requestError(QNetworkReply::NetworkError)));
-    m_lastFetch.remove(url);
+    m_lastFetch.remove(m_currentRequest);
+#ifdef DEBUG_NETWORK
+    qWarning() << "fetching from network:" << m_currentRequest;
+#endif
 
     // Start the throttle timer.  According to the OzTivo guidelines,
     // there must be at least 1 second between requests.  Requests

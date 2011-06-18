@@ -56,7 +56,7 @@ public:
     void replaceBookmarks(const QList<TvBookmark *> &bookmarks);
 
 public Q_SLOTS:
-    void refreshChannels();
+    void refreshChannels(bool forceReload = false);
     void requestChannelDay(TvChannel *channel, const QDate &date);
     void enqueueChannelDay(TvChannel *channel, const QDate &date);
     void abort();
@@ -83,16 +83,22 @@ Q_SIGNALS:
     void bookmarksChanged();
 
 private:
+    struct Request
+    {
+        QList<QUrl> urls;
+        int priority;
+    };
+
     QMap<QString, TvChannel *> m_channels;
     QList<TvChannel *> m_activeChannels;
     QStringList m_hiddenChannelIds;
     QNetworkAccessManager m_nam;
     QString m_serviceName;
     QUrl m_startUrl;
-    QList<QUrl> m_pending;
+    int m_startUrlRefresh;
+    QList<Request> m_requests;
     QUrl m_currentRequest;
     QTimer *m_throttleTimer;
-    bool m_firstIsDayUI;
     bool m_hasDataFor;
     bool m_throttled;
     bool m_busy;
@@ -106,8 +112,8 @@ private:
     QMultiMap<QString, TvBookmark *> m_indexedBookmarks;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
-    void appendPending(const QUrl &url);
-    void prependPending(const QUrl &url);
+    void requestData(const QList<QUrl> &urls, const QDateTime &lastmod, int priority, int refreshAge = -1);
+    void trimRequests(int first, int last);
     void nextPending();
     void forceProgressUpdate();
     void loadServiceSettings(QSettings *settings);
