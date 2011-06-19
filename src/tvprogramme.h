@@ -48,6 +48,9 @@ public:
     QString language() const { return m_language; }
     QString originalLanguage() const { return m_originalLanguage; }
     QString country() const { return m_country; }
+    QString aspectRatio() const { return m_aspectRatio; }
+    bool isPremiere() const { return m_isPremiere; }
+    bool isRepeat() const { return m_isRepeat; }
 
     void load(QXmlStreamReader *reader);
 
@@ -74,6 +77,9 @@ private:
     QString m_language;
     QString m_originalLanguage;
     QString m_country;
+    QString m_aspectRatio;
+    bool m_isPremiere;
+    bool m_isRepeat;
     mutable QString m_shortDescription;
     mutable QString m_longDescription;
     QColor m_color;

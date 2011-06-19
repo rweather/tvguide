@@ -22,6 +22,8 @@
 
 TvProgramme::TvProgramme(TvChannel *channel)
     : m_channel(channel)
+    , m_isPremiere(false)
+    , m_isRepeat(false)
     , m_next(0)
 {
 }
@@ -90,7 +92,38 @@ void TvProgramme::load(QXmlStreamReader *reader)
             } else if (reader->name() == QLatin1String("country")) {
                 m_country = reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() != QLatin1String("credits")) {
+            } else if (reader->name() == QLatin1String("aspect")) {
+                m_aspectRatio = reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements);
+            } else if (reader->name() == QLatin1String("premiere")) {
+                m_isPremiere = true;
+            } else if (reader->name() == QLatin1String("previously-shown")) {
+                m_isRepeat = true;
+            // The following are container elements that are ignored.
+            } else if (reader->name() == QLatin1String("credits") ||
+                       reader->name() == QLatin1String("video")) {
+            // The following are in the DTD, but not processed yet.
+            } else if (reader->name() == QLatin1String("present") ||
+                       reader->name() == QLatin1String("quality") ||
+                       reader->name() == QLatin1String("audio") ||
+                       reader->name() == QLatin1String("stereo") ||
+                       reader->name() == QLatin1String("last-chance") ||
+                       reader->name() == QLatin1String("new") ||
+                       reader->name() == QLatin1String("subtitles") ||
+                       reader->name() == QLatin1String("review") ||
+                       reader->name() == QLatin1String("url") ||
+                       reader->name() == QLatin1String("writer") ||
+                       reader->name() == QLatin1String("adapter") ||
+                       reader->name() == QLatin1String("producer") ||
+                       reader->name() == QLatin1String("composer") ||
+                       reader->name() == QLatin1String("editor") ||
+                       reader->name() == QLatin1String("presenter") ||
+                       reader->name() == QLatin1String("commentator") ||
+                       reader->name() == QLatin1String("guest") ||
+                       reader->name() == QLatin1String("length") ||
+                       reader->name() == QLatin1String("icon")) {
+                qWarning() << "Warning: unhandled standard programme element:" << reader->name();
+            } else {
                 qWarning() << "Warning: unknown programme element:" << reader->name();
             }
         } else if (token == QXmlStreamReader::EndElement) {
@@ -132,6 +165,10 @@ QString TvProgramme::shortDescription() const
     if (!m_rating.isEmpty()) {
         desc += QLatin1String(" (") +
                 Qt::escape(m_rating) + QLatin1String(")");
+        if (m_isRepeat)
+            desc += QObject::tr("(R)");
+    } else if (m_isRepeat) {
+        desc += QObject::tr(" (R)");
     }
     if (!m_categories.isEmpty()) {
         desc += QLatin1String(", ") +
@@ -174,6 +211,8 @@ QString TvProgramme::shortDescription() const
                 Qt::escape(m_subTitle) +
                 QLatin1String("</i>");
     }
+    if (m_isPremiere)
+        desc += QObject::tr(", <font color=\"red\"><b>Premiere</b></font>");
     m_shortDescription = desc;
     return desc;
 }
@@ -210,6 +249,10 @@ QString TvProgramme::longDescription() const
     if (!m_country.isEmpty()) {
         desc += QObject::tr("<p><b>Country:</b> %1</p>")
             .arg(Qt::escape(m_country));
+    }
+    if (!m_aspectRatio.isEmpty()) {
+        desc += QObject::tr("<p><b>Aspect ratio:</b> %1</p>")
+            .arg(Qt::escape(m_aspectRatio));
     }
     desc += QLatin1String("</qt>");
     m_longDescription = desc;
