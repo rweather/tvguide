@@ -189,7 +189,7 @@ void TvChannelList::refreshChannels(bool forceReload)
 }
 
 // Request a particular day's data based on user selections.
-void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date)
+void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int days)
 {
     Q_ASSERT(channel);
 
@@ -209,13 +209,18 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date)
         return;
     requestData(urls, channel->dayLastModified(date), 1);
 
-    // Also queue up the next day, to populate "Late Night"
-    // timeslots, which are actually "Early Morning" the next day.
-    QDate nextDay = date.addDays(1);
-    if (channel->hasDataFor(nextDay)) {
-        urls = channel->dayUrls(nextDay);
-        if (!urls.isEmpty())
-            requestData(urls, channel->dayLastModified(nextDay), 2);
+    // Add extra days if we want a 7-day outlook.  And add one more
+    // day after that to populate "Late Night" timeslots, which are
+    // actually "Early Morning" the next day.
+    int extraDay = 1;
+    while (extraDay <= days) {
+        QDate nextDay = date.addDays(extraDay);
+        if (channel->hasDataFor(nextDay)) {
+            urls = channel->dayUrls(nextDay);
+            if (!urls.isEmpty())
+                requestData(urls, channel->dayLastModified(nextDay), 2);
+        }
+        ++extraDay;
     }
 }
 

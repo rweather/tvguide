@@ -48,9 +48,10 @@ void TvProgrammeModel::setProgrammes(const QList<TvProgramme *> &programmes, TvC
     reset();
 }
 
-#define MODEL_COLUMNS       2
-#define MODEL_COL_TIME      0
-#define MODEL_COL_TITLE     1
+#define MODEL_COLUMNS       3
+#define MODEL_COL_DAY       0
+#define MODEL_COL_TIME      1
+#define MODEL_COL_TITLE     2
 
 QModelIndex TvProgrammeModel::index(int row, int column, const QModelIndex &) const
 {
@@ -88,6 +89,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
         } else if (index.column() == MODEL_COL_TITLE) {
             return QVariant::fromValue<void *>
                 (static_cast<void *>(prog));
+        } else if (index.column() == MODEL_COL_DAY) {
+            return QDate::longDayName(prog->start().date().dayOfWeek());
         }
     } else if (role == Qt::TextAlignmentRole) {
         if (index.column() == MODEL_COL_TIME)
@@ -103,8 +106,9 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
     } else if (role == Qt::BackgroundRole) {
         // Paint the times for different parts of the day
         // in different colors to make it easier to find
-        // things like Afternoon, Prime Time, etc.
-        if (index.column() == MODEL_COL_TIME) {
+        // things like Morning, Afternoon, Night, etc.
+        if (index.column() == MODEL_COL_DAY ||
+                index.column() == MODEL_COL_TIME) {
             int hour = prog->start().time().hour();
             if (hour < 6)
                 return QBrush(Qt::gray);
@@ -122,6 +126,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
 QVariant TvProgrammeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+        if (section == MODEL_COL_DAY)
+            return tr("Day");
         if (section == MODEL_COL_TIME)
             return tr("Time");
         if (section == MODEL_COL_TITLE) {

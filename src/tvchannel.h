@@ -70,6 +70,9 @@ public:
     QList<TvProgramme *> programmesForDay
         (const QDate &date, TimePeriods periods = AllPeriods) const;
 
+    QList<TvProgramme *> bookmarkedProgrammes
+        (const QDate &first, const QDate &last) const;
+
     static QDateTime stringToDateTime(const QString &str);
 
 private:

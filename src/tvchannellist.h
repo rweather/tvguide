@@ -57,7 +57,7 @@ public:
 
 public Q_SLOTS:
     void refreshChannels(bool forceReload = false);
-    void requestChannelDay(TvChannel *channel, const QDate &date);
+    void requestChannelDay(TvChannel *channel, const QDate &date, int days = 1);
     void enqueueChannelDay(TvChannel *channel, const QDate &date);
     void abort();
     void reload();

@@ -58,6 +58,8 @@
     <addaction name="actionAfternoon"/>
     <addaction name="actionNight"/>
     <addaction name="actionLateNight"/>
+    <addaction name="separator"/>
+    <addaction name="action7DayOutlook"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -135,6 +137,7 @@
    <addaction name="actionReload"/>
    <addaction name="action_Stop"/>
    <addaction name="separator"/>
+   <addaction name="action7DayOutlook"/>
    <addaction name="actionAddBookmark"/>
   </widget>
   <action name="action_Open">
@@ -278,6 +281,18 @@
   <action name="actionOrganizeBookmarks">
    <property name="text">
     <string>&amp;Organize Bookmarks ...</string>
+   </property>
+  </action>
+  <action name="action7DayOutlook">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/7days.png</normaloff>:/images/7days.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;7 Day Bookmark Outlook</string>
    </property>
   </action>
  </widget>

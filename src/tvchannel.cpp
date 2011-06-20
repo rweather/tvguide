@@ -306,6 +306,32 @@ QList<TvProgramme *> TvChannel::programmesForDay
     return list;
 }
 
+// Find all bookmarked programmes within a specific date range.
+QList<TvProgramme *> TvChannel::bookmarkedProgrammes
+    (const QDate &first, const QDate &last) const
+{
+    QList<TvProgramme *> list;
+    TvProgramme *prog = m_programmes;
+    QDateTime startTime = QDateTime(first, QTime(6, 0, 0));
+    QDateTime stopTime = QDateTime(last.addDays(1), QTime(6, 0, 0));
+    while (prog != 0) {
+        if ((prog->start() >= startTime &&
+                    prog->start() < stopTime) ||
+                (prog->stop() > startTime &&
+                    prog->stop() <= stopTime)) {
+            TvBookmark *bookmark = 0;
+            TvBookmark::Match match;
+            match = channelList()->matchBookmarks(prog, &bookmark);
+            if (match != TvBookmark::NoMatch) {
+                prog->setColor(bookmark->color());
+                list.append(prog);
+            }
+        }
+        prog = prog->m_next;
+    }
+    return list;
+}
+
 static int fetchField(const QString &str, int *posn, int size)
 {
     int value = 0;

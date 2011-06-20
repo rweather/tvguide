@@ -46,6 +46,7 @@ private Q_SLOTS:
     void showPreviousWeek();
 
     void updateTimePeriods();
+    void sevenDayOutlookChanged();
 
     void editChannels();
     void addBookmark();

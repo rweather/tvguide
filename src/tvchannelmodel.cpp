@@ -58,10 +58,13 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-    if (index.column() == 0 && role == Qt::DisplayRole) {
-        int row = index.row();
-        if (row >= 0 && row < m_visibleChannels.size())
-            return m_visibleChannels.at(row)->name();
+    int row = index.row();
+    if (row < 0 || row >= m_visibleChannels.size())
+        return QVariant();
+    TvChannel *channel = m_visibleChannels.at(row);
+    if (role == Qt::DisplayRole) {
+        if (index.column() == 0)
+            return channel->name();
     }
     return QVariant();
 }

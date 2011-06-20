@@ -20,6 +20,7 @@
 
 #include "tvchannellist.h"
 #include <QtCore/qabstractitemmodel.h>
+#include <QtGui/qicon.h>
 
 class TvChannelModel : public QAbstractItemModel
 {
