@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<tv generator-info-name="qtvguide">
+<tv-config>
 
   <!-- Information gleaned from multiple sources, including:
 
@@ -12,7 +12,17 @@
 
        http://www.oztivo.net/twiki/bin/view/TVGuide/WebHome
        http://creativecommons.org/licenses/by-nc-sa/2.5/au/
+
+  Note: This file was hand-edited.  Some of the data could be out of
+  date or flat-out wrong.  Patches welcome to improve it.
   -->
+
+  <data-source id="OzTivo">
+    <display-name lang="en">OzTivo</display-name>
+    <desc lang="en">Australian Community-Driven TV Guide</desc>
+    <data-url>http://xml.oztivo.net/xmltv/datalist.xml.gz</data-url>
+    <refresh>24</refresh>
+  </data-source>
 
   <broadcast-system id="digital">
     <display-name lang="en">Digital Free-to-Air</display-name>
@@ -23,7 +33,6 @@
 
   <region id="au">
     <display-name lang="en">Australia</display-name>
-    <default/>
   </region>
 
   <region id="act" parent="au">
@@ -51,6 +60,35 @@
     <display-name lang="en">Western Australia</display-name>
   </region>
 
+  <region id="regional-nsw" parent="nsw">
+    <display-name lang="en">Regional New South Wales</display-name>
+    <selectable/>
+  </region>
+  <region id="regional-nt" parent="nt">
+    <display-name lang="en">Regional Northern Terriority</display-name>
+    <selectable/>
+  </region>
+  <region id="regional-qld" parent="qld">
+    <display-name lang="en">Regional Queensland</display-name>
+    <selectable/>
+  </region>
+  <region id="regional-sa" parent="sa">
+    <display-name lang="en">Regional South Australia</display-name>
+    <selectable/>
+  </region>
+  <region id="regional-tas" parent="tas">
+    <display-name lang="en">Regional Tasmania</display-name>
+    <selectable/>
+  </region>
+  <region id="regional-vic" parent="vic">
+    <display-name lang="en">Regional Victoria</display-name>
+    <selectable/>
+  </region>
+  <region id="regional-wa" parent="wa">
+    <display-name lang="en">Regional Western Australia</display-name>
+    <selectable/>
+  </region>
+
   <region id="adelaide" parent="sa">
     <display-name lang="en">Adelaide</display-name>
     <selectable/>
@@ -67,12 +105,24 @@
     <display-name lang="en">Darwin</display-name>
     <selectable/>
   </region>
+  <region id="goldcoast" parent="regional-qld">
+    <display-name lang="en">Gold Coast</display-name>
+    <selectable/>
+  </region>
+  <region id="griffith" parent="regional-nsw">
+    <display-name lang="en">Griffith</display-name>
+    <selectable/>
+  </region>
   <region id="hobart" parent="tas">
     <display-name lang="en">Hobart</display-name>
     <selectable/>
   </region>
   <region id="melbourne" parent="vic">
     <display-name lang="en">Melbourne</display-name>
+    <selectable/>
+  </region>
+  <region id="newcastle" parent="regional-nsw">
+    <display-name lang="en">Newcastle</display-name>
     <selectable/>
   </region>
   <region id="perth" parent="wa">
@@ -99,6 +149,7 @@
   <channel id="31-Adl" region="adelaide">
     <display-name lang="en">Ch31 Adelaide</display-name>
     <icon name="http://www.c31.com.au/images/logo.jpg"/>
+    <number system="digital">44</number>
   </channel>
 
   <channel id="31-Mel" region="melbourne">
@@ -179,7 +230,7 @@
     <number system="foxtel">207</number>
   </channel>
 
-  <channel id="A-PAC">
+  <channel id="A-PAC" region="au">
     <display-name lang="en">Australia&#39;s Public Affairs Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/648.png"/>
     <number system="foxtel">648</number>
@@ -187,6 +238,7 @@
 
   <channel id="ABC-CLS">
     <display-name lang="en">ABC Classic FM</display-name>
+    <todo/>
   </channel>
 
   <channel id="ABC-Can" region="canberra">
@@ -260,111 +312,112 @@
     <number system="foxtel">102</number>
   </channel>
 
-  <channel id="ABC2">
+  <channel id="ABC2" region="au">
     <display-name lang="en">ABC2</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc2.png"/>
     <number system="digital">22</number>
     <number system="foxtel">126</number>
   </channel>
 
-  <channel id="ABC3">
+  <channel id="ABC3" region="au">
     <display-name lang="en">ABC3</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc3.png"/>
     <number system="digital">23</number>
     <number system="foxtel">723</number>
   </channel>
 
-  <channel id="ACC">
+  <channel id="ACC" region="au">
     <display-name lang="en">Australian Christian Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/182.png"/>
     <number system="foxtel">182</number>
   </channel>
 
-  <channel id="ADV">
+  <channel id="ADV" region="au">
     <display-name lang="en">National Geographic Adventure</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/628.png"/>
     <number system="foxtel">628</number>
   </channel>
 
-  <channel id="ADV+2">
+  <channel id="ADV+2" region="au">
     <display-name lang="en">National Geographic Adventure +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/629.png"/>
     <number system="foxtel">629</number>
   </channel>
 
-  <channel id="ANIMAL">
+  <channel id="ANIMAL" region="au">
     <display-name lang="en">Animal Planet</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/615.png"/>
     <number system="foxtel">615</number>
   </channel>
 
-  <channel id="ANT">
+  <channel id="ANT" region="au">
     <display-name lang="en">Antenna</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/941.png"/>
     <number system="foxtel">941</number>
   </channel>
 
-  <channel id="ARNA">
+  <channel id="ARNA" region="au">
     <display-name lang="en">Arena</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/105.png"/>
     <number system="foxtel">105</number>
   </channel>
 
-  <channel id="ARNA+2">
+  <channel id="ARNA+2" region="au">
     <display-name lang="en">Arena +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/154.png"/>
     <number system="foxtel">154</number>
   </channel>
 
-  <channel id="AUR">
+  <channel id="AUR" region="au">
     <display-name lang="en">Aurora Community Television</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/183.png"/>
     <number system="foxtel">183</number>
   </channel>
 
-  <channel id="BBC">
+  <channel id="BBC" region="au">
     <display-name lang="en">BBC World</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/649.png"/>
     <number system="foxtel">649</number>
   </channel>
 
-  <channel id="BBCK">
+  <channel id="BBCK" region="au">
     <display-name lang="en">BBC Knowledge</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/612.png"/>
     <number system="foxtel">612</number>
     <number system="foxtel">242</number>
   </channel>
 
-  <channel id="BIOG">
+  <channel id="BIOG" region="au">
     <display-name lang="en">The Biography Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/117.png"/>
     <number system="foxtel">117</number>
   </channel>
 
-  <channel id="BLM">
+  <channel id="BLM" region="au">
     <display-name lang="en">Bloomberg Television</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/650.png"/>
     <number system="foxtel">650</number>
   </channel>
 
-  <channel id="BOOM">
+  <channel id="BOOM" region="au">
     <display-name lang="en">Boomerang</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/715.png"/>
     <number system="foxtel">715</number>
   </channel>
 
-  <channel id="BRIZ">
+  <channel id="BRIZ" region="brisbane">
     <display-name lang="en">Briz 31</display-name>
-    <number system="digital">31</number>
+    <number system="digital">44</number>
+    <icon src="http://upload.wikimedia.org/wikipedia/commons/6/66/Thumb-31Digital-ProfilePic.jpg"/>
   </channel>
 
-  <channel id="CART">
+  <channel id="CART" region="au">
     <display-name lang="en">Cartoon Network</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/713.png"/>
     <number system="foxtel">713</number>
   </channel>
 
-  <channel id="CBEEB">
+  <channel id="CBEEB" region="au">
     <display-name lang="en">CBeebies</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/705.png"/>
     <number system="foxtel">705</number>
@@ -372,41 +425,44 @@
 
   <channel id="CCTV4">
     <display-name lang="en">CCTV International Mandarin</display-name>
+    <todo/>
   </channel>
 
   <channel id="CCTV9">
     <display-name lang="en">CCTV International English</display-name>
+    <todo/>
   </channel>
 
-  <channel id="CLAS">
+  <channel id="CLAS" region="au">
     <display-name lang="en">Fox Classics</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/114.png"/>
     <number system="foxtel">114</number>
   </channel>
 
-  <channel id="CLAS+2">
+  <channel id="CLAS+2" region="au">
     <display-name lang="en">Fox Classics +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/152.png"/>
     <number system="foxtel">152</number>
   </channel>
 
-  <channel id="CLUBV">
+  <channel id="CLUBV" region="au">
     <display-name lang="en">Club V</display-name>
+    <todo/>
   </channel>
 
-  <channel id="CMC">
+  <channel id="CMC" region="au">
     <display-name lang="en">Country Music Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/815.png"/>
     <number system="foxtel">815</number>
   </channel>
 
-  <channel id="CMDY">
+  <channel id="CMDY" region="au">
     <display-name lang="en">thecomedychannel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/112.png"/>
     <number system="foxtel">112</number>
   </channel>
 
-  <channel id="CMDY+2">
+  <channel id="CMDY+2" region="au">
     <display-name lang="en">thecomedychannel +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/153.png"/>
     <number system="foxtel">153</number>
@@ -437,24 +493,24 @@
     <todo/>
   </channel>
 
-  <channel id="CNBC">
+  <channel id="CNBC" region="au">
     <display-name lang="en">CNBC Australia</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/652.png"/>
     <number system="foxtel">652</number>
   </channel>
 
-  <channel id="CNNI">
+  <channel id="CNNI" region="au">
     <display-name lang="en">CNN International</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/605.png"/>
     <number system="foxtel">605</number>
   </channel>
 
-  <channel id="CNNfn">
+  <channel id="CNNfn" region="au">
     <display-name lang="en">CNN Financial Network</display-name>
     <todo/>
   </channel>
 
-  <channel id="CRIME">
+  <channel id="CRIME" region="au">
     <display-name lang="en">Crime &amp; Investigation</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/617.png"/>
     <number system="foxtel">617</number>
@@ -490,13 +546,13 @@
     <todo/>
   </channel>
 
-  <channel id="DISC">
+  <channel id="DISC" region="au">
     <display-name lang="en">Discovery Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/608.png"/>
     <number system="foxtel">608</number>
   </channel>
 
-  <channel id="DISC+2">
+  <channel id="DISC+2" region="au">
     <display-name lang="en">Discovery Channel +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/620.png"/>
     <number system="foxtel">620</number>
@@ -507,19 +563,19 @@
     <todo/>
   </channel>
 
-  <channel id="DISN">
+  <channel id="DISN" region="au">
     <display-name lang="en">Disney Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/707.png"/>
     <number system="foxtel">707</number>
   </channel>
 
-  <channel id="DTM">
+  <channel id="DTM" region="au">
     <display-name lang="en">Discovery Turbo Max</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/634.png"/>
     <number system="foxtel">634</number>
   </channel>
 
-  <channel id="DTM+2">
+  <channel id="DTM+2" region="au">
     <display-name lang="en">Discovery Turbo Max +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/635.png"/>
     <number system="foxtel">635</number>
@@ -535,13 +591,13 @@
     <todo/>
   </channel>
 
-  <channel id="E!">
+  <channel id="E!" region="au">
     <display-name lang="en">Entertainment Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/121.png"/>
     <number system="foxtel">121</number>
   </channel>
 
-  <channel id="ELEVEN">
+  <channel id="ELEVEN" region="au">
     <display-name lang="en">ELEVEN</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/eleven.png"/>
     <number system="digital">11</number>
@@ -589,14 +645,14 @@
     <todo/>
   </channel>
 
-  <channel id="ESPN">
+  <channel id="ESPN" region="au">
     <display-name lang="en">ESPN</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/508.png"/>
     <number system="foxtel">508</number>
     <number system="foxtel">211</number>
   </channel>
 
-  <channel id="ESPN2">
+  <channel id="ESPN2" region="au">
     <display-name lang="en">ESPN2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/509.png"/>
     <number system="foxtel">509</number>
@@ -608,7 +664,7 @@
     <todo/>
   </channel>
 
-  <channel id="EUROSPORT">
+  <channel id="EUROSPORT" region="au">
     <display-name lang="en">EUROSPORT</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/511.png"/>
     <number system="foxtel">511</number>
@@ -619,13 +675,13 @@
     <todo/>
   </channel>
 
-  <channel id="EXPO">
+  <channel id="EXPO" region="au">
     <display-name lang="en">Expo Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/177.png"/>
     <number system="foxtel">177</number>
   </channel>
 
-  <channel id="FASH">
+  <channel id="FASH" region="au">
     <display-name lang="en">Fashion TV</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/123.png"/>
     <number system="foxtel">123</number>
@@ -766,107 +822,77 @@
     <todo/>
   </channel>
 
-  <channel id="FFC">
-    <display-name lang="en">Fox Footy Channel</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="FFC-NSW">
-    <display-name lang="en">Fox Footy Channel NSW</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="FFC-Qld">
-    <display-name lang="en">Fox Footy Channel Qld</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="FFC-SA">
-    <display-name lang="en">Fox Footy Channel SA</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="FFC-Vic">
-    <display-name lang="en">Fox Footy Channel Victoria ACT NT</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="FFC-WA">
-    <display-name lang="en">Fox Footy Channel WA</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="FMC">
+  <channel id="FMC" region="au">
     <display-name lang="en">Family Movie Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/413.png"/>
     <number system="foxtel">413</number>
   </channel>
 
-  <channel id="FOOD">
+  <channel id="FOOD" region="au">
     <display-name lang="en">LifeStyle Food</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/118.png"/>
     <number system="foxtel">118</number>
   </channel>
 
-  <channel id="FOOD+2">
+  <channel id="FOOD+2" region="au">
     <display-name lang="en">LifeStyle Food +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/158.png"/>
     <number system="foxtel">158</number>
   </channel>
 
-  <channel id="FOX8">
+  <channel id="FOX8" region="au">
     <display-name lang="en">Fox8</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/108.png"/>
     <number system="foxtel">108</number>
     <number system="foxtel">208</number>
   </channel>
 
-  <channel id="FOX8+2">
+  <channel id="FOX8+2" region="au">
     <display-name lang="en">FOX8 +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/150.png"/>
     <number system="foxtel">150</number>
   </channel>
 
-  <channel id="FOXN">
+  <channel id="FOXN" region="au">
     <display-name lang="en">Fox News Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/604.png"/>
     <number system="foxtel">604</number>
   </channel>
 
-  <channel id="FS1">
+  <channel id="FS1" region="au">
     <display-name lang="en">Fox Sports One</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/501.png"/>
     <number system="foxtel">501</number>
     <number system="foxtel">203</number>
   </channel>
 
-  <channel id="FS2">
+  <channel id="FS2" region="au">
     <display-name lang="en">Fox Sports Two</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/502.png"/>
     <number system="foxtel">502</number>
     <number system="foxtel">204</number>
   </channel>
 
-  <channel id="FS3">
+  <channel id="FS3" region="au">
     <display-name lang="en">Fox Sports Three</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/503.png"/>
     <number system="foxtel">503</number>
     <number system="foxtel">205</number>
   </channel>
 
-  <channel id="FSN">
+  <channel id="FSN" region="au">
     <display-name lang="en">Fox Sports News</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/513.png"/>
     <number system="foxtel">513</number>
   </channel>
 
-  <channel id="FUEL">
+  <channel id="FUEL" region="au">
     <display-name lang="en">Fuel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/516.png"/>
     <number system="foxtel">516</number>
   </channel>
 
-  <channel id="GEM-ACT">
+  <channel id="GEM-ACT" region="act">
     <display-name lang="en">GEM ACT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -874,7 +900,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-NSW">
+  <channel id="GEM-NSW" region="nsw">
     <display-name lang="en">GEM NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -882,7 +908,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-Qld">
+  <channel id="GEM-Qld" region="qld">
     <display-name lang="en">GEM Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -890,7 +916,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-SA">
+  <channel id="GEM-SA" region="sa">
     <display-name lang="en">GEM SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -898,7 +924,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-Tas">
+  <channel id="GEM-Tas" region="tas">
     <display-name lang="en">GEM Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -906,7 +932,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-Vic">
+  <channel id="GEM-Vic" region="vic">
     <display-name lang="en">GEM Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -914,7 +940,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-WA">
+  <channel id="GEM-WA" region="wa">
     <display-name lang="en">GEM WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -922,7 +948,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GO">
+  <channel id="GO" region="au">
     <display-name lang="en">GO!</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/go.png"/>
     <number system="digital">99</number>
@@ -945,12 +971,7 @@
     <todo/>
   </channel>
 
-  <channel id="GWORLD">
-    <display-name lang="en">Gamesworld</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="H&amp;L">
+  <channel id="H&amp;L" region="au">
     <display-name lang="en">Discovery Home &amp; Leisure</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/640.png"/>
     <number system="foxtel">640</number>
@@ -961,30 +982,30 @@
     <todo/>
   </channel>
 
-  <channel id="HEALTH">
+  <channel id="HEALTH" region="au">
     <display-name lang="en">Discovery Health</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/640.png"/>
     <number system="foxtel">640</number>
   </channel>
 
-  <channel id="HIST">
+  <channel id="HIST" region="au">
     <display-name lang="en">History Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/606.png"/>
     <number system="foxtel">606</number>
   </channel>
 
-  <channel id="HIST+2">
+  <channel id="HIST+2" region="au">
     <display-name lang="en">History Channel +2</display-name>
     <todo/>
   </channel>
 
-  <channel id="HITS">
+  <channel id="HITS" region="au">
     <display-name lang="en">TV Hits</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/111.png"/>
     <number system="foxtel">111</number>
   </channel>
 
-  <channel id="HITS+2">
+  <channel id="HITS+2" region="au">
     <display-name lang="en">TV Hits +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/161.png"/>
     <number system="foxtel">161</number>
@@ -995,8 +1016,9 @@
     <todo/>
   </channel>
 
-  <channel id="IMP">
+  <channel id="IMP" region="au">
     <display-name lang="en">Imparja</display-name>
+    <icon src="http://www.lyngsat-logo.com/logo/tv/ii/imparja.jpg"/>
     <number system="digital">8</number>
   </channel>
 
@@ -1010,7 +1032,7 @@
     <todo/>
   </channel>
 
-  <channel id="KIDSCO">
+  <channel id="KIDSCO" region="au">
     <display-name lang="en">KidsCo</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/718.png"/>
     <number system="foxtel">718</number>
@@ -1026,20 +1048,20 @@
     <todo/>
   </channel>
 
-  <channel id="LHOME">
+  <channel id="LHOME" region="au">
     <display-name lang="en">Lifestyle Home</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/119.png"/>
     <number system="foxtel">119</number>
   </channel>
 
-  <channel id="LIFE">
+  <channel id="LIFE" region="au">
     <display-name lang="en">LifeStyle Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/106.png"/>
     <number system="foxtel">106</number>
     <number system="foxtel">216</number>
   </channel>
 
-  <channel id="LIFE+2">
+  <channel id="LIFE+2" region="au">
     <display-name lang="en">LifeStyle Channel +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/157.png"/>
     <number system="foxtel">157</number>
@@ -1050,13 +1072,13 @@
     <todo/>
   </channel>
 
-  <channel id="LYOU">
+  <channel id="LYOU" region="au">
     <display-name lang="en">LifeStyle YOU</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/120.png"/>
     <number system="foxtel">120</number>
   </channel>
 
-  <channel id="LYOU+2">
+  <channel id="LYOU+2" region="au">
     <display-name lang="en">LifeStyle YOU +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/160.png"/>
     <number system="foxtel">160</number>
@@ -1067,7 +1089,7 @@
     <todo/>
   </channel>
 
-  <channel id="MAIN">
+  <channel id="MAIN" region="au">
     <display-name lang="en">Main Event</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/518.png"/>
     <number system="foxtel">518</number>
@@ -1088,50 +1110,50 @@
     <todo/>
   </channel>
 
-  <channel id="MOV1">
+  <channel id="MOV1" region="au">
     <display-name lang="en">Movie One</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/411.png"/>
     <number system="foxtel">411</number>
     <number system="foxtel">224</number>
   </channel>
 
-  <channel id="MOV1+2">
+  <channel id="MOV1+2" region="au">
     <display-name lang="en">Movie One Take Two</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/412.png"/>
     <number system="foxtel">412</number>
   </channel>
 
-  <channel id="MOVG">
+  <channel id="MOVG" region="au">
     <display-name lang="en">Movie Greats</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/419.png"/>
     <number system="foxtel">419</number>
   </channel>
 
-  <channel id="MOVX">
+  <channel id="MOVX" region="au">
     <display-name lang="en">Movie Extra</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/417.png"/>
     <number system="foxtel">417</number>
   </channel>
 
-  <channel id="MTV">
+  <channel id="MTV" region="au">
     <display-name lang="en">MTV</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/124.png"/>
     <number system="foxtel">124</number>
   </channel>
 
-  <channel id="MTVC">
+  <channel id="MTVC" region="au">
     <display-name lang="en">MTVC</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/810.png"/>
     <number system="foxtel">810</number>
   </channel>
 
-  <channel id="MTVH">
+  <channel id="MTVH" region="au">
     <display-name lang="en">MTV Hits</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/808.png"/>
     <number system="foxtel">808</number>
   </channel>
 
-  <channel id="MTVN">
+  <channel id="MTVN" region="au">
     <display-name lang="en">MTVN Live</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/812.png"/>
     <number system="foxtel">812</number>
@@ -1143,94 +1165,94 @@
     <todo/>
   </channel>
 
-  <channel id="NBN">
+  <channel id="NBN" region="regional-nsw">
     <display-name lang="en">NBN NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nbn.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="NBN-GC">
+  <channel id="NBN-GC" region="goldcoast">
     <display-name lang="en">NBN Gold Coast</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nbn.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="NGEO">
+  <channel id="NGEO" region="au">
     <display-name lang="en">National Geographic Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/610.png"/>
     <number system="foxtel">610</number>
     <number system="foxtel">236</number>
   </channel>
 
-  <channel id="NGEO+2">
+  <channel id="NGEO+2" region="au">
     <display-name lang="en">National Geographic Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/622.png"/>
     <number system="foxtel">622</number>
   </channel>
 
-  <channel id="NGW">
+  <channel id="NGW" region="au">
     <display-name lang="en">National Geographic Wild</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/616.png"/>
     <number system="foxtel">616</number>
     <number system="foxtel">238</number>
   </channel>
 
-  <channel id="NICK">
+  <channel id="NICK" region="au">
     <display-name lang="en">Nickelodeon</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/701.png"/>
     <number system="foxtel">701</number>
   </channel>
 
-  <channel id="NICKJR">
+  <channel id="NICKJR" region="au">
     <display-name lang="en">Nick Jr</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/703.png"/>
     <number system="foxtel">703</number>
   </channel>
 
-  <channel id="NITV">
+  <channel id="NITV" region="au">
     <display-name lang="en">National Indigenous TV</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/180.png"/>
     <number system="foxtel">180</number>
   </channel>
 
-  <channel id="Nine-Mel">
+  <channel id="Nine-Mel" region="melbourne">
     <display-name lang="en">Nine Melbourne</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-NT">
+  <channel id="Nine-NT" region="nt">
     <display-name lang="en">Nine NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-Qld">
+  <channel id="Nine-Qld" region="qld">
     <display-name lang="en">Nine Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-SA">
+  <channel id="Nine-SA" region="sa">
     <display-name lang="en">Nine SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-Syd">
+  <channel id="Nine-Syd" region="sydney">
     <display-name lang="en">Nine Sydney</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-WA">
+  <channel id="Nine-WA" region="wa">
     <display-name lang="en">Nine WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
@@ -1252,12 +1274,7 @@
     <todo/>
   </channel>
 
-  <channel id="OVAT">
-    <display-name lang="en">Ovation</display-name>
-    <todo/>
-  </channel>
-
-  <channel id="One-Dar">
+  <channel id="One-Dar" region="darwin">
     <display-name lang="en">One Darwin</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1265,7 +1282,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-NSW">
+  <channel id="One-NSW" region="nsw">
     <display-name lang="en">One NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1273,7 +1290,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Newc">
+  <channel id="One-Newc" region="newcastle">
     <display-name lang="en">One SC Newcastle</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1281,7 +1298,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Qld">
+  <channel id="One-Qld" region="qld">
     <display-name lang="en">One QLD</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1289,7 +1306,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-SA">
+  <channel id="One-SA" region="sa">
     <display-name lang="en">One SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1297,7 +1314,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Tas">
+  <channel id="One-Tas" region="tas">
     <display-name lang="en">One Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1305,7 +1322,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Vic">
+  <channel id="One-Vic" region="vic">
     <display-name lang="en">One Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1313,7 +1330,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-WA">
+  <channel id="One-WA" region="wa">
     <display-name lang="en">One WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1321,7 +1338,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="PHDISN">
+  <channel id="PHDISN" region="au">
     <display-name lang="en">Playhouse Disney</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/709.png"/>
     <number system="foxtel">709</number>
@@ -1332,37 +1349,37 @@
     <todo/>
   </channel>
 
-  <channel id="Prime-Can">
+  <channel id="Prime-Can" region="canberra">
     <display-name lang="en">Prime Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="Prime-GC">
+  <channel id="Prime-GC" region="goldcoast">
     <display-name lang="en">Prime Gold Coast</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="Prime-Vic">
+  <channel id="Prime-Vic" region="regional-vic">
     <display-name lang="en">Prime Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="PrimeN">
+  <channel id="PrimeN" region="regional-nsw">
     <display-name lang="en">Prime North</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="PrimeS">
+  <channel id="PrimeS" region="regional-nsw">
     <display-name lang="en">Prime South</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="RAI">
+  <channel id="RAI" region="au">
     <display-name lang="en">RAI International</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/942.png"/>
     <number system="foxtel">942</number>
@@ -1378,7 +1395,7 @@
     <todo/>
   </channel>
 
-  <channel id="SACT">
+  <channel id="SACT" region="au">
     <display-name lang="en">Showtime Action</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/406.png"/>
     <number system="foxtel">406</number>
@@ -1390,7 +1407,7 @@
     <todo/>
   </channel>
 
-  <channel id="SBS-Can">
+  <channel id="SBS-Can" region="canberra">
     <display-name lang="en">SBS Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1404,7 +1421,7 @@
     <todo/>
   </channel>
 
-  <channel id="SBS-NSW">
+  <channel id="SBS-NSW" region="nsw">
     <display-name lang="en">SBS NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1413,7 +1430,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-NT">
+  <channel id="SBS-NT" region="nt">
     <display-name lang="en">SBS NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1422,7 +1439,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-Qld">
+  <channel id="SBS-Qld" region="qld">
     <display-name lang="en">SBS Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1431,7 +1448,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-SA">
+  <channel id="SBS-SA" region="sa">
     <display-name lang="en">SBS SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1440,7 +1457,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-Tas">
+  <channel id="SBS-Tas" region="tas">
     <display-name lang="en">SBS Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1449,7 +1466,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-Vic">
+  <channel id="SBS-Vic" region="vic">
     <display-name lang="en">SBS Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1458,7 +1475,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-WA">
+  <channel id="SBS-WA" region="wa">
     <display-name lang="en">SBS WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1467,7 +1484,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBSHD-Vic">
+  <channel id="SBSHD-Vic" region="vic">
     <display-name lang="en">SBS HD Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1476,56 +1493,56 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBSTWO-NSW">
+  <channel id="SBSTWO-NSW" region="nsw">
     <display-name lang="en">SBS Two NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-NT">
+  <channel id="SBSTWO-NT" region="nt">
     <display-name lang="en">SBS TWO NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-Qld">
+  <channel id="SBSTWO-Qld" region="qld">
     <display-name lang="en">SBS TWO QLD</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-SA">
+  <channel id="SBSTWO-SA" region="sa">
     <display-name lang="en">SBS TWO SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-Tas">
+  <channel id="SBSTWO-Tas" region="tas">
     <display-name lang="en">SBS TWO Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-Vic">
+  <channel id="SBSTWO-Vic" region="vic">
     <display-name lang="en">SBS TWO Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-WA">
+  <channel id="SBSTWO-WA" region="wa">
     <display-name lang="en">SBS TWO WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SC-Tas">
+  <channel id="SC-Tas" region="tas">
     <display-name lang="en">Southern Cross Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-television.png"/>
     <number system="digital">6</number>
@@ -1534,43 +1551,43 @@
     <number system="digital">70</number>
   </channel>
 
-  <channel id="SC10-GC">
+  <channel id="SC10-GC" region="goldcoast">
     <display-name lang="en">Southern Cross Ten Gold Coast</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
   </channel>
 
-  <channel id="SC10-NSW">
+  <channel id="SC10-NSW" region="regional-nsw">
     <display-name lang="en">Southern Cross Ten NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
   </channel>
 
-  <channel id="SC10-Qld">
+  <channel id="SC10-Qld" region="regional-qld">
     <display-name lang="en">Southern Cross Ten Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
   </channel>
 
-  <channel id="SC10-Vic">
+  <channel id="SC10-Vic" region="regional-vic">
     <display-name lang="en">Southern Cross Ten Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
   </channel>
 
-  <channel id="SCIENCE">
+  <channel id="SCIENCE" region="au">
     <display-name lang="en">Discovery Science</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/638.png"/>
     <number system="foxtel">638</number>
   </channel>
 
-  <channel id="SCOM">
+  <channel id="SCOM" region="au">
     <display-name lang="en">Showtime Comedy</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/407.png"/>
     <number system="foxtel">407</number>
   </channel>
 
-  <channel id="SDRA">
+  <channel id="SDRA" region="au">
     <display-name lang="en">Showtime Drama</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/408.png"/>
     <number system="foxtel">408</number>
@@ -1581,65 +1598,65 @@
     <todo/>
   </channel>
 
-  <channel id="SHOW">
+  <channel id="SHOW" region="au">
     <display-name lang="en">Showtime</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/401.png"/>
     <number system="foxtel">401</number>
     <number system="foxtel">219</number>
   </channel>
 
-  <channel id="SHW2">
+  <channel id="SHW2" region="au">
     <display-name lang="en">Showtime 2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/402.png"/>
     <number system="foxtel">402</number>
   </channel>
 
-  <channel id="SHWC">
+  <channel id="SHWC" region="au">
     <display-name lang="en">Showcase</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/403.png"/>
     <number system="foxtel">403</number>
     <number system="foxtel">220</number>
   </channel>
 
-  <channel id="SHWC+2">
+  <channel id="SHWC+2" region="au">
     <display-name lang="en">Showcase +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/404.png"/>
     <number system="foxtel">404</number>
   </channel>
 
-  <channel id="SKYB">
+  <channel id="SKYB" region="au">
     <display-name lang="en">Sky News Business</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/602.png"/>
     <number system="foxtel">602</number>
   </channel>
 
-  <channel id="SKYN">
+  <channel id="SKYN" region="au">
     <display-name lang="en">Sky News Australia</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/601.png"/>
     <number system="foxtel">601</number>
   </channel>
 
-  <channel id="SKYR">
+  <channel id="SKYR" region="au">
     <display-name lang="en">Sky Racing</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/519.png"/>
     <number system="foxtel">519</number>
   </channel>
 
-  <channel id="SPEED">
+  <channel id="SPEED" region="au">
     <display-name lang="en">SPEED</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/505.png"/>
     <number system="foxtel">505</number>
     <number system="foxtel">206</number>
   </channel>
 
-  <channel id="SPICS">
+  <channel id="SPICS" region="au">
     <display-name lang="en">STARPICS</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/415.png"/>
     <number system="foxtel">415</number>
     <number system="foxtel">225</number>
   </channel>
 
-  <channel id="SPICS+2">
+  <channel id="SPICS+2" region="au">
     <display-name lang="en">STARPICS +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/416.png"/>
     <number system="foxtel">416</number>
@@ -1651,7 +1668,7 @@
     <todo/>
   </channel>
 
-  <channel id="STAS">
+  <channel id="STAS" region="au">
     <display-name lang="en">Setanta Sports</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/525.png"/>
     <number system="foxtel">525</number>
@@ -1662,13 +1679,13 @@
     <todo/>
   </channel>
 
-  <channel id="STVDIO">
+  <channel id="STVDIO" region="au">
     <display-name lang="en">STYDIO</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/132.png"/>
     <number system="foxtel">132</number>
   </channel>
 
-  <channel id="STYLE">
+  <channel id="STYLE" region="au">
     <display-name lang="en">The Style Network</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/122.png"/>
     <number system="foxtel">122</number>
@@ -1679,13 +1696,13 @@
     <todo/>
   </channel>
 
-  <channel id="Sci-Fi">
+  <channel id="Sci-Fi" region="au">
     <display-name lang="en">Sci Fi</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/125.png"/>
     <number system="foxtel">125</number>
   </channel>
 
-  <channel id="Sci-Fi+2">
+  <channel id="Sci-Fi+2" region="au">
     <display-name lang="en">Sci Fi +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/165.png"/>
     <number system="foxtel">165</number>
@@ -1696,49 +1713,49 @@
     <todo/>
   </channel>
 
-  <channel id="Seven-Bris">
+  <channel id="Seven-Bris" region="brisbane">
     <display-name lang="en">Seven Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Dar">
+  <channel id="Seven-Dar" region="darwin">
     <display-name lang="en">Seven Darwin</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Mel">
+  <channel id="Seven-Mel" region="melbourne">
     <display-name lang="en">Seven Melbourne</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Qld">
+  <channel id="Seven-Qld" region="regional-qld">
     <display-name lang="en">Seven Regional Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-SA">
+  <channel id="Seven-SA" region="sa">
     <display-name lang="en">Seven SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Syd">
+  <channel id="Seven-Syd" region="sydney">
     <display-name lang="en">Seven Sydney</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-WA">
+  <channel id="Seven-WA" region="wa">
     <display-name lang="en">Seven WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
@@ -1760,36 +1777,37 @@
     <todo/>
   </channel>
 
-  <channel id="TCM">
+  <channel id="TCM" region="au">
     <display-name lang="en">Turner Classic Movies</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/428.png"/>
     <number system="foxtel">428</number>
   </channel>
 
-  <channel id="TDT-Tas">
+  <channel id="TDT-Tas" region="tas">
     <display-name lang="en">Tasmanian Digital Television</display-name>
-    <todo/>
+    <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
+    <number system="digital">11</number>
   </channel>
 
-  <channel id="TLC">
+  <channel id="TLC" region="au">
     <display-name lang="en">TLC</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/646.png"/>
     <number system="foxtel">646</number>
   </channel>
 
-  <channel id="TLC+2">
+  <channel id="TLC+2" region="au">
     <display-name lang="en">TLC+2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/647.png"/>
     <number system="foxtel">647</number>
   </channel>
 
-  <channel id="TV1">
+  <channel id="TV1" region="au">
     <display-name lang="en">TV1</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/101.png"/>
     <number system="foxtel">101</number>
   </channel>
 
-  <channel id="TV1+2">
+  <channel id="TV1+2" region="au">
     <display-name lang="en">TV1 +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/152.png"/>
     <number system="foxtel">152</number>
@@ -1810,7 +1828,7 @@
     <todo/>
   </channel>
 
-  <channel id="TVN">
+  <channel id="TVN" region="au">
     <display-name lang="en">Thoroughbred Racing</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/522.png"/>
     <number system="foxtel">522</number>
@@ -1826,55 +1844,55 @@
     <todo/>
   </channel>
 
-  <channel id="TWC">
+  <channel id="TWC" region="au">
     <display-name lang="en">Weather Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/603.png"/>
     <number system="foxtel">603</number>
   </channel>
 
-  <channel id="Ten-Can">
+  <channel id="Ten-Can" region="canberra">
     <display-name lang="en">Ten Capital Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-Dar">
+  <channel id="Ten-Dar" region="darwin">
     <display-name lang="en">Ten Darwin</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-NSW">
+  <channel id="Ten-NSW" region="nsw">
     <display-name lang="en">Ten NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-Qld">
+  <channel id="Ten-Qld" region="qld">
     <display-name lang="en">Ten Brisbane</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-SA">
+  <channel id="Ten-SA" region="sa">
     <display-name lang="en">Ten SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-Vic">
+  <channel id="Ten-Vic" region="vic">
     <display-name lang="en">Ten Melbourne</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-WA">
+  <channel id="Ten-WA" region="wa">
     <display-name lang="en">Ten WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
@@ -1886,32 +1904,32 @@
     <todo/>
   </channel>
 
-  <channel id="UKTV">
+  <channel id="UKTV" region="au">
     <display-name lang="en">UKTV</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/103.png"/>
     <number system="foxtel">103</number>
     <number system="foxtel">214</number>
   </channel>
 
-  <channel id="UKTV+2">
+  <channel id="UKTV+2" region="au">
     <display-name lang="en">UK.TV +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/156.png"/>
     <number system="foxtel">156</number>
   </channel>
 
-  <channel id="UNIV">
+  <channel id="UNIV" region="au">
     <display-name lang="en">Universal Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/116.png"/>
     <number system="foxtel">116</number>
   </channel>
 
-  <channel id="V">
+  <channel id="V" region="au">
     <display-name lang="en">Channel V</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/801.png"/>
     <number system="foxtel">801</number>
   </channel>
 
-  <channel id="V2">
+  <channel id="V2" region="au">
     <display-name lang="en">Channel V2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/803.png"/>
     <number system="foxtel">803</number>
@@ -1922,14 +1940,14 @@
     <todo/>
   </channel>
 
-  <channel id="W">
+  <channel id="W" region="au">
     <display-name lang="en">W for Women</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/115.png"/>
     <number system="foxtel">115</number>
     <number system="foxtel">215</number>
   </channel>
 
-  <channel id="W+2">
+  <channel id="W+2" region="au">
     <display-name lang="en">W for Women</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/155.png"/>
     <number system="foxtel">155</number>
@@ -1940,58 +1958,60 @@
     <todo/>
   </channel>
 
-  <channel id="WIN-Can">
+  <channel id="WIN-Can" region="canberra">
     <display-name lang="en">WIN Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Grif">
+  <channel id="WIN-Grif" region="Griffith">
     <display-name lang="en">WIN Griffith</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-NSW">
+  <channel id="WIN-NSW" region="regional-nsw">
     <display-name lang="en">WIN NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Qld">
+  <channel id="WIN-Qld" region="regional-qld">
     <display-name lang="en">WIN Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Tas">
+  <channel id="WIN-Tas" region="regional-tas">
     <display-name lang="en">WIN Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Vic">
+  <channel id="WIN-Vic" region="regional-vic">
     <display-name lang="en">WIN Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-WA">
+  <channel id="WIN-WA" regional="regional-wa">
     <display-name lang="en">WIN WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN7-SA">
+  <channel id="WIN7-SA" region="sa">
     <display-name lang="en">WIN-7 SA</display-name>
-    <todo/>
+    <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
+    <number system="digital">8</number>
+    <number system="digital">80</number>
   </channel>
 
   <channel id="WINE">
@@ -2004,7 +2024,7 @@
     <todo/>
   </channel>
 
-  <channel id="WMOV">
+  <channel id="WMOV" region="au">
     <display-name lang="en">World Movies</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/430.png"/>
     <number system="foxtel">430</number>
@@ -2020,9 +2040,9 @@
     <todo/>
   </channel>
 
-  <channel id="max">
+  <channel id="max" region="au">
     <display-name lang="en">musicMAX</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/805.png"/>
     <number system="foxtel">805</number>
   </channel>
-</tv>
+</tv-config>
