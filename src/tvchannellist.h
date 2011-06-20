@@ -21,6 +21,7 @@
 #include "tvchannel.h"
 #include "tvbookmark.h"
 #include <QtCore/qmap.h>
+#include <QtCore/qset.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/qsettings.h>
@@ -91,7 +92,7 @@ private:
 
     QMap<QString, TvChannel *> m_channels;
     QList<TvChannel *> m_activeChannels;
-    QStringList m_hiddenChannelIds;
+    QSet<QString> m_hiddenChannelIds;
     QNetworkAccessManager m_nam;
     QString m_serviceName;
     QUrl m_startUrl;

@@ -276,11 +276,11 @@ void TvChannelList::reload()
 
 void TvChannelList::updateHidden()
 {
-    QStringList hidden;
+    QSet<QString> hidden;
     for (int index = 0; index < m_activeChannels.size(); ++index) {
         TvChannel *channel = m_activeChannels.at(index);
         if (channel->isHidden())
-            hidden.append(channel->id());
+            hidden.insert(channel->id());
     }
     if (m_hiddenChannelIds != hidden) {
         m_hiddenChannelIds = hidden;
@@ -572,7 +572,7 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
             continue;
         bool hidden = settings->value(QLatin1String("hidden"), false).toBool();
         if (hidden)
-            m_hiddenChannelIds.append(id);
+            m_hiddenChannelIds.insert(id);
     }
     settings->endArray();
     settings->endGroup();
