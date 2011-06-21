@@ -5,6 +5,8 @@ SOURCES += \
     bookmarkitemeditor.cpp \
     bookmarklisteditor.cpp \
     channeleditor.cpp \
+    serviceeditor.cpp \
+    serviceselector.cpp \
     tvbookmark.cpp \
     tvbookmarkmodel.cpp \
     tvchannel.cpp \
@@ -19,6 +21,8 @@ HEADERS += \
     bookmarkitemeditor.h \
     bookmarklisteditor.h \
     channeleditor.h \
+    serviceeditor.h \
+    serviceselector.h \
     tvbookmark.h \
     tvbookmarkmodel.h \
     tvchannel.h \
@@ -36,5 +40,7 @@ FORMS += \
     bookmarkitemeditor.ui \
     bookmarklisteditor.ui \
     channeleditor.ui \
+    serviceeditor.ui \
+    serviceselector.ui \
 
 QT += network

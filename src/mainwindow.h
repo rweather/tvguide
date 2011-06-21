@@ -51,8 +51,11 @@ private Q_SLOTS:
     void editChannels();
     void addBookmark();
     void organizeBookmarks();
+    void selectService();
 
     void hiddenChannelsChanged();
+    void channelIndexLoaded();
+    void refineChannels();
 
 private:
     TvChannelList *m_channelList;
@@ -60,6 +63,7 @@ private:
     TvProgrammeModel *m_programmeModel;
     QProgressBar *m_progress;
     QTimer *m_hideProgressTimer;
+    bool m_firstTimeChannelList;
 
     TvChannel::TimePeriods timePeriods() const;
     void setDay(const QModelIndex &index, const QDate &date);

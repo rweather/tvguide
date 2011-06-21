@@ -35,6 +35,8 @@ public:
     explicit TvChannelList(QObject *parent = 0);
     ~TvChannelList();
 
+    bool hasService() const { return !m_serviceName.isEmpty(); }
+
     QUrl startUrl() const { return m_startUrl; }
     void setStartUrl(const QUrl &url) { m_startUrl = url; }
 
@@ -65,6 +67,7 @@ public Q_SLOTS:
     void enqueueChannelDay(TvChannel *channel, const QDate &date);
     void abort();
     void reload();
+    void reloadService();
     void updateChannels(bool largeIcons);
 
 private Q_SLOTS:

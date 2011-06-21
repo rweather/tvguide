@@ -37,7 +37,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="action_Open"/>
+    <addaction name="actionSelectService"/>
     <addaction name="separator"/>
     <addaction name="action_Quit"/>
    </widget>
@@ -140,9 +140,9 @@
    <addaction name="action7DayOutlook"/>
    <addaction name="actionAddBookmark"/>
   </widget>
-  <action name="action_Open">
+  <action name="actionSelectService">
    <property name="text">
-    <string>&amp;Open data source ...</string>
+    <string>&amp;Select guide service ...</string>
    </property>
   </action>
   <action name="action_Quit">

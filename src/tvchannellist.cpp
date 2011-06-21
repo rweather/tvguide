@@ -54,21 +54,7 @@ TvChannelList::TvChannelList(QObject *parent)
     connect(m_throttleTimer, SIGNAL(timeout()),
             this, SLOT(throttleTimeout()));
 
-    QSettings settings(QLatin1String("Southern Storm"),
-                       QLatin1String("qtvguide"));
-    settings.beginGroup(QLatin1String("Service"));
-    m_serviceName = settings.value
-        (QLatin1String("name"), QLatin1String("OzTivo")).toString();
-    QString url = settings.value
-        (QLatin1String("url"),
-         QLatin1String("http://xml.oztivo.net/xmltv/datalist.xml.gz")).toString();
-    if (!url.isEmpty())
-        m_startUrl = QUrl(url);
-    m_startUrlRefresh = settings.value(QLatin1String("refresh"), 24).toInt();
-    if (m_startUrlRefresh < 1)
-        m_startUrlRefresh = 1;
-    settings.endGroup();
-    loadServiceSettings(&settings);
+    reloadService();
 }
 
 TvChannelList::~TvChannelList()
@@ -273,6 +259,44 @@ void TvChannelList::reload()
     // but we want to know if the cache is up to date on reload.
     m_lastFetch.clear();
     refreshChannels(true);
+}
+
+void TvChannelList::reloadService()
+{
+    abort();
+
+    qDeleteAll(m_channels);
+    qDeleteAll(m_bookmarks);
+    m_channels.clear();
+    m_activeChannels.clear();
+    m_hiddenChannelIds.clear();
+    m_iconFiles.clear();
+    m_hasDataFor = false;
+    m_largeIcons = false;
+    m_bookmarks.clear();
+    m_indexedBookmarks.clear();
+    m_serviceName = QString();
+    m_startUrl = QUrl();
+
+    emit channelsChanged();
+    emit bookmarksChanged();
+
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("Service"));
+    m_serviceName = settings.value(QLatin1String("id")).toString();
+    QString url = settings.value(QLatin1String("url")).toString();
+    if (!url.isEmpty())
+        m_startUrl = QUrl(url);
+    else
+        m_startUrl = QUrl();
+    m_startUrlRefresh = settings.value(QLatin1String("refresh"), 24).toInt();
+    if (m_startUrlRefresh < 1)
+        m_startUrlRefresh = 1;
+    settings.endGroup();
+    loadServiceSettings(&settings);
+
+    reload();
 }
 
 void TvChannelList::updateChannels(bool largeIcons)

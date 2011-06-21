@@ -20,16 +20,18 @@
 #include "channeleditor.h"
 #include "bookmarkitemeditor.h"
 #include "bookmarklisteditor.h"
+#include "serviceselector.h"
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
 #include <QtGui/qitemselectionmodel.h>
+#include <QtGui/qmessagebox.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
+    , m_firstTimeChannelList(false)
 {
     setupUi(this);
 
-    action_Open->setShortcuts(QKeySequence::Open);
     action_Quit->setShortcuts(QKeySequence::Quit);
     actionReload->setShortcuts(QKeySequence::Refresh);
     actionNextDay->setShortcuts(QKeySequence::MoveToNextPage);
@@ -60,6 +62,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(updateTimePeriods()));
     connect(m_channelList, SIGNAL(hiddenChannelsChanged()),
             this, SLOT(hiddenChannelsChanged()));
+    connect(m_channelList, SIGNAL(channelIndexLoaded()),
+            this, SLOT(channelIndexLoaded()));
     m_channelModel = new TvChannelModel(m_channelList, this);
     channels->setModel(m_channelModel);
 
@@ -76,13 +80,18 @@ MainWindow::MainWindow(QWidget *parent)
     programmes->setItemDelegate(new TvProgrammeDelegate(programmes));
     programmes->setColumnHidden(0, true);
 
-    QTimer::singleShot(1000, m_channelList, SLOT(refreshChannels()));
+    if (m_channelList->hasService())
+        QTimer::singleShot(0, m_channelList, SLOT(refreshChannels()));
+    else
+        QTimer::singleShot(0, this, SLOT(selectService()));
 
     m_hideProgressTimer = new QTimer(this);
     m_hideProgressTimer->setSingleShot(true);
     connect(m_hideProgressTimer, SIGNAL(timeout()),
             m_progress, SLOT(hide()));
 
+    connect(actionSelectService, SIGNAL(triggered()),
+            this, SLOT(selectService()));
     connect(actionReload, SIGNAL(triggered()),
             m_channelList, SLOT(reload()));
     connect(action_Stop, SIGNAL(triggered()),
@@ -297,12 +306,43 @@ void MainWindow::organizeBookmarks()
     dialog.exec();
 }
 
+void MainWindow::selectService()
+{
+    bool firstTime = !m_channelList->hasService();
+    ServiceSelector dialog(this);
+    if (dialog.exec() == QDialog::Accepted) {
+        m_firstTimeChannelList = firstTime;
+        m_programmeModel->clear();
+        m_channelList->reloadService();
+    }
+}
+
 void MainWindow::hiddenChannelsChanged()
 {
     if (m_channelList->largeIcons())
         channels->setIconSize(QSize(64, 64));
     else
         channels->setIconSize(QSize());
+}
+
+void MainWindow::channelIndexLoaded()
+{
+    if (m_firstTimeChannelList) {
+        m_firstTimeChannelList = false;
+        QTimer::singleShot(0, this, SLOT(refineChannels()));
+    }
+}
+
+void MainWindow::refineChannels()
+{
+    if (QMessageBox::question
+            (this, tr("TV Guide"),
+             tr("Tools->Edit Channels can be used to refine the "
+                "list of channels that are shown.  Do you wish to "
+                "do that now?"),
+             QMessageBox::Yes | QMessageBox::No,
+             QMessageBox::Yes) == QMessageBox::Yes)
+        editChannels();
 }
 
 TvChannel::TimePeriods MainWindow::timePeriods() const

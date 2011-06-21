@@ -36,6 +36,8 @@ void TvProgrammeModel::clear()
 {
     if (!m_programmes.isEmpty()) {
         m_programmes.clear();
+        m_channel = 0;
+        m_date = QDate();
         reset();
     }
 }
