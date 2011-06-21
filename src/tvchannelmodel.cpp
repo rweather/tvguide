@@ -65,6 +65,9 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
     if (role == Qt::DisplayRole) {
         if (index.column() == 0)
             return channel->name();
+    } else if (role == Qt::DecorationRole) {
+        if (index.column() == 0)
+            return channel->icon();
     }
     return QVariant();
 }

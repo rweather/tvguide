@@ -52,6 +52,8 @@ private Q_SLOTS:
     void addBookmark();
     void organizeBookmarks();
 
+    void hiddenChannelsChanged();
+
 private:
     TvChannelList *m_channelList;
     TvChannelModel *m_channelModel;

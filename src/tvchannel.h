@@ -23,6 +23,7 @@
 #include <QtCore/qdatetime.h>
 #include <QtCore/qxmlstream.h>
 #include <QtCore/qurl.h>
+#include <QtGui/qicon.h>
 
 class TvChannelList;
 class TvProgramme;
@@ -43,6 +44,15 @@ public:
 
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
+
+    QString iconUrl() const { return m_iconUrl; }
+    void setIconUrl(const QString &url) { m_iconUrl = url; }
+
+    QString iconFile() const { return m_iconFile; }
+    void setIconFile(const QString &file) { m_iconFile = file; }
+
+    QIcon icon() const { return m_icon; }
+    void setIcon(const QIcon &icon) { m_icon = icon; }
 
     QStringList baseUrls() const { return m_baseUrls; }
     QList<QUrl> dayUrls(const QDate &date) const;
@@ -79,6 +89,9 @@ private:
     TvChannelList *m_channelList;
     QString m_id;
     QString m_name;
+    QString m_iconUrl;
+    QString m_iconFile;
+    QIcon m_icon;
     QStringList m_baseUrls;
     QList<QDate> m_dates;
     QList<QDateTime> m_modifiedTimes;

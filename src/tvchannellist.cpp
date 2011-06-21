@@ -30,6 +30,7 @@ TvChannelList::TvChannelList(QObject *parent)
     , m_hasDataFor(false)
     , m_throttled(false)
     , m_busy(false)
+    , m_largeIcons(false)
     , m_progress(1.0f)
     , m_requestsToDo(0)
     , m_requestsDone(0)
@@ -274,16 +275,24 @@ void TvChannelList::reload()
     refreshChannels(true);
 }
 
-void TvChannelList::updateHidden()
+void TvChannelList::updateChannels(bool largeIcons)
 {
     QSet<QString> hidden;
+    QMap<QString, QString> iconFiles;
     for (int index = 0; index < m_activeChannels.size(); ++index) {
         TvChannel *channel = m_activeChannels.at(index);
         if (channel->isHidden())
             hidden.insert(channel->id());
+        QString file = channel->iconFile();
+        if (!file.isEmpty())
+            iconFiles.insert(channel->id(), file);
     }
-    if (m_hiddenChannelIds != hidden) {
+    if (m_hiddenChannelIds != hidden ||
+            m_iconFiles != iconFiles ||
+            m_largeIcons != largeIcons) {
         m_hiddenChannelIds = hidden;
+        m_iconFiles = iconFiles;
+        m_largeIcons = largeIcons;
         saveChannelSettings();
         emit hiddenChannelsChanged();
     }
@@ -562,8 +571,13 @@ void TvChannelList::forceProgressUpdate()
 
 void TvChannelList::loadServiceSettings(QSettings *settings)
 {
+    if (m_serviceName.isEmpty())
+        return;
+
     settings->beginGroup(m_serviceName);
+    m_largeIcons = settings->value(QLatin1String("largeIcons"), false).toBool();
     m_hiddenChannelIds.clear();
+    m_iconFiles.clear();
     int size = settings->beginReadArray(QLatin1String("channels"));
     for (int index = 0; index < size; ++index) {
         settings->setArrayIndex(index);
@@ -573,14 +587,15 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
         bool hidden = settings->value(QLatin1String("hidden"), false).toBool();
         if (hidden)
             m_hiddenChannelIds.insert(id);
+        QString file = settings->value(QLatin1String("icon")).toString();
+        if (!file.isEmpty())
+            m_iconFiles.insert(id, file);
     }
     settings->endArray();
-    settings->endGroup();
 
     qDeleteAll(m_bookmarks);
     m_bookmarks.clear();
     m_indexedBookmarks.clear();
-    settings->beginGroup(QLatin1String("Bookmarks"));
     size = settings->beginReadArray(QLatin1String("bookmarks"));
     for (int index = 0; index < size; ++index) {
         settings->setArrayIndex(index);
@@ -600,15 +615,21 @@ void TvChannelList::saveChannelSettings()
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
     settings.beginGroup(m_serviceName);
+    settings.setValue(QLatin1String("largeIcons"), m_largeIcons);
     settings.beginWriteArray(QLatin1String("channels"));
     int aindex = 0;
     for (int index = 0; index < m_activeChannels.size(); ++index) {
         TvChannel *channel = m_activeChannels.at(index);
-        if (!channel->isHidden())
+        if (!channel->isHidden() && channel->iconFile().isEmpty())
             continue;
         settings.setArrayIndex(aindex++);
         settings.setValue(QLatin1String("id"), channel->id());
         settings.setValue(QLatin1String("hidden"), channel->isHidden());
+        QString file = channel->iconFile();
+        if (file.isEmpty())
+            settings.remove(QLatin1String("icon"));
+        else
+            settings.setValue(QLatin1String("icon"), file);
     }
     settings.endArray();
     settings.endGroup();
@@ -617,9 +638,11 @@ void TvChannelList::saveChannelSettings()
 
 void TvChannelList::saveBookmarks()
 {
+    if (m_serviceName.isEmpty())
+        return;
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
-    settings.beginGroup(QLatin1String("Bookmarks"));
+    settings.beginGroup(m_serviceName);
     settings.beginWriteArray(QLatin1String("bookmarks"));
     for (int index = 0; index < m_bookmarks.size(); ++index) {
         TvBookmark *bookmark = m_bookmarks.at(index);

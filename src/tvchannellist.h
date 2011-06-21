@@ -49,6 +49,9 @@ public:
     qreal progress() const { return m_progress; }
     bool useSimpleProgress() const { return m_requestsToDo <= 3; }
 
+    bool largeIcons() const { return m_largeIcons; }
+    void setLargeIcons(bool value) { m_largeIcons = value; }
+
     void addBookmark(TvBookmark *bookmark);
     TvBookmark::Match matchBookmarks
         (const TvProgramme *programme, TvBookmark **bookmark) const;
@@ -62,7 +65,7 @@ public Q_SLOTS:
     void enqueueChannelDay(TvChannel *channel, const QDate &date);
     void abort();
     void reload();
-    void updateHidden();
+    void updateChannels(bool largeIcons);
 
 private Q_SLOTS:
     void authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);
@@ -93,6 +96,7 @@ private:
     QMap<QString, TvChannel *> m_channels;
     QList<TvChannel *> m_activeChannels;
     QSet<QString> m_hiddenChannelIds;
+    QMap<QString, QString> m_iconFiles;
     QNetworkAccessManager m_nam;
     QString m_serviceName;
     QUrl m_startUrl;
@@ -103,6 +107,7 @@ private:
     bool m_hasDataFor;
     bool m_throttled;
     bool m_busy;
+    bool m_largeIcons;
     qreal m_progress;
     int m_requestsToDo;
     int m_requestsDone;
@@ -120,6 +125,8 @@ private:
     void loadServiceSettings(QSettings *settings);
     void saveChannelSettings();
     void saveBookmarks();
+
+    friend class TvChannel;
 };
 
 #endif

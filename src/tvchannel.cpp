@@ -159,11 +159,27 @@ bool TvChannel::load(QXmlStreamReader *reader)
                     (QXmlStreamReader::SkipChildElements);
                 addDataFor(QDate::fromString(date, QLatin1String("yyyy-MM-dd")),
                            stringToDateTime(lastmod));
+            } else if (reader->name() == QLatin1String("icon")) {
+                QString src = reader->attributes().value
+                    (QLatin1String("src")).toString();
+                if (m_iconUrl != src) {
+                    m_iconUrl = src;
+                    changed = true;
+                }
             }
         } else if (token == QXmlStreamReader::EndElement) {
             if (reader->name() == QLatin1String("channel"))
                 break;
         }
+    }
+    QString iconFile = m_channelList->m_iconFiles.value(m_id, QString());
+    if (m_iconFile != iconFile) {
+        m_iconFile = iconFile;
+        changed = true;
+        if (!iconFile.isEmpty())
+            m_icon = QIcon(iconFile);
+        else
+            m_icon = QIcon();
     }
     if (baseUrls != m_baseUrls) {
         m_baseUrls = baseUrls;

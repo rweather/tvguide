@@ -58,8 +58,15 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(programmesChanged(TvChannel *)));
     connect(m_channelList, SIGNAL(bookmarksChanged()),
             this, SLOT(updateTimePeriods()));
+    connect(m_channelList, SIGNAL(hiddenChannelsChanged()),
+            this, SLOT(hiddenChannelsChanged()));
     m_channelModel = new TvChannelModel(m_channelList, this);
     channels->setModel(m_channelModel);
+
+    if (m_channelList->largeIcons())
+        channels->setIconSize(QSize(64, 64));
+    else
+        channels->setIconSize(QSize());
 
     m_programmeModel = new TvProgrammeModel(this);
     programmes->setModel(m_programmeModel);
@@ -288,6 +295,14 @@ void MainWindow::organizeBookmarks()
 {
     BookmarkListEditor dialog(m_channelList, this);
     dialog.exec();
+}
+
+void MainWindow::hiddenChannelsChanged()
+{
+    if (m_channelList->largeIcons())
+        channels->setIconSize(QSize(64, 64));
+    else
+        channels->setIconSize(QSize());
 }
 
 TvChannel::TimePeriods MainWindow::timePeriods() const

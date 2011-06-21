@@ -90,7 +90,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
+        <spacer name="verticalSpacer_4">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -98,6 +98,47 @@
           <size>
            <width>20</width>
            <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="setIconButton">
+         <property name="toolTip">
+          <string>Set Channel Logo</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="tvguide.qrc">
+           <normaloff>:/images/document-open.png</normaloff>:/images/document-open.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="removeIconButton">
+         <property name="toolTip">
+          <string>Remove Channel Logo</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="tvguide.qrc">
+           <normaloff>:/images/edit-delete.png</normaloff>:/images/edit-delete.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>18</height>
           </size>
          </property>
         </spacer>
@@ -178,6 +219,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QCheckBox" name="largeIcons">
+     <property name="text">
+      <string>Use large channel logos</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -194,8 +242,11 @@
   <tabstop>inactiveChannels</tabstop>
   <tabstop>makeInactive</tabstop>
   <tabstop>makeActive</tabstop>
+  <tabstop>setIconButton</tabstop>
+  <tabstop>removeIconButton</tabstop>
   <tabstop>makeInactiveAll</tabstop>
   <tabstop>makeActiveAll</tabstop>
+  <tabstop>largeIcons</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>

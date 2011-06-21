@@ -17,6 +17,8 @@
 
 #include "channeleditor.h"
 #include "tvchannellist.h"
+#include <QtGui/qfiledialog.h>
+#include <QtCore/qdebug.h>
 
 ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     : QDialog(parent)
@@ -32,18 +34,28 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
         item1->setData(Qt::UserRole, QVariant::fromValue<void *>(channel));
         activeChannels->addItem(item1);
         item1->setHidden(channel->isHidden());
+        item1->setIcon(channel->icon());
 
         QListWidgetItem *item2 = new QListWidgetItem(channel->name());
         item2->setData(Qt::UserRole, QVariant::fromValue<void *>(channel));
         inactiveChannels->addItem(item2);
         item2->setHidden(!channel->isHidden());
+        item2->setIcon(channel->icon());
 
         item1->setData(Qt::UserRole + 1, QVariant::fromValue<void *>(item2));
         item2->setData(Qt::UserRole + 1, QVariant::fromValue<void *>(item1));
+
+        item1->setData(Qt::UserRole + 2, channel->iconFile());
+        item2->setData(Qt::UserRole + 2, channel->iconFile());
     }
 
     activeChannels->setSortingEnabled(true);
     inactiveChannels->setSortingEnabled(true);
+    if (channelList->largeIcons()) {
+        activeChannels->setIconSize(QSize(64, 64));
+        inactiveChannels->setIconSize(QSize(64, 64));
+        largeIcons->setChecked(true);
+    }
 
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
@@ -52,11 +64,16 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     connect(makeActive, SIGNAL(clicked()), this, SLOT(moveToActive()));
     connect(makeInactiveAll, SIGNAL(clicked()), this, SLOT(moveToInactiveAll()));
     connect(makeActiveAll, SIGNAL(clicked()), this, SLOT(moveToActiveAll()));
+    connect(setIconButton, SIGNAL(clicked()), this, SLOT(setIcon()));
+    connect(removeIconButton, SIGNAL(clicked()), this, SLOT(removeIcon()));
+    connect(largeIcons, SIGNAL(toggled(bool)), this, SLOT(largeIconsChanged(bool)));
 
     connect(activeChannels, SIGNAL(itemSelectionChanged()),
             this, SLOT(updateMakeInactive()));
     connect(activeChannels, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+    connect(activeChannels, SIGNAL(itemSelectionChanged()),
+            this, SLOT(updateSetIcon()));
 
     connect(inactiveChannels, SIGNAL(itemSelectionChanged()),
             this, SLOT(updateMakeActive()));
@@ -65,6 +82,8 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
 
     makeActive->setEnabled(false);
     makeInactive->setEnabled(false);
+    setIconButton->setEnabled(false);
+    removeIconButton->setEnabled(false);
 }
 
 ChannelEditor::~ChannelEditor()
@@ -79,8 +98,10 @@ void ChannelEditor::accept()
         TvChannel *channel = static_cast<TvChannel *>
             (item->data(Qt::UserRole).value<void *>());
         channel->setHidden(item->isHidden());
+        channel->setIcon(item->icon());
+        channel->setIconFile(item->data(Qt::UserRole + 2).toString());
     }
-    m_channelList->updateHidden();
+    m_channelList->updateChannels(largeIcons->isChecked());
     QDialog::accept();
 }
 
@@ -136,6 +157,42 @@ void ChannelEditor::moveToActiveAll()
     inactiveChannels->clearSelection();
 }
 
+void ChannelEditor::setIcon()
+{
+    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    if (items.size() != 1)
+        return;
+    QListWidgetItem *item = items.at(0);
+    QListWidgetItem *other = static_cast<QListWidgetItem *>
+        (item->data(Qt::UserRole + 1).value<void *>());
+    QString iconFile = item->data(Qt::UserRole + 2).toString();
+    QString result = QFileDialog::getOpenFileName
+        (this, tr("Select Icon"), iconFile,
+         tr("Images (*.png *.xpm *.jpg)"));
+    if (!result.isEmpty() && result != iconFile) {
+        item->setData(Qt::UserRole + 2, result);
+        item->setIcon(QIcon(result));
+        other->setData(Qt::UserRole + 2, result);
+        other->setIcon(QIcon(result));
+        updateSetIcon();
+    }
+}
+
+void ChannelEditor::removeIcon()
+{
+    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    if (items.size() != 1)
+        return;
+    QListWidgetItem *item = items.at(0);
+    QListWidgetItem *other = static_cast<QListWidgetItem *>
+        (item->data(Qt::UserRole + 1).value<void *>());
+    item->setData(Qt::UserRole + 2, QString());
+    item->setIcon(QIcon());
+    other->setData(Qt::UserRole + 2, QString());
+    other->setIcon(QIcon());
+    updateSetIcon();
+}
+
 void ChannelEditor::updateMakeInactive()
 {
     makeInactive->setEnabled(!activeChannels->selectedItems().isEmpty());
@@ -146,6 +203,13 @@ void ChannelEditor::updateMakeActive()
     makeActive->setEnabled(!inactiveChannels->selectedItems().isEmpty());
 }
 
+void ChannelEditor::updateSetIcon()
+{
+    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    setIconButton->setEnabled(items.size() == 1);
+    removeIconButton->setEnabled(items.size() == 1 && !items.at(0)->icon().isNull());
+}
+
 void ChannelEditor::itemDoubleClicked(QListWidgetItem *item)
 {
     QListWidgetItem *other = static_cast<QListWidgetItem *>
@@ -154,4 +218,15 @@ void ChannelEditor::itemDoubleClicked(QListWidgetItem *item)
     other->setHidden(false);
     activeChannels->clearSelection();
     inactiveChannels->clearSelection();
+}
+
+void ChannelEditor::largeIconsChanged(bool value)
+{
+    if (value) {
+        activeChannels->setIconSize(QSize(64, 64));
+        inactiveChannels->setIconSize(QSize(64, 64));
+    } else {
+        activeChannels->setIconSize(QSize());
+        inactiveChannels->setIconSize(QSize());
+    }
 }

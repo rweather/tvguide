@@ -35,8 +35,10 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     for (int index = 0; index < active.size(); ++index) {
         TvChannel *channel = active.at(index);
         if (!channel->isHidden())
-            channelsCombo->addItem(channel->name(), channel->id());
+            channelsCombo->addItem(channel->icon(), channel->name(), channel->id());
     }
+    if (channelList->largeIcons())
+        channelsCombo->setIconSize(QSize(64, 64));
     channelsCombo->setCurrentIndex(0);
 
     connect(colorSelect, SIGNAL(clicked()), this, SLOT(changeColor()));

@@ -38,9 +38,13 @@ private Q_SLOTS:
     void moveToActive();
     void moveToInactiveAll();
     void moveToActiveAll();
+    void setIcon();
+    void removeIcon();
     void updateMakeInactive();
     void updateMakeActive();
+    void updateSetIcon();
     void itemDoubleClicked(QListWidgetItem *item);
+    void largeIconsChanged(bool value);
 
 private:
     TvChannelList *m_channelList;
