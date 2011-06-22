@@ -35,7 +35,8 @@ public:
     explicit TvChannelList(QObject *parent = 0);
     ~TvChannelList();
 
-    bool hasService() const { return !m_serviceName.isEmpty(); }
+    bool hasService() const { return !m_serviceId.isEmpty(); }
+    QString serviceName() const { return m_serviceName; }
 
     QUrl startUrl() const { return m_startUrl; }
     void setStartUrl(const QUrl &url) { m_startUrl = url; }
@@ -101,6 +102,7 @@ private:
     QSet<QString> m_hiddenChannelIds;
     QMap<QString, QString> m_iconFiles;
     QNetworkAccessManager m_nam;
+    QString m_serviceId;
     QString m_serviceName;
     QUrl m_startUrl;
     int m_startUrlRefresh;

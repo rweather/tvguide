@@ -1,4 +1,7 @@
 TARGET = tvguide
+
+TVGUIDE_VERSION = 0.0.1
+
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
@@ -36,6 +39,7 @@ RESOURCES += \
     tvguide.qrc \
 
 FORMS += \
+    aboutdialog.ui \
     mainwindow.ui \
     bookmarkitemeditor.ui \
     bookmarklisteditor.ui \
@@ -44,3 +48,4 @@ FORMS += \
     serviceselector.ui \
 
 QT += network
+DEFINES += TVGUIDE_VERSION=\\\"$$TVGUIDE_VERSION\\\"

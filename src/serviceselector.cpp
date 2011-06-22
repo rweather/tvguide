@@ -89,6 +89,7 @@ void ServiceSelector::accept()
     QListWidgetItem *item = serviceList->selectedItems().at(0);
     settings.setValue(QLatin1String("id"),
                       item->data(ROLE_SERVICE_ID).toString());
+    settings.setValue(QLatin1String("name"), item->text());
     settings.setValue(QLatin1String("url"),
                       item->data(ROLE_SERVICE_URL).toString());
     settings.setValue(QLatin1String("refresh"),

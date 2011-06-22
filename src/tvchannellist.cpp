@@ -275,6 +275,7 @@ void TvChannelList::reloadService()
     m_largeIcons = false;
     m_bookmarks.clear();
     m_indexedBookmarks.clear();
+    m_serviceId = QString();
     m_serviceName = QString();
     m_startUrl = QUrl();
 
@@ -284,7 +285,8 @@ void TvChannelList::reloadService()
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
     settings.beginGroup(QLatin1String("Service"));
-    m_serviceName = settings.value(QLatin1String("id")).toString();
+    m_serviceId = settings.value(QLatin1String("id")).toString();
+    m_serviceName = settings.value(QLatin1String("name")).toString();
     QString url = settings.value(QLatin1String("url")).toString();
     if (!url.isEmpty())
         m_startUrl = QUrl(url);
@@ -549,7 +551,7 @@ void TvChannelList::nextPending()
     m_currentRequest = req.urls.at(0);
     QNetworkRequest request;
     request.setUrl(m_currentRequest);
-    request.setRawHeader("User-Agent", "qtvguide/0.0.1");
+    request.setRawHeader("User-Agent", "qtvguide/" TVGUIDE_VERSION);
     m_contents = QByteArray();
     m_reply = m_nam.get(request);
     connect(m_reply, SIGNAL(readyRead()), this, SLOT(requestReadyRead()));
@@ -595,10 +597,10 @@ void TvChannelList::forceProgressUpdate()
 
 void TvChannelList::loadServiceSettings(QSettings *settings)
 {
-    if (m_serviceName.isEmpty())
+    if (m_serviceId.isEmpty())
         return;
 
-    settings->beginGroup(m_serviceName);
+    settings->beginGroup(m_serviceId);
     m_largeIcons = settings->value(QLatin1String("largeIcons"), false).toBool();
     m_hiddenChannelIds.clear();
     m_iconFiles.clear();
@@ -634,11 +636,11 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
 
 void TvChannelList::saveChannelSettings()
 {
-    if (m_serviceName.isEmpty())
+    if (m_serviceId.isEmpty())
         return;
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
-    settings.beginGroup(m_serviceName);
+    settings.beginGroup(m_serviceId);
     settings.setValue(QLatin1String("largeIcons"), m_largeIcons);
     settings.beginWriteArray(QLatin1String("channels"));
     int aindex = 0;
@@ -662,11 +664,11 @@ void TvChannelList::saveChannelSettings()
 
 void TvChannelList::saveBookmarks()
 {
-    if (m_serviceName.isEmpty())
+    if (m_serviceId.isEmpty())
         return;
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
-    settings.beginGroup(m_serviceName);
+    settings.beginGroup(m_serviceId);
     settings.beginWriteArray(QLatin1String("bookmarks"));
     for (int index = 0; index < m_bookmarks.size(); ++index) {
         TvBookmark *bookmark = m_bookmarks.at(index);

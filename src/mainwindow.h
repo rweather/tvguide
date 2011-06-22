@@ -57,6 +57,8 @@ private Q_SLOTS:
     void channelIndexLoaded();
     void refineChannels();
 
+    void about();
+
 private:
     TvChannelList *m_channelList;
     TvChannelModel *m_channelModel;

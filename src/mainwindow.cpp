@@ -21,6 +21,7 @@
 #include "bookmarkitemeditor.h"
 #include "bookmarklisteditor.h"
 #include "serviceselector.h"
+#include "ui_aboutdialog.h"
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
 #include <QtGui/qitemselectionmodel.h>
@@ -123,6 +124,7 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(organizeBookmarks()));
     connect(action7DayOutlook, SIGNAL(toggled(bool)),
             this, SLOT(sevenDayOutlookChanged()));
+    connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
@@ -343,6 +345,18 @@ void MainWindow::refineChannels()
              QMessageBox::Yes | QMessageBox::No,
              QMessageBox::Yes) == QMessageBox::Yes)
         editChannels();
+}
+
+void MainWindow::about()
+{
+    QDialog dlg(this);
+    Ui::AboutDialog about;
+    about.setupUi(&dlg);
+    about.version->setText(TVGUIDE_VERSION);
+    QString name = m_channelList->serviceName();
+    if (!name.isEmpty())
+        about.serviceName->setText(name);
+    dlg.exec();
 }
 
 TvChannel::TimePeriods MainWindow::timePeriods() const
