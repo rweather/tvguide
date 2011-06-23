@@ -1,0 +1,24 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/help/en">
+    <file>index.html</file>
+
+    <file>bookmarks.html</file>
+    <file>edit_channels.html</file>
+    <file>select_guide.html</file>
+    <file>viewing.html</file>
+
+    <file>bookmark_7days.png</file>
+    <file>bookmark_edit.png</file>
+    <file>bookmark_new.png</file>
+    <file>bookmark_set.png</file>
+    <file>edit_channels.png</file>
+    <file>new_service.png</file>
+    <file>select_service.png</file>
+    <file>view_channels.png</file>
+    <file>view_date.png</file>
+    <file>view_details.png</file>
+    <file>view_periods.png</file>
+    <file>view_programmes.png</file>
+    <file>view_toolbar.png</file>
+</qresource>
+</RCC>
