@@ -25,6 +25,8 @@
 #include "tvchannelmodel.h"
 #include "tvprogrammemodel.h"
 
+class HelpBrowser;
+
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
@@ -57,6 +59,9 @@ private Q_SLOTS:
     void channelIndexLoaded();
     void refineChannels();
 
+    void help();
+    void helpDeleted();
+
     void about();
 
 private:
@@ -66,6 +71,7 @@ private:
     QProgressBar *m_progress;
     QTimer *m_hideProgressTimer;
     bool m_firstTimeChannelList;
+    HelpBrowser *m_helpBrowser;
 
     TvChannel::TimePeriods timePeriods() const;
     void setDay(const QModelIndex &index, const QDate &date);

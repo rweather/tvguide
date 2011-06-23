@@ -8,6 +8,7 @@ SOURCES += \
     bookmarkitemeditor.cpp \
     bookmarklisteditor.cpp \
     channeleditor.cpp \
+    helpbrowser.cpp \
     serviceeditor.cpp \
     serviceselector.cpp \
     tvbookmark.cpp \
@@ -24,6 +25,7 @@ HEADERS += \
     bookmarkitemeditor.h \
     bookmarklisteditor.h \
     channeleditor.h \
+    helpbrowser.h \
     serviceeditor.h \
     serviceselector.h \
     tvbookmark.h \
@@ -37,6 +39,7 @@ HEADERS += \
 
 RESOURCES += \
     tvguide.qrc \
+    $$PWD/../help/en/help_en.qrc \
 
 FORMS += \
     aboutdialog.ui \
@@ -44,6 +47,7 @@ FORMS += \
     bookmarkitemeditor.ui \
     bookmarklisteditor.ui \
     channeleditor.ui \
+    helpbrowser.ui \
     serviceeditor.ui \
     serviceselector.ui \
 

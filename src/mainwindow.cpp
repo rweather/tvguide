@@ -21,6 +21,7 @@
 #include "bookmarkitemeditor.h"
 #include "bookmarklisteditor.h"
 #include "serviceselector.h"
+#include "helpbrowser.h"
 #include "ui_aboutdialog.h"
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
@@ -30,6 +31,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_firstTimeChannelList(false)
+    , m_helpBrowser(0)
 {
     setupUi(this);
 
@@ -125,6 +127,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(action7DayOutlook, SIGNAL(toggled(bool)),
             this, SLOT(sevenDayOutlookChanged()));
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
+    connect(actionHelp, SIGNAL(triggered()), this, SLOT(help()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
@@ -345,6 +348,23 @@ void MainWindow::refineChannels()
              QMessageBox::Yes | QMessageBox::No,
              QMessageBox::Yes) == QMessageBox::Yes)
         editChannels();
+}
+
+void MainWindow::help()
+{
+    if (m_helpBrowser) {
+        m_helpBrowser->activateWindow();
+    } else {
+        m_helpBrowser = new HelpBrowser();
+        connect(m_helpBrowser, SIGNAL(destroyed()),
+                this, SLOT(helpDeleted()));
+        m_helpBrowser->show();
+    }
+}
+
+void MainWindow::helpDeleted()
+{
+    m_helpBrowser = 0;
 }
 
 void MainWindow::about()
