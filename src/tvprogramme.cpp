@@ -24,6 +24,7 @@ TvProgramme::TvProgramme(TvChannel *channel)
     : m_channel(channel)
     , m_isPremiere(false)
     , m_isRepeat(false)
+    , m_isMovie(false)
     , m_next(0)
 {
 }
@@ -69,8 +70,12 @@ void TvProgramme::load(QXmlStreamReader *reader)
                 m_actors += reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
             } else if (reader->name() == QLatin1String("category")) {
-                m_categories += reader->readElementText
+                QString category = reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
+                m_categories += category;
+                if (category == QLatin1String("Movie") ||
+                        category == QLatin1String("Movies"))
+                    m_isMovie = true;   // FIXME: other languages
             } else if (reader->name() == QLatin1String("rating")) {
                 m_rating = reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
@@ -153,9 +158,12 @@ QString TvProgramme::shortDescription() const
                 m_color.name() +
                 QLatin1String("\">");
     }
-    desc += QLatin1String("<b>") +
-            Qt::escape(m_title) +
-            QLatin1String("</b>");
+    desc += QLatin1String("<b>");
+    if (m_isMovie)
+        desc += QObject::tr("MOVIE: %1").arg(Qt::escape(m_title));
+    else
+        desc += Qt::escape(m_title);
+    desc += QLatin1String("</b>");
     if (m_color.isValid())
         desc += QLatin1String("</font>");
     if (!m_date.isEmpty() && m_date != QLatin1String("0")) {

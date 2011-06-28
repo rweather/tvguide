@@ -51,6 +51,7 @@ public:
     QString aspectRatio() const { return m_aspectRatio; }
     bool isPremiere() const { return m_isPremiere; }
     bool isRepeat() const { return m_isRepeat; }
+    bool isMovie() const { return m_isMovie; }
 
     void load(QXmlStreamReader *reader);
 
@@ -80,6 +81,7 @@ private:
     QString m_aspectRatio;
     bool m_isPremiere;
     bool m_isRepeat;
+    bool m_isMovie;
     mutable QString m_shortDescription;
     mutable QString m_longDescription;
     QColor m_color;
