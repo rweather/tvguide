@@ -54,6 +54,7 @@ private Q_SLOTS:
     void addBookmark();
     void organizeBookmarks();
     void selectService();
+    void webSearch();
 
     void hiddenChannelsChanged();
     void channelIndexLoaded();

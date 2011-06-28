@@ -19,6 +19,7 @@ SOURCES += \
     tvprogramme.cpp \
     tvprogrammedelegate.cpp \
     tvprogrammemodel.cpp \
+    websearchdialog.cpp \
 
 HEADERS += \
     mainwindow.h \
@@ -36,6 +37,7 @@ HEADERS += \
     tvprogramme.h \
     tvprogrammedelegate.h \
     tvprogrammemodel.h \
+    websearchdialog.h \
 
 RESOURCES += \
     tvguide.qrc \
@@ -50,6 +52,7 @@ FORMS += \
     helpbrowser.ui \
     serviceeditor.ui \
     serviceselector.ui \
+    websearchdialog.ui \
 
 QT += network
 DEFINES += TVGUIDE_VERSION=\\\"$$TVGUIDE_VERSION\\\"

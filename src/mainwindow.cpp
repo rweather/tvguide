@@ -23,10 +23,12 @@
 #include "serviceselector.h"
 #include "helpbrowser.h"
 #include "ui_aboutdialog.h"
+#include "websearchdialog.h"
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
 #include <QtGui/qitemselectionmodel.h>
 #include <QtGui/qmessagebox.h>
+#include <QtGui/qdesktopservices.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -126,6 +128,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(organizeBookmarks()));
     connect(action7DayOutlook, SIGNAL(toggled(bool)),
             this, SLOT(sevenDayOutlookChanged()));
+    connect(actionWebSearch, SIGNAL(triggered()),
+            this, SLOT(webSearch()));
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(actionHelp, SIGNAL(triggered()), this, SLOT(help()));
 
@@ -320,6 +324,18 @@ void MainWindow::selectService()
         m_programmeModel->clear();
         m_channelList->reloadService();
     }
+}
+
+void MainWindow::webSearch()
+{
+    WebSearchDialog searchDlg(this);
+    QModelIndex index = programmes->selectionModel()->currentIndex();
+    if (index.isValid()) {
+        TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
+        searchDlg.setTitle(programme->title());
+    }
+    if (searchDlg.exec() == QDialog::Accepted)
+        QDesktopServices::openUrl(searchDlg.url());
 }
 
 void MainWindow::hiddenChannelsChanged()

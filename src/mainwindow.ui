@@ -69,6 +69,7 @@
     <addaction name="actionOrganizeBookmarks"/>
     <addaction name="separator"/>
     <addaction name="actionEditChannels"/>
+    <addaction name="actionWebSearch"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -147,6 +148,7 @@
    <addaction name="separator"/>
    <addaction name="action7DayOutlook"/>
    <addaction name="actionAddBookmark"/>
+   <addaction name="actionWebSearch"/>
   </widget>
   <action name="actionSelectService">
    <property name="text">
@@ -318,6 +320,18 @@
    </property>
    <property name="shortcut">
     <string>F1</string>
+   </property>
+  </action>
+  <action name="actionWebSearch">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/network.png</normaloff>:/images/network.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Web Search ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
    </property>
   </action>
  </widget>
