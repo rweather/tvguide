@@ -33,6 +33,34 @@ TvProgramme::~TvProgramme()
 {
 }
 
+// Episode numbers in the "xmltv_ns" system are of the form
+// A.B.C, where each of the numbers is 0-based, not 1-based.
+// The numbers could also have the form X/Y for multiple parts.
+// Fix the number so it is closer to what the user expects.
+static QString fixEpisodeNumber(const QString &str)
+{
+    QStringList components = str.split(QLatin1String("."));
+    QString result;
+    bool needDot = false;
+    for (int index = 0; index < components.size(); ++index) {
+        QString comp = components.at(index);
+        int slash = comp.indexOf(QLatin1Char('/'));
+        if (slash >= 0)
+            comp = comp.left(slash);
+        if (comp.isEmpty())
+            continue;
+        if (needDot) {
+            if (index == 2)
+                result += QObject::tr(", Part ");
+            else
+                result += QLatin1Char('.');
+        }
+        result += QString::number(comp.toInt() + 1);
+        needDot = true;
+    }
+    return result;
+}
+
 void TvProgramme::load(QXmlStreamReader *reader)
 {
     // Will leave the XML stream positioned on </programme>.
@@ -85,8 +113,9 @@ void TvProgramme::load(QXmlStreamReader *reader)
             } else if (reader->name() == QLatin1String("episode-num")) {
                 QStringRef system = reader->attributes().value(QLatin1String("system"));
                 if (system == QLatin1String("xmltv_ns")) {
-                    m_episodeNumber = reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements);
+                    m_episodeNumber = fixEpisodeNumber
+                        (reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
                 }
             } else if (reader->name() == QLatin1String("language")) {
                 m_language = reader->readElementText
@@ -218,6 +247,10 @@ QString TvProgramme::shortDescription() const
         desc += QLatin1String("<br><i>") +
                 Qt::escape(m_subTitle) +
                 QLatin1String("</i>");
+    }
+    if (!m_episodeNumber.isEmpty()) {
+        desc += QObject::tr(" <i>(Episode %1)</i>").arg
+            (Qt::escape(m_episodeNumber));
     }
     if (m_isPremiere)
         desc += QObject::tr(", <font color=\"red\"><b>Premiere</b></font>");
