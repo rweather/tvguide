@@ -694,15 +694,19 @@ TvBookmark::Match TvChannelList::matchBookmarks
 {
     QMultiMap<QString, TvBookmark *>::ConstIterator it;
     it = m_indexedBookmarks.constFind(programme->title().toLower());
+    TvBookmark::Match result = TvBookmark::NoMatch;
     while (it != m_indexedBookmarks.constEnd()) {
         TvBookmark::Match match = it.value()->match(programme);
         if (match != TvBookmark::NoMatch) {
             *bookmark = it.value();
-            return match;
+            if (match != TvBookmark::TitleMatch)
+                return match;
+            else
+                result = match;
         }
         ++it;
     }
-    return TvBookmark::NoMatch;
+    return result;
 }
 
 void TvChannelList::replaceBookmarks(const QList<TvBookmark *> &bookmarks)

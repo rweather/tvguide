@@ -67,7 +67,8 @@ public:
         NoMatch,
         FullMatch,
         Overrun,        // Runs over the stop time
-        Underrun        // Starts before the start time
+        Underrun,       // Starts before the start time
+        TitleMatch      // Matches only on the title
     };
 
     TvBookmark::Match match(const TvProgramme *programme) const;

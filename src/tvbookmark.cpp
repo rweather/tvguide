@@ -48,7 +48,7 @@ TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
 
     if (!m_channelId.isEmpty() &&
             m_channelId != programme->channel()->id())
-        return NoMatch;
+        result = TitleMatch;
 
     // Check that start and stop times are within the expected range.
     QTime start = programme->start().time();
@@ -59,9 +59,9 @@ TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
             if (stop > m_startTime)
                 result = Underrun;
             else
-                return NoMatch;
+                result = TitleMatch;
         } else if (start >= m_stopTime) {
-            return NoMatch;
+            result = TitleMatch;
         } else if (stop < m_startTime || stop > m_stopTime) {
             result = Overrun;
         }
@@ -70,7 +70,7 @@ TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
             if (stop <= m_stopTime || stop > m_startTime)
                 result = Underrun;
             else
-                return NoMatch;
+                result = TitleMatch;
         } else if (start < m_stopTime) {
             // Adjust the expected weekday - start time is in tomorrow.
             if (dayOfWeek == Sunday)
@@ -89,10 +89,10 @@ TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
     int weekday = programme->start().date().dayOfWeek();
     if (dayOfWeek == MondayToFriday) {
         if (weekday == Saturday || weekday == Sunday)
-            return NoMatch;
+            result = TitleMatch;
     } else if (dayOfWeek != AnyDay) {
         if (weekday != dayOfWeek)
-            return NoMatch;
+            result = TitleMatch;
     }
 
     return result;

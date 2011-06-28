@@ -315,6 +315,8 @@ QList<TvProgramme *> TvChannel::programmesForDay
                 prog->setColor(QColor());
             else if (match == TvBookmark::FullMatch)
                 prog->setColor(bookmark->color());
+            else if (match == TvBookmark::TitleMatch)
+                prog->setColor(bookmark->color().darker(300));
             else
                 prog->setColor(bookmark->color().lighter(150));
             list.append(prog);
@@ -343,6 +345,8 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
             if (match != TvBookmark::NoMatch) {
                 if (match == TvBookmark::FullMatch)
                     prog->setColor(bookmark->color());
+                else if (match == TvBookmark::TitleMatch)
+                    prog->setColor(bookmark->color().darker(300));
                 else
                     prog->setColor(bookmark->color().lighter(150));
                 list.append(prog);
