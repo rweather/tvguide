@@ -298,7 +298,7 @@ void TvChannelList::reloadService()
     settings.endGroup();
     loadServiceSettings(&settings);
 
-    reload();
+    refreshChannels(false);
 }
 
 void TvChannelList::updateChannels(bool largeIcons)
