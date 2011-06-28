@@ -18,6 +18,7 @@
 #include "tvbookmark.h"
 #include "tvprogramme.h"
 #include "tvchannel.h"
+#include <QtCore/qdebug.h>
 
 TvBookmark::TvBookmark()
     : m_dayOfWeek(TvBookmark::AnyDay)
@@ -54,11 +55,13 @@ TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
     QTime stop = programme->stop().time();
     int dayOfWeek = m_dayOfWeek;
     if (m_startTime < m_stopTime) {
-        if (start < m_startTime || start >= m_stopTime) {
-            if (stop > m_stopTime && stop < m_startTime)
+        if (start < m_startTime) {
+            if (stop > m_startTime)
                 result = Underrun;
             else
                 return NoMatch;
+        } else if (start >= m_stopTime) {
+            return NoMatch;
         } else if (stop < m_startTime || stop > m_stopTime) {
             result = Overrun;
         }
