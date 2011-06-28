@@ -43,6 +43,7 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
     deleteButton->setEnabled(false);
 
     bookmarkView->setSortingEnabled(true);
+    bookmarkView->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
 }
 
 BookmarkListEditor::~BookmarkListEditor()
