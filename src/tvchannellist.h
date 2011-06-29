@@ -89,12 +89,15 @@ Q_SIGNALS:
     void busyChanged(bool value);
     void progressChanged(qreal value);
     void bookmarksChanged();
+    void networkRequest(TvChannel *channel, const QDate &date);
 
 private:
     struct Request
     {
         QList<QUrl> urls;
         int priority;
+        TvChannel *channel;
+        QDate date;
     };
 
     QMap<QString, TvChannel *> m_channels;
@@ -123,7 +126,7 @@ private:
     QMultiMap<QString, TvBookmark *> m_indexedBookmarks;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
-    void requestData(const QList<QUrl> &urls, const QDateTime &lastmod, int priority, int refreshAge = -1);
+    void requestData(const Request &req, const QDateTime &lastmod, int refreshAge = -1);
     void trimRequests(int first, int last);
     void nextPending();
     void forceProgressUpdate();

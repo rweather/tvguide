@@ -69,6 +69,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(hiddenChannelsChanged()));
     connect(m_channelList, SIGNAL(channelIndexLoaded()),
             this, SLOT(channelIndexLoaded()));
+    connect(m_channelList, SIGNAL(networkRequest(TvChannel *, QDate)),
+            this, SLOT(networkRequest(TvChannel *, QDate)));
     m_channelModel = new TvChannelModel(m_channelList, this);
     channels->setModel(m_channelModel);
 
@@ -178,6 +180,7 @@ void MainWindow::busyChanged(bool value)
         m_hideProgressTimer->stop();
     } else {
         m_hideProgressTimer->start(500);
+        statusBar()->clearMessage();
     }
 }
 
@@ -189,6 +192,15 @@ void MainWindow::progressChanged(qreal progress)
     } else {
         m_progress->setValue(0);
         m_progress->setMaximum(0);
+    }
+}
+
+void MainWindow::networkRequest(TvChannel *channel, const QDate &date)
+{
+    if (channel) {
+        statusBar()->showMessage(tr("Fetching %1, %2...").arg(channel->name(), date.toString(Qt::DefaultLocaleLongDate)));
+    } else {
+        statusBar()->showMessage(tr("Fetching channel list ..."));
     }
 }
 

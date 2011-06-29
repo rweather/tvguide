@@ -168,9 +168,12 @@ void TvChannelList::refreshChannels(bool forceReload)
     // Add the start URL to the front of the queue to fetch
     // it as soon as the current request completes.
     if (m_startUrl.isValid()) {
-        QList<QUrl> urls;
-        urls += m_startUrl;
-        requestData(urls, QDateTime(), 0,
+        Request req;
+        req.urls += m_startUrl;
+        req.priority = 0;
+        req.channel = 0;
+        req.date = QDate();
+        requestData(req, QDateTime(),
                     forceReload ? -1 : m_startUrlRefresh);
     }
 }
@@ -194,7 +197,12 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int
     QList<QUrl> urls = channel->dayUrls(date);
     if (urls.isEmpty())
         return;
-    requestData(urls, channel->dayLastModified(date), 1);
+    Request req;
+    req.urls = urls;
+    req.priority = 1;
+    req.channel = channel;
+    req.date = date;
+    requestData(req, channel->dayLastModified(date));
 
     // Add extra days if we want a 7-day outlook.  And add one more
     // day after that to populate "Late Night" timeslots, which are
@@ -204,8 +212,13 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int
         QDate nextDay = date.addDays(extraDay);
         if (channel->hasDataFor(nextDay)) {
             urls = channel->dayUrls(nextDay);
-            if (!urls.isEmpty())
-                requestData(urls, channel->dayLastModified(nextDay), 2);
+            if (!urls.isEmpty()) {
+                req.urls = urls;
+                req.priority = 2;
+                req.channel = channel;
+                req.date = nextDay;
+                requestData(req, channel->dayLastModified(nextDay));
+            }
         }
         ++extraDay;
     }
@@ -226,7 +239,12 @@ void TvChannelList::enqueueChannelDay(TvChannel *channel, const QDate &date)
     QList<QUrl> urls = channel->dayUrls(date);
     if (urls.isEmpty())
         return;
-    requestData(urls, channel->dayLastModified(date), 3);
+    Request req;
+    req.urls = urls;
+    req.priority = 3;
+    req.channel = channel;
+    req.date = date;
+    requestData(req, channel->dayLastModified(date));
 }
 
 void TvChannelList::abort()
@@ -414,11 +432,10 @@ void TvChannelList::requestError(QNetworkReply::NetworkError error)
 }
 
 void TvChannelList::requestData
-    (const QList<QUrl> &urls, const QDateTime &lastmod,
-     int priority, int refreshAge)
+    (const Request &req, const QDateTime &lastmod, int refreshAge)
 {
     // Bail out if the url is currently being requested.
-    if (m_currentRequest.isValid() && urls.contains(m_currentRequest))
+    if (m_currentRequest.isValid() && req.urls.contains(m_currentRequest))
         return;
 
     // Look in the cache to see if the data is fresh enough.
@@ -432,8 +449,8 @@ void TvChannelList::requestData
     QDateTime age = QDateTime::currentDateTime().addSecs(-(60 * 60));
     QDateTime refAge = QDateTime::currentDateTime().addSecs(-(60 * 60 * refreshAge));
     QDateTime lastFetch;
-    for (int index = 0; index < urls.size(); ++index) {
-        url = urls.at(index);
+    for (int index = 0; index < req.urls.size(); ++index) {
+        url = req.urls.at(index);
         if (lastmod.isValid()) {
             QNetworkCacheMetaData meta = m_nam.cache()->metaData(url);
             if (meta.isValid() && meta.lastModified() == lastmod) {
@@ -490,18 +507,15 @@ void TvChannelList::requestData
 
     // Add the request to the queue, in priority order.
     int index = 0;
-    url = urls.at(0);
+    url = req.urls.at(0);
     while (index < m_requests.size()) {
         const Request &r = m_requests.at(index);
-        if (r.priority == priority && r.urls.contains(url))
+        if (r.priority == req.priority && r.urls.contains(url))
             return;     // We have already queued this request.
-        if (r.priority > priority)
+        if (r.priority > req.priority)
             break;
         ++index;
     }
-    Request req;
-    req.urls = urls;
-    req.priority = priority;
     m_requests.insert(index, req);
     ++m_requestsToDo;
 
@@ -577,6 +591,9 @@ void TvChannelList::nextPending()
     // one request per second.
     m_throttleTimer->start(1000);
     m_throttled = true;
+
+    // Tell the UI that a network request has been initiated.
+    emit networkRequest(req.channel, req.date);
 
     // Turn on the busy flag and report the progress.
     if (!m_busy) {

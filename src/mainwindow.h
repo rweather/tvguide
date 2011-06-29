@@ -40,6 +40,7 @@ private Q_SLOTS:
     void dateChanged();
     void channelChanged(const QModelIndex &index);
     void programmesChanged(TvChannel *channel);
+    void networkRequest(TvChannel *channel, const QDate &date);
 
     void showToday();
     void showNextDay();
