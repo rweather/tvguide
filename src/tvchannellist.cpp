@@ -298,7 +298,7 @@ void TvChannelList::reloadService()
     settings.endGroup();
     loadServiceSettings(&settings);
 
-    refreshChannels(false);
+    QTimer::singleShot(0, this, SLOT(refreshChannels()));
 }
 
 void TvChannelList::updateChannels(bool largeIcons)
