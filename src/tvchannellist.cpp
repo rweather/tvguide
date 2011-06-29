@@ -396,7 +396,7 @@ void TvChannelList::requestFinished()
     m_currentRequest = QUrl();
     ++m_requestsDone;
     nextPending();
-    if (!m_currentRequest.isValid() && m_busy) {
+    if (!m_currentRequest.isValid() && m_busy && m_requests.isEmpty()) {
         // Turn off the busy flag.
         m_busy = false;
         m_progress = 1.0f;
