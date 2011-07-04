@@ -29,6 +29,12 @@ public:
     explicit TvProgrammeModel(QObject *parent = 0);
     ~TvProgrammeModel();
 
+    static const int ColumnCount        = 4;
+    static const int ColumnDay          = 0;
+    static const int ColumnTime         = 1;
+    static const int ColumnChannel      = 2;
+    static const int ColumnTitle        = 3;
+
     void clear();
     void setProgrammes(const QList<TvProgramme *> &programmes, TvChannel *channel, const QDate &date);
 

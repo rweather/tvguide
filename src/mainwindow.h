@@ -50,6 +50,7 @@ private Q_SLOTS:
 
     void updateTimePeriods();
     void sevenDayOutlookChanged();
+    void multiChannelChanged();
 
     void editChannels();
     void addBookmark();
@@ -73,10 +74,13 @@ private:
     QProgressBar *m_progress;
     QTimer *m_hideProgressTimer;
     bool m_firstTimeChannelList;
+    bool m_fetching;
     HelpBrowser *m_helpBrowser;
 
     TvChannel::TimePeriods timePeriods() const;
     void setDay(const QModelIndex &index, const QDate &date);
+    void updateProgrammes(TvChannel *channel, const QDate &date, bool request);
+    void updateMultiChannelProgrammes(const QDate &date, bool request);
 };
 
 #endif

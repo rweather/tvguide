@@ -33,6 +33,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_firstTimeChannelList(false)
+    , m_fetching(false)
     , m_helpBrowser(0)
 {
     setupUi(this);
@@ -85,7 +86,8 @@ MainWindow::MainWindow(QWidget *parent)
     programmes->horizontalHeader()->setStretchLastSection(true);
     programmes->setSelectionBehavior(QTableView::SelectRows);
     programmes->setItemDelegate(new TvProgrammeDelegate(programmes));
-    programmes->setColumnHidden(0, true);
+    programmes->setColumnHidden(TvProgrammeModel::ColumnDay, true);
+    programmes->setColumnHidden(TvProgrammeModel::ColumnChannel, true);
 
     if (m_channelList->hasService())
         QTimer::singleShot(0, m_channelList, SLOT(refreshChannels()));
@@ -130,6 +132,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(organizeBookmarks()));
     connect(action7DayOutlook, SIGNAL(toggled(bool)),
             this, SLOT(sevenDayOutlookChanged()));
+    connect(actionMultiChannel, SIGNAL(toggled(bool)),
+            this, SLOT(multiChannelChanged()));
     connect(actionWebSearch, SIGNAL(triggered()),
             this, SLOT(webSearch()));
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
@@ -229,21 +233,17 @@ void MainWindow::channelChanged(const QModelIndex &index)
 
 void MainWindow::programmesChanged(TvChannel *channel)
 {
-    QModelIndex index = channels->selectionModel()->currentIndex();
-    if (index.isValid()) {
-        TvChannel *indexChannel = static_cast<TvChannel *>(index.internalPointer());
-        if (channel == indexChannel) {
-            QList<TvProgramme *> programmes;
-            QDate date = calendar->selectedDate();
-            if (action7DayOutlook->isChecked()) {
-                programmes = channel->bookmarkedProgrammes
-                    (date, date.addDays(6));
-            } else {
-                programmes = channel->programmesForDay
-                    (date, timePeriods());
-            }
-            m_programmeModel->setProgrammes(programmes, channel, date);
-            this->programmes->resizeRowsToContents();
+    if (m_fetching)
+        return;
+    QDate date = calendar->selectedDate();
+    if (actionMultiChannel->isChecked()) {
+        updateMultiChannelProgrammes(date, false);
+    } else {
+        QModelIndex index = channels->selectionModel()->currentIndex();
+        if (index.isValid()) {
+            TvChannel *indexChannel = static_cast<TvChannel *>(index.internalPointer());
+            if (channel == indexChannel)
+                updateProgrammes(channel, date, false);
         }
     }
 }
@@ -280,8 +280,21 @@ void MainWindow::updateTimePeriods()
 
 void MainWindow::sevenDayOutlookChanged()
 {
-    programmes->setColumnHidden(0, !action7DayOutlook->isChecked());
+    programmes->setColumnHidden
+        (TvProgrammeModel::ColumnDay, !action7DayOutlook->isChecked());
     updateTimePeriods();
+}
+
+void MainWindow::multiChannelChanged()
+{
+    bool multi = actionMultiChannel->isChecked();
+    programmes->setColumnHidden
+        (TvProgrammeModel::ColumnChannel, !multi);
+    channels->setEnabled(!multi);
+    if (multi)
+        channelChanged(QModelIndex());
+    else
+        channelChanged(channels->selectionModel()->currentIndex());
 }
 
 void MainWindow::editChannels()
@@ -445,26 +458,77 @@ TvChannel::TimePeriods MainWindow::timePeriods() const
 void MainWindow::setDay(const QModelIndex &index, const QDate &date)
 {
     TvChannel *channel;
-    if (index.isValid()) {
-        // Display the current programmes for the channel and day.
-        channel = static_cast<TvChannel *>(index.internalPointer());
-        QList<TvProgramme *> programmes;
+    if (actionMultiChannel->isChecked()) {
+        updateMultiChannelProgrammes(date, true);
+    } else {
+        if (index.isValid()) {
+            channel = static_cast<TvChannel *>(index.internalPointer());
+            updateProgrammes(channel, date, true);
+        } else {
+            channel = 0;
+            m_programmeModel->clear();
+        }
+    }
+}
+
+void MainWindow::updateProgrammes
+    (TvChannel *channel, const QDate &date, bool request)
+{
+    // Display the current programmes for the channel and day.
+    QList<TvProgramme *> programmes;
+    m_fetching = true;
+    if (action7DayOutlook->isChecked()) {
+        if (request)
+            m_channelList->requestChannelDay(channel, date, 7);
+        programmes = channel->bookmarkedProgrammes
+            (date, date.addDays(6));
+    } else {
+        if (request)
+            m_channelList->requestChannelDay(channel, date);
+        programmes = channel->programmesForDay(date, timePeriods());
+    }
+    m_programmeModel->setProgrammes(programmes, channel, date);
+    this->programmes->resizeRowsToContents();
+    m_fetching = false;
+}
+
+static bool sortByStartTimeAndChannel(TvProgramme *p1, TvProgramme *p2)
+{
+    if (p1->start() < p2->start())
+        return true;
+    else if (p1->start() > p2->start())
+        return false;
+    return p1->channel()->name().compare
+                (p2->channel()->name(), Qt::CaseInsensitive) < 0;
+}
+
+void MainWindow::updateMultiChannelProgrammes
+    (const QDate &date, bool request)
+{
+    // Collect up the programmes for all channels on this date.
+    QList<TvProgramme *> programmes;
+    QList<TvChannel *> channels = m_channelList->activeChannels();
+    m_fetching = true;
+    for (int index = 0; index < channels.size(); ++index) {
+        TvChannel *channel = channels.at(index);
+        if (channel->isHidden())
+            continue;
         if (action7DayOutlook->isChecked()) {
-            programmes = channel->bookmarkedProgrammes
+            if (request)
+                m_channelList->requestChannelDay(channel, date, 7, index == 0);
+            programmes += channel->bookmarkedProgrammes
                 (date, date.addDays(6));
         } else {
-            programmes = channel->programmesForDay(date, timePeriods());
+            if (request)
+                m_channelList->requestChannelDay(channel, date, 1, index == 0);
+            programmes += channel->programmesForDay(date, timePeriods());
         }
-        m_programmeModel->setProgrammes(programmes, channel, date);
-        this->programmes->resizeRowsToContents();
-
-        // Explicitly request and update of the data.
-        if (action7DayOutlook->isChecked())
-            m_channelList->requestChannelDay(channel, date, 7);
-        else
-            m_channelList->requestChannelDay(channel, date);
-    } else {
-        channel = 0;
-        m_programmeModel->clear();
     }
+
+    // Sort the programmes to intermix the channel data and
+    // then display them.
+    qSort(programmes.begin(), programmes.end(), sortByStartTimeAndChannel);
+    m_programmeModel->setProgrammes(programmes, 0, date);
+    this->programmes->resizeRowsToContents();
+    m_fetching = false;
 }

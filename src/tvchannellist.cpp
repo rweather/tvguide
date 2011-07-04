@@ -179,7 +179,7 @@ void TvChannelList::refreshChannels(bool forceReload)
 }
 
 // Request a particular day's data based on user selections.
-void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int days)
+void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int days, bool trimPrevious)
 {
     Q_ASSERT(channel);
 
@@ -191,7 +191,8 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int
     // for the current day and the next day.  Since we are about
     // to request a different day for the UI, there's no point
     // retrieving the previous day's data any more.
-    trimRequests(1, 2);
+    if (trimPrevious)
+        trimRequests(1, 2);
 
     // Fetch the day URL and start a request for it.
     QList<QUrl> urls = channel->dayUrls(date);
@@ -222,29 +223,6 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int
         }
         ++extraDay;
     }
-}
-
-// Enqueue a request for a day in the background for bulk
-// downloading of channel data.
-void TvChannelList::enqueueChannelDay(TvChannel *channel, const QDate &date)
-{
-    Q_ASSERT(channel);
-
-    // No point performing a network request if no data for the day.
-    if (!channel->hasDataFor(date))
-        return;
-
-    // Fetch the day URL and start a request for it.  Add the URL
-    // to the end of the queue since timeliness is not important.
-    QList<QUrl> urls = channel->dayUrls(date);
-    if (urls.isEmpty())
-        return;
-    Request req;
-    req.urls = urls;
-    req.priority = 3;
-    req.channel = channel;
-    req.date = date;
-    requestData(req, channel->dayLastModified(date));
 }
 
 void TvChannelList::abort()

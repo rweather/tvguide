@@ -50,16 +50,11 @@ void TvProgrammeModel::setProgrammes(const QList<TvProgramme *> &programmes, TvC
     reset();
 }
 
-#define MODEL_COLUMNS       3
-#define MODEL_COL_DAY       0
-#define MODEL_COL_TIME      1
-#define MODEL_COL_TITLE     2
-
 QModelIndex TvProgrammeModel::index(int row, int column, const QModelIndex &) const
 {
     if (row < 0 || row >= m_programmes.size())
         return QModelIndex();
-    if (column < 0 || column >= MODEL_COLUMNS)
+    if (column < 0 || column >= ColumnCount)
         return QModelIndex();
     return createIndex(row, column, m_programmes.at(row));
 }
@@ -71,7 +66,7 @@ QModelIndex TvProgrammeModel::parent(const QModelIndex &) const
 
 int TvProgrammeModel::columnCount(const QModelIndex &) const
 {
-    return MODEL_COLUMNS;
+    return ColumnCount;
 }
 
 int TvProgrammeModel::rowCount(const QModelIndex &) const
@@ -85,23 +80,28 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
         return QVariant();
     TvProgramme *prog = static_cast<TvProgramme *>(index.internalPointer());
     if (role == Qt::DisplayRole) {
-        if (index.column() == MODEL_COL_TIME) {
+        if (index.column() == ColumnTime) {
             QTime time = prog->start().time();
-            return time.toString(Qt::LocaleDate);
-        } else if (index.column() == MODEL_COL_TITLE) {
+            int prevrow = index.row() - 1;
+            if (prevrow < 0 ||
+                    m_programmes.at(prevrow)->start().time() != time)
+                return time.toString(Qt::LocaleDate);
+        } else if (index.column() == ColumnTitle) {
             return QVariant::fromValue<void *>
                 (static_cast<void *>(prog));
-        } else if (index.column() == MODEL_COL_DAY) {
+        } else if (index.column() == ColumnDay) {
             return QDate::longDayName(prog->start().date().dayOfWeek());
+        } else if (index.column() == ColumnChannel) {
+            return prog->channel()->name();
         }
     } else if (role == Qt::TextAlignmentRole) {
-        if (index.column() == MODEL_COL_TIME)
+        if (index.column() == ColumnTime)
             return int(Qt::AlignRight | Qt::AlignVCenter);
     } else if (role == Qt::ToolTipRole) {
-        if (index.column() == MODEL_COL_TITLE)
+        if (index.column() == ColumnTitle)
             return prog->longDescription();
     } else if (role == Qt::DecorationRole) {
-        if (index.column() == MODEL_COL_TIME) {
+        if (index.column() == ColumnTime) {
             if (prog->color().isValid())
                 return m_bookmarkIcon;
         }
@@ -109,8 +109,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
         // Paint the times for different parts of the day
         // in different colors to make it easier to find
         // things like Morning, Afternoon, Night, etc.
-        if (index.column() == MODEL_COL_DAY ||
-                index.column() == MODEL_COL_TIME) {
+        if (index.column() == ColumnDay ||
+                index.column() == ColumnTime) {
             int hour = prog->start().time().hour();
             if (hour < 6)
                 return QBrush(Qt::gray);
@@ -128,11 +128,11 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
 QVariant TvProgrammeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        if (section == MODEL_COL_DAY)
+        if (section == ColumnDay)
             return tr("Day");
-        if (section == MODEL_COL_TIME)
+        if (section == ColumnTime)
             return tr("Time");
-        if (section == MODEL_COL_TITLE) {
+        if (section == ColumnTitle) {
             if (m_date.isValid()) {
                 QString title;
                 if (m_channel) {
@@ -145,6 +145,8 @@ QVariant TvProgrammeModel::headerData(int section, Qt::Orientation orientation, 
                 return tr("Description");
             }
         }
+        if (section == ColumnChannel)
+            return tr("Channel");
     }
     return QVariant();
 }

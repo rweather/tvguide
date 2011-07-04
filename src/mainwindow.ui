@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>969</width>
     <height>600</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>969</width>
      <height>24</height>
     </rect>
    </property>
@@ -60,6 +60,7 @@
     <addaction name="actionLateNight"/>
     <addaction name="separator"/>
     <addaction name="action7DayOutlook"/>
+    <addaction name="actionMultiChannel"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -147,6 +148,8 @@
    <addaction name="action_Stop"/>
    <addaction name="separator"/>
    <addaction name="action7DayOutlook"/>
+   <addaction name="actionMultiChannel"/>
+   <addaction name="separator"/>
    <addaction name="actionAddBookmark"/>
    <addaction name="actionWebSearch"/>
   </widget>
@@ -332,6 +335,18 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+K</string>
+   </property>
+  </action>
+  <action name="actionMultiChannel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/format-justify-right.png</normaloff>:/images/format-justify-right.png</iconset>
+   </property>
+   <property name="text">
+    <string>All &amp;Channels</string>
    </property>
   </action>
  </widget>
