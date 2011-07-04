@@ -23,6 +23,7 @@
 #include <QtCore/qdatetime.h>
 #include <QtCore/qxmlstream.h>
 #include <QtGui/qcolor.h>
+#include "tvbookmark.h"
 
 class TvChannel;
 
@@ -58,6 +59,9 @@ public:
     QColor color() const { return m_color; }
     void setColor(const QColor &color);
 
+    TvBookmark *bookmark() const { return m_bookmark; }
+    void setBookmark(TvBookmark *bookmark, TvBookmark::Match match);
+
     QString shortDescription() const;
     QString longDescription() const;
 
@@ -84,6 +88,7 @@ private:
     bool m_isMovie;
     mutable QString m_shortDescription;
     mutable QString m_longDescription;
+    TvBookmark *m_bookmark;
     QColor m_color;
     TvProgramme *m_next;
 

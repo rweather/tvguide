@@ -25,6 +25,7 @@ TvProgramme::TvProgramme(TvChannel *channel)
     , m_isPremiere(false)
     , m_isRepeat(false)
     , m_isMovie(false)
+    , m_bookmark(0)
     , m_next(0)
 {
 }
@@ -175,6 +176,20 @@ void TvProgramme::setColor(const QColor &color)
         m_color = color;
         m_shortDescription = QString();
     }
+}
+
+void TvProgramme::setBookmark
+    (TvBookmark *bookmark, TvBookmark::Match match)
+{
+    m_bookmark = bookmark;
+    if (match == TvBookmark::NoMatch)
+        setColor(QColor());
+    else if (match == TvBookmark::FullMatch)
+        setColor(bookmark->color());
+    else if (match == TvBookmark::TitleMatch)
+        setColor(bookmark->color().darker(300));
+    else
+        setColor(bookmark->color().lighter(150));
 }
 
 QString TvProgramme::shortDescription() const
