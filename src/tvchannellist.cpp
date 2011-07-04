@@ -706,6 +706,17 @@ void TvChannelList::addBookmark(TvBookmark *bookmark)
     saveBookmarks();
 }
 
+void TvChannelList::removeBookmark(TvBookmark *bookmark, bool notify)
+{
+    Q_ASSERT(bookmark);
+    m_bookmarks.removeAll(bookmark);
+    m_indexedBookmarks.remove(bookmark->title().toLower(), bookmark);
+    if (notify) {
+        emit bookmarksChanged();
+        saveBookmarks();
+    }
+}
+
 TvBookmark::Match TvChannelList::matchBookmarks
     (const TvProgramme *programme, TvBookmark **bookmark) const
 {

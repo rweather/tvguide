@@ -56,6 +56,7 @@ public:
     void setLargeIcons(bool value) { m_largeIcons = value; }
 
     void addBookmark(TvBookmark *bookmark);
+    void removeBookmark(TvBookmark *bookmark, bool notify = true);
     TvBookmark::Match matchBookmarks
         (const TvProgramme *programme, TvBookmark **bookmark) const;
 
