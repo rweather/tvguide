@@ -31,6 +31,7 @@ TvChannelList::TvChannelList(QObject *parent)
     , m_throttled(false)
     , m_busy(false)
     , m_largeIcons(false)
+    , m_haveChannelNumbers(false)
     , m_progress(1.0f)
     , m_requestsToDo(0)
     , m_requestsDone(0)
@@ -70,7 +71,7 @@ TvChannel *TvChannelList::channel(const QString &id) const
 
 static bool sortActiveChannels(TvChannel *c1, TvChannel *c2)
 {
-    return c1->name().compare(c2->name(), Qt::CaseInsensitive) < 0;
+    return c1->compare(c2) < 0;
 }
 
 void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
@@ -148,6 +149,8 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
         } else {
             m_activeChannels = m_channels.values();
         }
+        if (m_startUrl.host().endsWith(QLatin1String(".oztivo.net")))
+            loadOzTivoChannelData();
         qSort(m_activeChannels.begin(),
               m_activeChannels.end(), sortActiveChannels);
         emit channelsChanged();
@@ -161,6 +164,56 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
     }
     if (url == m_startUrl)
         emit channelIndexLoaded();
+}
+
+void TvChannelList::loadOzTivoChannelData()
+{
+    QFile file(QLatin1String(":/data/channels_oztivo.xml"));
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+    QXmlStreamReader reader(&file);
+    while (!reader.hasError()) {
+        QXmlStreamReader::TokenType tokenType = reader.readNext();
+        if (tokenType == QXmlStreamReader::StartElement) {
+            if (reader.name() == QLatin1String("channel")) {
+                QString channelId = reader.attributes().value
+                        (QLatin1String("id")).toString();
+                TvChannel *channel = this->channel(channelId);
+                if (channel)
+                    loadOzTivoChannelData(&reader, channel);
+            }
+        }
+    }
+}
+
+void TvChannelList::loadOzTivoChannelData
+    (QXmlStreamReader *reader, TvChannel *channel)
+{
+    // Will leave the XML stream positioned on </channel>.
+    Q_ASSERT(reader->isStartElement());
+    Q_ASSERT(reader->name() == QLatin1String("channel"));
+    while (!reader->hasError()) {
+        QXmlStreamReader::TokenType token = reader->readNext();
+        if (token == QXmlStreamReader::StartElement) {
+            if (reader->name() == QLatin1String("number")) {
+                if (reader->attributes().value
+                        (QLatin1String("system")) ==
+                                QLatin1String("foxtel")) {
+                    // Ignore foxtel channel numbers on channels
+                    // that already have a free-to-air digital number.
+                    if (!channel->channelNumbers().isEmpty())
+                        continue;
+                }
+                QString num = reader->readElementText
+                    (QXmlStreamReader::SkipChildElements);
+                channel->addChannelNumber(num);
+                m_haveChannelNumbers = true;
+            }
+        } else if (token == QXmlStreamReader::EndElement) {
+            if (reader->name() == QLatin1String("channel"))
+                break;
+        }
+    }
 }
 
 void TvChannelList::refreshChannels(bool forceReload)
@@ -269,6 +322,7 @@ void TvChannelList::reloadService()
     m_iconFiles.clear();
     m_hasDataFor = false;
     m_largeIcons = false;
+    m_haveChannelNumbers = false;
     m_bookmarks.clear();
     m_indexedBookmarks.clear();
     m_serviceId = QString();

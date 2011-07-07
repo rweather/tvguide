@@ -29,6 +29,10 @@ public:
     explicit TvChannelModel(TvChannelList *channelList, QObject *parent = 0);
     ~TvChannelModel();
 
+    static const int ColumnCount    = 2;
+    static const int ColumnNumber   = 0;
+    static const int ColumnName     = 1;
+
     QModelIndex index(int row, int column, const QModelIndex &parent) const;
     QModelIndex parent(const QModelIndex &child) const;
     int columnCount(const QModelIndex &parent) const;

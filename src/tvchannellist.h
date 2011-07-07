@@ -48,6 +48,8 @@ public:
 
     QList<TvChannel *> activeChannels() const { return m_activeChannels; }
 
+    bool haveChannelNumbers() const { return m_haveChannelNumbers; }
+
     bool busy() const { return m_busy; }
     qreal progress() const { return m_progress; }
     bool useSimpleProgress() const { return m_requestsToDo <= 3; }
@@ -116,6 +118,7 @@ private:
     bool m_throttled;
     bool m_busy;
     bool m_largeIcons;
+    bool m_haveChannelNumbers;
     qreal m_progress;
     int m_requestsToDo;
     int m_requestsDone;
@@ -126,6 +129,8 @@ private:
     QMultiMap<QString, TvBookmark *> m_indexedBookmarks;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
+    void loadOzTivoChannelData();
+    void loadOzTivoChannelData(QXmlStreamReader *reader, TvChannel *channel);
     void requestData(const Request &req, const QDateTime &lastmod, int refreshAge = -1);
     void trimRequests(int first, int last);
     void nextPending();

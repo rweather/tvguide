@@ -26,6 +26,9 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
 {
     setupUi(this);
 
+    activeChannels->setSortingEnabled(true);
+    inactiveChannels->setSortingEnabled(true);
+
     QList<TvChannel *> channels = channelList->activeChannels();
 
     for (int index = 0; index < channels.size(); ++index) {
@@ -49,8 +52,6 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
         item2->setData(Qt::UserRole + 2, channel->iconFile());
     }
 
-    activeChannels->setSortingEnabled(true);
-    inactiveChannels->setSortingEnabled(true);
     if (channelList->largeIcons()) {
         activeChannels->setIconSize(QSize(64, 64));
         inactiveChannels->setIconSize(QSize(64, 64));

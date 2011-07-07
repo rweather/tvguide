@@ -45,6 +45,10 @@ public:
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
 
+    int primaryChannelNumber() const { return m_primaryChannelNumber; }
+    QStringList channelNumbers() const { return m_channelNumbers; }
+    void addChannelNumber(const QString &number);
+
     QString iconUrl() const { return m_iconUrl; }
     void setIconUrl(const QString &url) { m_iconUrl = url; }
 
@@ -85,6 +89,8 @@ public:
 
     static QDateTime stringToDateTime(const QString &str);
 
+    int compare(const TvChannel *other) const;
+
 private:
     TvChannelList *m_channelList;
     QString m_id;
@@ -96,6 +102,8 @@ private:
     QList<QDate> m_dates;
     QList<QDateTime> m_modifiedTimes;
     TvProgramme *m_programmes;
+    QStringList m_channelNumbers;
+    int m_primaryChannelNumber;
     bool m_hidden;
 
     void addDataFor(const QDate &date, const QDateTime &lastModified);

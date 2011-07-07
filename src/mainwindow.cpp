@@ -79,6 +79,12 @@ MainWindow::MainWindow(QWidget *parent)
         channels->setIconSize(QSize(64, 64));
     else
         channels->setIconSize(QSize());
+    channels->verticalHeader()->hide();
+    channels->horizontalHeader()->hide();
+    channels->horizontalHeader()->setStretchLastSection(true);
+    channels->setSelectionBehavior(QTableView::SelectRows);
+    channels->setColumnHidden(TvChannelModel::ColumnNumber, true);
+    channels->setColumnWidth(TvChannelModel::ColumnNumber, 70);
 
     m_programmeModel = new TvProgrammeModel(this);
     programmes->setModel(m_programmeModel);
@@ -390,6 +396,7 @@ void MainWindow::hiddenChannelsChanged()
         channels->setIconSize(QSize(64, 64));
     else
         channels->setIconSize(QSize());
+    channels->resizeRowsToContents();
 }
 
 void MainWindow::channelIndexLoaded()
@@ -398,6 +405,9 @@ void MainWindow::channelIndexLoaded()
         m_firstTimeChannelList = false;
         QTimer::singleShot(0, this, SLOT(refineChannels()));
     }
+    channels->setColumnHidden
+        (TvChannelModel::ColumnNumber, !m_channelList->haveChannelNumbers());
+    channels->resizeRowsToContents();
 }
 
 void MainWindow::refineChannels()
@@ -498,8 +508,7 @@ static bool sortByStartTimeAndChannel(TvProgramme *p1, TvProgramme *p2)
         return true;
     else if (p1->start() > p2->start())
         return false;
-    return p1->channel()->name().compare
-                (p2->channel()->name(), Qt::CaseInsensitive) < 0;
+    return p1->channel()->compare(p2->channel()) < 0;
 }
 
 void MainWindow::updateMultiChannelProgrammes

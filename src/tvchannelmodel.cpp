@@ -34,7 +34,9 @@ TvChannelModel::~TvChannelModel()
 
 QModelIndex TvChannelModel::index(int row, int column, const QModelIndex &) const
 {
-    if (column != 0 || row < 0 || row >= m_visibleChannels.size())
+    if (column < 0 || column >= ColumnCount)
+        return QModelIndex();
+    if (row < 0 || row >= m_visibleChannels.size())
         return QModelIndex();
     return createIndex(row, column, m_visibleChannels.at(row));
 }
@@ -46,7 +48,7 @@ QModelIndex TvChannelModel::parent(const QModelIndex &) const
 
 int TvChannelModel::columnCount(const QModelIndex &) const
 {
-    return 1;
+    return ColumnCount;
 }
 
 int TvChannelModel::rowCount(const QModelIndex &) const
@@ -63,10 +65,20 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
         return QVariant();
     TvChannel *channel = m_visibleChannels.at(row);
     if (role == Qt::DisplayRole) {
-        if (index.column() == 0)
+        if (index.column() == ColumnName) {
             return channel->name();
+        } else if (index.column() == ColumnNumber) {
+            QStringList numbers = channel->channelNumbers();
+            if (numbers.isEmpty())
+                return QString();
+            else
+                return numbers.join(QLatin1String(", "));
+        }
+    //} else if (role == Qt::TextAlignmentRole) {
+        //if (index.column() == ColumnNumber)
+            //return int(Qt::AlignRight | Qt::AlignVCenter);
     } else if (role == Qt::DecorationRole) {
-        if (index.column() == 0)
+        if (index.column() == ColumnName)
             return channel->icon();
     }
     return QVariant();
@@ -75,7 +87,9 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
 QVariant TvChannelModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        if (section == 0)
+        if (section == ColumnNumber)
+            return tr("Number");
+        if (section == ColumnName)
             return tr("Name");
     }
     return QVariant();

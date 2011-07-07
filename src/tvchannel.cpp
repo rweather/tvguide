@@ -24,6 +24,7 @@
 TvChannel::TvChannel(TvChannelList *channelList)
     : m_channelList(channelList)
     , m_programmes(0)
+    , m_primaryChannelNumber(-1)
     , m_hidden(false)
 {
 }
@@ -37,6 +38,14 @@ TvChannel::~TvChannel()
         delete prog;
         prog = next;
     }
+}
+
+void TvChannel::addChannelNumber(const QString &number)
+{
+    if (m_primaryChannelNumber == -1)
+        m_primaryChannelNumber = number.toInt();
+    if (!m_channelNumbers.contains(number))
+        m_channelNumbers += number;
 }
 
 QList<QUrl> TvChannel::dayUrls(const QDate &date) const
@@ -387,4 +396,30 @@ QDateTime TvChannel::stringToDateTime(const QString &str)
     dt.setUtcOffset(tz * 60);
     // Converting from a UTC offset to local must go via UTC.
     return dt.toTimeSpec(Qt::UTC).toTimeSpec(Qt::LocalTime);
+}
+
+// Compares using Australian channel number rules:
+// 1, 2, 20, 21, 3, 30, 31, ..., 9, 90, 91, ..., 10, 11, ...
+int TvChannel::compare(const TvChannel *other) const
+{
+    int num1 = primaryChannelNumber();
+    int num2 = other->primaryChannelNumber();
+    if (num1 < 0 || num1 >= 100 || num2 < 0 || num2 >= 100) {
+        if (uint(num1) < uint(num2))
+            return -1;
+        else if (uint(num1) > uint(num2))
+            return 1;
+    } else {
+        int high1 = (num1 < 10 ? num1 : (num1 < 20 ? 10 : (num1 / 10)));
+        int high2 = (num2 < 10 ? num2 : (num2 < 20 ? 10 : (num2 / 10)));
+        if (high1 < high2)
+            return -1;
+        else if (high1 > high2)
+            return 1;
+        if (num1 < num2)
+            return -1;
+        else if (num1 > num2)
+            return 1;
+    }
+    return name().compare(other->name(), Qt::CaseInsensitive);
 }

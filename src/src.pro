@@ -42,6 +42,7 @@ HEADERS += \
 RESOURCES += \
     tvguide.qrc \
     $$PWD/../help/en/help_en.qrc \
+    $$PWD/../data/data.qrc \
 
 FORMS += \
     aboutdialog.ui \
