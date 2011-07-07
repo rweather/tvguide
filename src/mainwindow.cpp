@@ -321,6 +321,7 @@ void MainWindow::addBookmark()
     TvBookmark *editBookmark = 0;
     if (index.isValid()) {
         TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
+        bookmarkDlg.setChannelId(programme->channel()->id());
         bookmarkDlg.setTitle(programme->title());
         bookmarkDlg.setStartTime(programme->start().time());
         bookmarkDlg.setStopTime(programme->stop().time());
