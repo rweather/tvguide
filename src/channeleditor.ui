@@ -219,11 +219,45 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="largeIcons">
-     <property name="text">
-      <string>Use large channel logos</string>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="largeIcons">
+       <property name="text">
+        <string>Use large channel logos</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="regionLabel">
+       <property name="text">
+        <string>Region:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="regions">
+       <property name="minimumSize">
+        <size>
+         <width>286</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -247,6 +281,7 @@
   <tabstop>makeInactiveAll</tabstop>
   <tabstop>makeActiveAll</tabstop>
   <tabstop>largeIcons</tabstop>
+  <tabstop>regions</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources>

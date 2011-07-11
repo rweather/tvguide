@@ -19,6 +19,8 @@
 #define _CHANNELEDITOR_H
 
 #include <QtGui/qdialog.h>
+#include <QtCore/qmap.h>
+#include <QtCore/qxmlstream.h>
 #include "ui_channeleditor.h"
 
 class TvChannelList;
@@ -45,9 +47,24 @@ private Q_SLOTS:
     void updateSetIcon();
     void itemDoubleClicked(QListWidgetItem *item);
     void largeIconsChanged(bool value);
+    void regionChanged(int index);
 
 private:
+    struct Region
+    {
+        Region *parent;
+        QString id;
+        QString name;
+        bool isSelectable;
+    };
+
     TvChannelList *m_channelList;
+    QMap<QString, Region *> m_regions;
+    QMap<QString, Region *> m_channelToRegion;
+
+    void loadOzTivoRegions();
+    void loadOzTivoRegionData(QXmlStreamReader *reader);
+    static bool channelInRegion(const Region *cregion, const Region *region);
 };
 
 #endif

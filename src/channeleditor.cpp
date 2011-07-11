@@ -18,6 +18,8 @@
 #include "channeleditor.h"
 #include "tvchannellist.h"
 #include <QtGui/qfiledialog.h>
+#include <QtCore/qfile.h>
+#include <QtCore/qxmlstream.h>
 #include <QtCore/qdebug.h>
 
 ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
@@ -85,10 +87,29 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     makeInactive->setEnabled(false);
     setIconButton->setEnabled(false);
     removeIconButton->setEnabled(false);
+
+    if (channelList->startUrl().host().endsWith(QLatin1String(".oztivo.net")))
+        loadOzTivoRegions();
+
+    if (m_regions.isEmpty()) {
+        regionLabel->setVisible(false);
+        regions->setVisible(false);
+    } else {
+        connect(regions, SIGNAL(currentIndexChanged(int)),
+                this, SLOT(regionChanged(int)));
+    }
+
+    QMap<QString, Region *>::ConstIterator it;
+    regions->addItem(tr("Select region ..."), QString());
+    for (it = m_regions.constBegin(); it != m_regions.constEnd(); ++it) {
+        if (it.value()->isSelectable)
+            regions->addItem(it.value()->name, it.value()->id);
+    }
 }
 
 ChannelEditor::~ChannelEditor()
 {
+    qDeleteAll(m_regions);
 }
 
 void ChannelEditor::accept()
@@ -117,6 +138,7 @@ void ChannelEditor::moveToInactive()
         other->setHidden(false);
     }
     activeChannels->clearSelection();
+    regions->setCurrentIndex(0);
 }
 
 void ChannelEditor::moveToActive()
@@ -130,6 +152,7 @@ void ChannelEditor::moveToActive()
         other->setHidden(false);
     }
     inactiveChannels->clearSelection();
+    regions->setCurrentIndex(0);
 }
 
 void ChannelEditor::moveToInactiveAll()
@@ -143,6 +166,7 @@ void ChannelEditor::moveToInactiveAll()
     }
     activeChannels->clearSelection();
     inactiveChannels->clearSelection();
+    regions->setCurrentIndex(0);
 }
 
 void ChannelEditor::moveToActiveAll()
@@ -156,6 +180,7 @@ void ChannelEditor::moveToActiveAll()
     }
     activeChannels->clearSelection();
     inactiveChannels->clearSelection();
+    regions->setCurrentIndex(0);
 }
 
 void ChannelEditor::setIcon()
@@ -219,6 +244,7 @@ void ChannelEditor::itemDoubleClicked(QListWidgetItem *item)
     other->setHidden(false);
     activeChannels->clearSelection();
     inactiveChannels->clearSelection();
+    regions->setCurrentIndex(0);
 }
 
 void ChannelEditor::largeIconsChanged(bool value)
@@ -230,4 +256,94 @@ void ChannelEditor::largeIconsChanged(bool value)
         activeChannels->setIconSize(QSize());
         inactiveChannels->setIconSize(QSize());
     }
+}
+
+void ChannelEditor::regionChanged(int index)
+{
+    QString id = regions->itemData(index).toString();
+    if (id.isEmpty())
+        return;
+    Region *region = m_regions.value(id);
+    Q_ASSERT(region);
+
+    int count = activeChannels->count();
+    for (int index = 0; index < count; ++index) {
+        QListWidgetItem *item = activeChannels->item(index);
+        QListWidgetItem *other = static_cast<QListWidgetItem *>
+            (item->data(Qt::UserRole + 1).value<void *>());
+        TvChannel *channel = static_cast<TvChannel *>
+            (item->data(Qt::UserRole).value<void *>());
+        Region *cregion = m_channelToRegion.value(channel->id(), 0);
+        if (!cregion)
+            continue;   // Region-less channels are not changed.
+        if (channelInRegion(cregion, region)) {
+            item->setHidden(false);
+            other->setHidden(true);
+        } else {
+            item->setHidden(true);
+            other->setHidden(false);
+        }
+    }
+}
+
+void ChannelEditor::loadOzTivoRegions()
+{
+    QFile file(QLatin1String(":/data/channels_oztivo.xml"));
+    if (!file.open(QIODevice::ReadOnly))
+        return;
+    QXmlStreamReader reader(&file);
+    while (!reader.hasError()) {
+        QXmlStreamReader::TokenType tokenType = reader.readNext();
+        if (tokenType == QXmlStreamReader::StartElement) {
+            if (reader.name() == QLatin1String("channel")) {
+                QString channelId = reader.attributes().value
+                        (QLatin1String("id")).toString();
+                QString regionId = reader.attributes().value
+                        (QLatin1String("region")).toString();
+                Region *reg = m_regions.value(regionId, 0);
+                if (reg)
+                    m_channelToRegion.insert(channelId, reg);
+            } else if (reader.name() == QLatin1String("region")) {
+                loadOzTivoRegionData(&reader);
+            }
+        }
+    }
+}
+
+void ChannelEditor::loadOzTivoRegionData(QXmlStreamReader *reader)
+{
+    // Will leave the XML stream positioned on </region>.
+    Q_ASSERT(reader->isStartElement());
+    Q_ASSERT(reader->name() == QLatin1String("region"));
+    Region *region = new Region;
+    region->id = reader->attributes().value(QLatin1String("id")).toString();
+    region->name = region->id;
+    region->parent = m_regions.value
+        (reader->attributes().value(QLatin1String("parent")).toString(), 0);
+    region->isSelectable = false;
+    m_regions.insert(region->id, region);
+    while (!reader->hasError()) {
+        QXmlStreamReader::TokenType token = reader->readNext();
+        if (token == QXmlStreamReader::StartElement) {
+            if (reader->name() == QLatin1String("display-name")) {
+                region->name = reader->readElementText
+                    (QXmlStreamReader::SkipChildElements);
+            } else if (reader->name() == QLatin1String("selectable")) {
+                region->isSelectable = true;
+            }
+        } else if (token == QXmlStreamReader::EndElement) {
+            if (reader->name() == QLatin1String("region"))
+                break;
+        }
+    }
+}
+
+bool ChannelEditor::channelInRegion(const Region *cregion, const Region *region)
+{
+    while (region != 0) {
+        if (cregion == region)
+            return true;
+        region = region->parent;
+    }
+    return false;
 }
