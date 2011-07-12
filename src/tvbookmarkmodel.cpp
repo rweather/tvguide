@@ -18,6 +18,9 @@
 #include "tvbookmarkmodel.h"
 #include "tvchannellist.h"
 #include <QtGui/qbrush.h>
+#include <QtGui/qpalette.h>
+#include <QtGui/qwidget.h>
+#include <QtCore/qdebug.h>
 
 TvBookmarkModel::TvBookmarkModel(TvChannelList *channelList, QObject *parent)
     : QAbstractItemModel(parent)
@@ -33,12 +36,13 @@ TvBookmarkModel::~TvBookmarkModel()
     qDeleteAll(m_bookmarks);
 }
 
-#define MODEL_NUM_COLS      5
-#define MODEL_DAY           0
-#define MODEL_START_TIME    1
-#define MODEL_STOP_TIME     2
-#define MODEL_CHANNEL       3
-#define MODEL_TITLE         4
+#define MODEL_NUM_COLS      6
+#define MODEL_CHECK         0
+#define MODEL_DAY           1
+#define MODEL_START_TIME    2
+#define MODEL_STOP_TIME     3
+#define MODEL_CHANNEL       4
+#define MODEL_TITLE         5
 
 QModelIndex TvBookmarkModel::index(int row, int column, const QModelIndex &) const
 {
@@ -104,16 +108,45 @@ QVariant TvBookmarkModel::data(const QModelIndex &index, int role) const
         default: break;
         }
     } else if (role == Qt::ForegroundRole) {
-        if (index.column() == MODEL_TITLE)
-            return QBrush(bookmark->color());
+        if (bookmark->isEnabled()) {
+            if (index.column() == MODEL_TITLE)
+                return QBrush(bookmark->color());
+        } else {
+            QWidget *w = qobject_cast<QWidget *>
+                (static_cast<const QObject *>(this)->parent());
+            return w->palette().brush(QPalette::Disabled, QPalette::WindowText);
+        }
+    } else if (role == Qt::CheckStateRole) {
+        if (index.column() == MODEL_CHECK) {
+            if (bookmark->isEnabled())
+                return int(Qt::Checked);
+            else
+                return int(Qt::Unchecked);
+        }
     }
     return QVariant();
+}
+
+bool TvBookmarkModel::setData
+    (const QModelIndex &index, const QVariant &value, int role)
+{
+    if (role != Qt::CheckStateRole)
+        return false;
+    if (!index.isValid())
+        return false;
+    int row = index.row();
+    if (row < 0 || row >= m_bookmarks.size())
+        return false;
+    TvBookmark *bookmark = m_bookmarks.at(row);
+    bookmark->setEnabled(value.toInt() == int(Qt::Checked));
+    return true;
 }
 
 QVariant TvBookmarkModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
         switch (section) {
+        case MODEL_CHECK:           return QString();
         case MODEL_DAY:             return tr("Day");
         case MODEL_START_TIME:      return tr("Start");
         case MODEL_STOP_TIME:       return tr("Stop");
@@ -122,6 +155,16 @@ QVariant TvBookmarkModel::headerData(int section, Qt::Orientation orientation, i
         }
     }
     return QVariant();
+}
+
+Qt::ItemFlags TvBookmarkModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return 0;
+    Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    if (index.column() == MODEL_CHECK)
+        flags |= Qt::ItemIsUserCheckable;
+    return flags;
 }
 
 static bool sortDay(TvBookmark *b1, TvBookmark *b2)
@@ -200,6 +243,8 @@ static bool sortTitleD(TvBookmark *b1, TvBookmark *b2)
 
 void TvBookmarkModel::sort(int column, Qt::SortOrder order)
 {
+    if (column == MODEL_CHECK)
+        return;
     if (order == Qt::AscendingOrder) {
         switch (column) {
         case MODEL_DAY:

@@ -19,6 +19,9 @@
 #include "bookmarkitemeditor.h"
 #include "tvchannellist.h"
 #include <QtCore/qdebug.h>
+#include <QtGui/qapplication.h>
+#include <QtGui/qstyle.h>
+#include <QtGui/qstyleoption.h>
 
 BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *parent)
     : QDialog(parent)
@@ -43,7 +46,14 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
     deleteButton->setEnabled(false);
 
     bookmarkView->setSortingEnabled(true);
-    bookmarkView->horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
+    bookmarkView->horizontalHeader()->setSortIndicator(1, Qt::AscendingOrder);
+
+    QStyle *style = bookmarkView->style();
+    if (!style)
+        style = QApplication::style();
+    QStyleOptionButton opt;
+    QSize size = style->sizeFromContents(QStyle::CT_CheckBox, &opt, QSize(3, 1), bookmarkView);
+    bookmarkView->setColumnWidth(0, size.width());
 }
 
 BookmarkListEditor::~BookmarkListEditor()

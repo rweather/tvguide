@@ -62,6 +62,9 @@ public:
     QColor color() const { return m_color; }
     void setColor(const QColor &color) { m_color = color; }
 
+    bool isEnabled() const { return m_enabled; }
+    void setEnabled(bool value) { m_enabled = value; }
+
     enum Match
     {
         NoMatch,
@@ -80,6 +83,7 @@ private:
     QString m_title;
     QString m_channelId;
     int m_dayOfWeek;
+    bool m_enabled;
     QTime m_startTime;
     QTime m_stopTime;
     QColor m_color;

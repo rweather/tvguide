@@ -22,6 +22,7 @@
 
 TvBookmark::TvBookmark()
     : m_dayOfWeek(TvBookmark::AnyDay)
+    , m_enabled(true)
 {
 }
 
@@ -29,6 +30,7 @@ TvBookmark::TvBookmark(const TvBookmark &other)
     : m_title(other.title())
     , m_channelId(other.channelId())
     , m_dayOfWeek(other.dayOfWeek())
+    , m_enabled(other.isEnabled())
     , m_startTime(other.startTime())
     , m_stopTime(other.stopTime())
     , m_color(other.color())
@@ -42,6 +44,9 @@ TvBookmark::~TvBookmark()
 TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
 {
     TvBookmark::Match result = FullMatch;
+
+    if (!m_enabled)
+        return NoMatch;
 
     if (m_title.compare(programme->title(), Qt::CaseInsensitive) != 0)
         return NoMatch;
@@ -105,6 +110,7 @@ void TvBookmark::load(QSettings *settings)
     m_dayOfWeek = settings->value(QLatin1String("dayOfWeek")).toInt();
     if (m_dayOfWeek < AnyDay || m_dayOfWeek > MondayToFriday)
         m_dayOfWeek = AnyDay;
+    m_enabled = settings->value(QLatin1String("enabled"), true).toBool();
     m_startTime = QTime::fromString(settings->value(QLatin1String("startTime")).toString(), Qt::TextDate);
     m_stopTime = QTime::fromString(settings->value(QLatin1String("stopTime")).toString(), Qt::TextDate);
     m_color = QColor(settings->value(QLatin1String("color")).toString());
@@ -115,6 +121,7 @@ void TvBookmark::save(QSettings *settings)
     settings->setValue(QLatin1String("title"), m_title);
     settings->setValue(QLatin1String("channelId"), m_channelId);
     settings->setValue(QLatin1String("dayOfWeek"), m_dayOfWeek);
+    settings->setValue(QLatin1String("enabled"), m_enabled);
     settings->setValue(QLatin1String("startTime"), m_startTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("stopTime"), m_stopTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("color"), m_color.name());
