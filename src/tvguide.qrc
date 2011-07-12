@@ -20,5 +20,7 @@
     <file>images/process-stop.png</file>
     <file>images/today.png</file>
     <file>images/view-refresh.png</file>
+    <file>images/zoom-in.png</file>
+    <file>images/zoom-out.png</file>
 </qresource>
 </RCC>

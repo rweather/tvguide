@@ -29,11 +29,14 @@
 #include <QtGui/qitemselectionmodel.h>
 #include <QtGui/qmessagebox.h>
 #include <QtGui/qdesktopservices.h>
+#include <QtGui/qevent.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_firstTimeChannelList(false)
     , m_fetching(false)
+    , m_baseFontSize(12.0f)
+    , m_fontMultiplier(1.0f)
     , m_helpBrowser(0)
 {
     setupUi(this);
@@ -44,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
     actionPreviousDay->setShortcuts(QKeySequence::MoveToPreviousPage);
     actionNextWeek->setShortcuts(QKeySequence::MoveToNextWord);
     actionPreviousWeek->setShortcuts(QKeySequence::MoveToPreviousWord);
+    actionZoomIn->setShortcuts(QKeySequence::ZoomIn);
+    actionZoomOut->setShortcuts(QKeySequence::ZoomOut);
 
     actionToday->setEnabled(false); // Calendar starts on today.
 
@@ -94,6 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
     programmes->setItemDelegate(new TvProgrammeDelegate(programmes));
     programmes->setColumnHidden(TvProgrammeModel::ColumnDay, true);
     programmes->setColumnHidden(TvProgrammeModel::ColumnChannel, true);
+    m_baseFontSize = programmes->font().pointSizeF();
 
     if (m_channelList->hasService())
         QTimer::singleShot(0, m_channelList, SLOT(refreshChannels()));
@@ -144,6 +150,9 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(webSearch()));
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(actionHelp, SIGNAL(triggered()), this, SLOT(help()));
+    connect(actionZoomIn, SIGNAL(triggered()), this, SLOT(zoomIn()));
+    connect(actionZoomOut, SIGNAL(triggered()), this, SLOT(zoomOut()));
+    connect(actionZoomReset, SIGNAL(triggered()), this, SLOT(zoomReset()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
@@ -159,6 +168,12 @@ MainWindow::MainWindow(QWidget *parent)
     actionNight->setChecked(settings.value(QLatin1String("night"), true).toBool());
     actionLateNight->setChecked(settings.value(QLatin1String("latenight"), true).toBool());
     settings.endGroup();
+
+    settings.beginGroup(QLatin1String("View"));
+    m_fontMultiplier = qreal(settings.value(QLatin1String("zoom"), 1.0).toDouble());
+    settings.endGroup();
+
+    zoomUpdate();
 }
 
 MainWindow::~MainWindow()
@@ -176,6 +191,10 @@ MainWindow::~MainWindow()
                       (periods & TvChannel::Night) != 0);
     settings.setValue(QLatin1String("latenight"),
                       (periods & TvChannel::LateNight) != 0);
+    settings.endGroup();
+
+    settings.beginGroup(QLatin1String("View"));
+    settings.setValue(QLatin1String("zoom"), m_fontMultiplier);
     settings.endGroup();
 
     settings.sync();
@@ -450,6 +469,48 @@ void MainWindow::about()
     if (!name.isEmpty())
         about.serviceName->setText(name);
     dlg.exec();
+}
+
+void MainWindow::zoomIn()
+{
+    m_fontMultiplier += 0.25f;
+    zoomUpdate();
+}
+
+void MainWindow::zoomOut()
+{
+    if (m_fontMultiplier > 0.25f)
+        m_fontMultiplier -= 0.25f;
+    zoomUpdate();
+}
+
+void MainWindow::zoomReset()
+{
+    m_fontMultiplier = 1.0f;
+    zoomUpdate();
+}
+
+void MainWindow::zoomUpdate()
+{
+    actionZoomOut->setEnabled(m_fontMultiplier > 0.25f);
+    actionZoomReset->setEnabled(m_fontMultiplier != 1.0f);
+
+    QFont font(programmes->font());
+    font.setPointSizeF(m_baseFontSize * m_fontMultiplier);
+    programmes->setFont(font);
+    programmes->resizeRowsToContents();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Equal &&
+            (event->modifiers() & Qt::ControlModifier) != 0) {
+        // Ctrl/= is an alias for Ctrl/+ for convenience.
+        zoomIn();
+        event->accept();
+    } else {
+        QMainWindow::keyPressEvent(event);
+    }
 }
 
 TvChannel::TimePeriods MainWindow::timePeriods() const

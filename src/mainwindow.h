@@ -67,6 +67,14 @@ private Q_SLOTS:
 
     void about();
 
+    void zoomIn();
+    void zoomOut();
+    void zoomReset();
+    void zoomUpdate();
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
+
 private:
     TvChannelList *m_channelList;
     TvChannelModel *m_channelModel;
@@ -75,6 +83,8 @@ private:
     QTimer *m_hideProgressTimer;
     bool m_firstTimeChannelList;
     bool m_fetching;
+    qreal m_baseFontSize;
+    qreal m_fontMultiplier;
     HelpBrowser *m_helpBrowser;
 
     TvChannel::TimePeriods timePeriods() const;
