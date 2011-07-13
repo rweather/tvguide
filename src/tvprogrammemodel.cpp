@@ -86,6 +86,9 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
             if (prevrow < 0 ||
                     m_programmes.at(prevrow)->start().time() != time)
                 return time.toString(Qt::LocaleDate);
+            if (prog->start().date().dayOfWeek() !=
+                    m_programmes.at(prevrow)->start().date().dayOfWeek())
+                return time.toString(Qt::LocaleDate);
         } else if (index.column() == ColumnTitle) {
             return QVariant::fromValue<void *>
                 (static_cast<void *>(prog));
