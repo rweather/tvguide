@@ -18,6 +18,7 @@
 #ifndef _TVCHANNEL_H
 #define _TVCHANNEL_H
 
+#include "tvbookmark.h"
 #include <QtCore/qstring.h>
 #include <QtCore/qstringlist.h>
 #include <QtCore/qdatetime.h>
@@ -82,10 +83,12 @@ public:
     Q_DECLARE_FLAGS(TimePeriods, TimePeriod)
 
     QList<TvProgramme *> programmesForDay
-        (const QDate &date, TimePeriods periods = AllPeriods) const;
+        (const QDate &date, TimePeriods periods,
+         TvBookmark::MatchOptions options) const;
 
     QList<TvProgramme *> bookmarkedProgrammes
-        (const QDate &first, const QDate &last) const;
+        (const QDate &first, const QDate &last,
+         TvBookmark::MatchOptions options) const;
 
     static QDateTime stringToDateTime(const QString &str);
 

@@ -41,19 +41,25 @@ TvBookmark::~TvBookmark()
 {
 }
 
-TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
+TvBookmark::Match TvBookmark::match
+    (const TvProgramme *programme, MatchOptions options) const
 {
     TvBookmark::Match result = FullMatch;
+    bool should = false;
 
     if (!m_enabled)
         return NoMatch;
 
-    if (m_title.compare(programme->title(), Qt::CaseInsensitive) != 0)
-        return NoMatch;
-
-    if (!m_channelId.isEmpty() &&
-            m_channelId != programme->channel()->id())
-        result = TitleMatch;
+    if (m_title.compare(programme->title(), Qt::CaseInsensitive) != 0) {
+        if (!(options & NonMatching))
+            return NoMatch;
+        should = true;
+        result = ShouldMatch;
+    } else {
+        if (!m_channelId.isEmpty() &&
+                m_channelId != programme->channel()->id())
+            result = TitleMatch;
+    }
 
     // Check that start and stop times are within the expected range.
     QTime start = programme->start().time();
@@ -99,6 +105,14 @@ TvBookmark::Match TvBookmark::match(const TvProgramme *programme) const
         if (weekday != dayOfWeek)
             result = TitleMatch;
     }
+
+    // Disallow partial title matches if not allowed by the option list.
+    if (!(options & PartialMatches) && result == TitleMatch)
+        result = NoMatch;
+
+    // Deal with non-matching bookmarks that cover the same timeslot.
+    if (should && result != ShouldMatch)
+        result = NoMatch;
 
     return result;
 }

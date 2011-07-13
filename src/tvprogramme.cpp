@@ -182,7 +182,7 @@ void TvProgramme::setBookmark
     (TvBookmark *bookmark, TvBookmark::Match match)
 {
     m_bookmark = bookmark;
-    if (match == TvBookmark::NoMatch)
+    if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch)
         setColor(QColor());
     else if (match == TvBookmark::FullMatch)
         setColor(bookmark->color());

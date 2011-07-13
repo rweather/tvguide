@@ -88,6 +88,7 @@ private:
     HelpBrowser *m_helpBrowser;
 
     TvChannel::TimePeriods timePeriods() const;
+    TvBookmark::MatchOptions matchOptions() const;
     void setDay(const QModelIndex &index, const QDate &date);
     void updateProgrammes(TvChannel *channel, const QDate &date, bool request);
     void updateMultiChannelProgrammes(const QDate &date, bool request);

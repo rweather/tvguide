@@ -68,7 +68,6 @@
     <addaction name="actionNight"/>
     <addaction name="actionLateNight"/>
     <addaction name="separator"/>
-    <addaction name="action7DayOutlook"/>
     <addaction name="actionMultiChannel"/>
     <addaction name="separator"/>
     <addaction name="menu_Zoom"/>
@@ -77,9 +76,6 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="actionAddBookmark"/>
-    <addaction name="actionOrganizeBookmarks"/>
-    <addaction name="separator"/>
     <addaction name="actionEditChannels"/>
     <addaction name="actionWebSearch"/>
    </widget>
@@ -90,8 +86,19 @@
     <addaction name="actionHelp"/>
     <addaction name="actionAbout"/>
    </widget>
+   <widget class="QMenu" name="menu_Bookmarks">
+    <property name="title">
+     <string>&amp;Bookmarks</string>
+    </property>
+    <addaction name="actionAddBookmark"/>
+    <addaction name="actionOrganizeBookmarks"/>
+    <addaction name="separator"/>
+    <addaction name="action7DayOutlook"/>
+    <addaction name="actionShowPartialMatches"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
+   <addaction name="menu_Bookmarks"/>
    <addaction name="menu_Tools"/>
    <addaction name="menu_Help"/>
   </widget>
@@ -388,6 +395,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+0</string>
+   </property>
+  </action>
+  <action name="actionShowPartialMatches">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show &amp;Partial Matches</string>
    </property>
   </action>
  </widget>

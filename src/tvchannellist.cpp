@@ -750,19 +750,27 @@ void TvChannelList::removeBookmark(TvBookmark *bookmark, bool notify)
 }
 
 TvBookmark::Match TvChannelList::matchBookmarks
-    (const TvProgramme *programme, TvBookmark **bookmark) const
+    (const TvProgramme *programme, TvBookmark **bookmark,
+     TvBookmark::MatchOptions options) const
 {
     QMultiMap<QString, TvBookmark *>::ConstIterator it;
     it = m_indexedBookmarks.constFind(programme->title().toLower());
     TvBookmark::Match result = TvBookmark::NoMatch;
     while (it != m_indexedBookmarks.constEnd()) {
-        TvBookmark::Match match = it.value()->match(programme);
+        TvBookmark::Match match = it.value()->match(programme, options);
         if (match != TvBookmark::NoMatch) {
-            *bookmark = it.value();
-            if (match != TvBookmark::TitleMatch)
+            if (match == TvBookmark::ShouldMatch) {
+                if (result != TvBookmark::TitleMatch) {
+                    *bookmark = it.value();
+                    result = TvBookmark::ShouldMatch;
+                }
+            } else if (match != TvBookmark::TitleMatch) {
+                *bookmark = it.value();
                 return match;
-            else
-                result = match;
+            } else {
+                *bookmark = it.value();
+                result = TvBookmark::TitleMatch;
+            }
         }
         ++it;
     }

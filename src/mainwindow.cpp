@@ -144,6 +144,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(organizeBookmarks()));
     connect(action7DayOutlook, SIGNAL(toggled(bool)),
             this, SLOT(sevenDayOutlookChanged()));
+    connect(actionShowPartialMatches, SIGNAL(toggled(bool)),
+            this, SLOT(updateTimePeriods()));
     connect(actionMultiChannel, SIGNAL(toggled(bool)),
             this, SLOT(multiChannelChanged()));
     connect(actionWebSearch, SIGNAL(triggered()),
@@ -171,6 +173,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     settings.beginGroup(QLatin1String("View"));
     m_fontMultiplier = qreal(settings.value(QLatin1String("zoom"), 1.0).toDouble());
+    actionShowPartialMatches->setChecked(settings.value(QLatin1String("partial"), true).toBool());
     settings.endGroup();
 
     zoomUpdate();
@@ -195,6 +198,8 @@ MainWindow::~MainWindow()
 
     settings.beginGroup(QLatin1String("View"));
     settings.setValue(QLatin1String("zoom"), m_fontMultiplier);
+    settings.setValue(QLatin1String("partial"),
+                      actionShowPartialMatches->isChecked());
     settings.endGroup();
 
     settings.sync();
@@ -527,6 +532,14 @@ TvChannel::TimePeriods MainWindow::timePeriods() const
     return periods;
 }
 
+TvBookmark::MatchOptions MainWindow::matchOptions() const
+{
+    TvBookmark::MatchOptions options(0);
+    if (actionShowPartialMatches->isChecked())
+        options |= TvBookmark::PartialMatches;
+    return options;
+}
+
 void MainWindow::setDay(const QModelIndex &index, const QDate &date)
 {
     TvChannel *channel;
@@ -553,11 +566,11 @@ void MainWindow::updateProgrammes
         if (request)
             m_channelList->requestChannelDay(channel, date, 7);
         programmes = channel->bookmarkedProgrammes
-            (date, date.addDays(6));
+            (date, date.addDays(6), matchOptions());
     } else {
         if (request)
             m_channelList->requestChannelDay(channel, date);
-        programmes = channel->programmesForDay(date, timePeriods());
+        programmes = channel->programmesForDay(date, timePeriods(), matchOptions());
     }
     m_programmeModel->setProgrammes(programmes, channel, date);
     this->programmes->resizeRowsToContents();
@@ -588,11 +601,11 @@ void MainWindow::updateMultiChannelProgrammes
             if (request)
                 m_channelList->requestChannelDay(channel, date, 7, index == 0);
             programmes += channel->bookmarkedProgrammes
-                (date, date.addDays(6));
+                (date, date.addDays(6), matchOptions());
         } else {
             if (request)
                 m_channelList->requestChannelDay(channel, date, 1, index == 0);
-            programmes += channel->programmesForDay(date, timePeriods());
+            programmes += channel->programmesForDay(date, timePeriods(), matchOptions());
         }
     }
 

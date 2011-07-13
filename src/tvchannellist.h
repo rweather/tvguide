@@ -60,7 +60,8 @@ public:
     void addBookmark(TvBookmark *bookmark);
     void removeBookmark(TvBookmark *bookmark, bool notify = true);
     TvBookmark::Match matchBookmarks
-        (const TvProgramme *programme, TvBookmark **bookmark) const;
+        (const TvProgramme *programme, TvBookmark **bookmark,
+         TvBookmark::MatchOptions options) const;
 
     QList<TvBookmark *> bookmarks() const { return m_bookmarks; }
     void replaceBookmarks(const QList<TvBookmark *> &bookmarks);

@@ -284,7 +284,8 @@ bool TvChannel::trimProgrammes()
 }
 
 QList<TvProgramme *> TvChannel::programmesForDay
-    (const QDate &date, TimePeriods periods) const
+    (const QDate &date, TimePeriods periods,
+     TvBookmark::MatchOptions options) const
 {
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
@@ -319,7 +320,7 @@ QList<TvProgramme *> TvChannel::programmesForDay
         if (candidate) {
             TvBookmark *bookmark = 0;
             TvBookmark::Match match;
-            match = channelList()->matchBookmarks(prog, &bookmark);
+            match = channelList()->matchBookmarks(prog, &bookmark, options);
             prog->setBookmark(bookmark, match);
             list.append(prog);
         }
@@ -330,7 +331,8 @@ QList<TvProgramme *> TvChannel::programmesForDay
 
 // Find all bookmarked programmes within a specific date range.
 QList<TvProgramme *> TvChannel::bookmarkedProgrammes
-    (const QDate &first, const QDate &last) const
+    (const QDate &first, const QDate &last,
+     TvBookmark::MatchOptions options) const
 {
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
@@ -343,7 +345,7 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
                     prog->stop() <= stopTime)) {
             TvBookmark *bookmark = 0;
             TvBookmark::Match match;
-            match = channelList()->matchBookmarks(prog, &bookmark);
+            match = channelList()->matchBookmarks(prog, &bookmark, options);
             if (match != TvBookmark::NoMatch) {
                 prog->setBookmark(bookmark, match);
                 list.append(prog);

@@ -71,10 +71,20 @@ public:
         FullMatch,
         Overrun,        // Runs over the stop time
         Underrun,       // Starts before the start time
-        TitleMatch      // Matches only on the title
+        TitleMatch,     // Matches only on the title
+        ShouldMatch     // Should match but doesn't (NonMatching option)
     };
 
-    TvBookmark::Match match(const TvProgramme *programme) const;
+    enum MatchOption
+    {
+        PartialMatches      = 0x0001,
+        NonMatching         = 0x0002,
+        DefaultOptions      = PartialMatches
+    };
+    Q_DECLARE_FLAGS(MatchOptions, MatchOption)
+
+    TvBookmark::Match match
+        (const TvProgramme *programme, MatchOptions options) const;
 
     void load(QSettings *settings);
     void save(QSettings *settings);
@@ -88,5 +98,7 @@ private:
     QTime m_stopTime;
     QColor m_color;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(TvBookmark::MatchOptions)
 
 #endif
