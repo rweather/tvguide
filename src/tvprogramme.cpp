@@ -190,6 +190,16 @@ void TvProgramme::setBookmark
         setColor(bookmark->color().darker(300));
     else
         setColor(bookmark->color().lighter(150));
+
+    QString title;
+    if (match == TvBookmark::ShouldMatch) {
+        title = bookmark->title();
+        m_bookmark = 0;
+    }
+    if (m_nonMatchingTitle != title) {
+        m_nonMatchingTitle = title;
+        m_shortDescription = QString();
+    }
 }
 
 QString TvProgramme::shortDescription() const
@@ -269,6 +279,11 @@ QString TvProgramme::shortDescription() const
     }
     if (m_isPremiere)
         desc += QObject::tr(", <font color=\"red\"><b>Premiere</b></font>");
+    if (!m_nonMatchingTitle.isEmpty()) {
+        desc += QLatin1String("<br><s>") +
+                Qt::escape(m_nonMatchingTitle) +
+                QLatin1String("</s>");
+    }
     m_shortDescription = desc;
     return desc;
 }

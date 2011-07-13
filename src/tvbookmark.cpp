@@ -53,6 +53,9 @@ TvBookmark::Match TvBookmark::match
     if (m_title.compare(programme->title(), Qt::CaseInsensitive) != 0) {
         if (!(options & NonMatching))
             return NoMatch;
+        if (!m_channelId.isEmpty() &&
+                m_channelId != programme->channel()->id())
+            return NoMatch;
         should = true;
         result = ShouldMatch;
     } else {

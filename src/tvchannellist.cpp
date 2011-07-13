@@ -754,7 +754,10 @@ TvBookmark::Match TvChannelList::matchBookmarks
      TvBookmark::MatchOptions options) const
 {
     QMultiMap<QString, TvBookmark *>::ConstIterator it;
-    it = m_indexedBookmarks.constFind(programme->title().toLower());
+    if (options & TvBookmark::NonMatching)
+        it = m_indexedBookmarks.constBegin();
+    else
+        it = m_indexedBookmarks.constFind(programme->title().toLower());
     TvBookmark::Match result = TvBookmark::NoMatch;
     while (it != m_indexedBookmarks.constEnd()) {
         TvBookmark::Match match = it.value()->match(programme, options);

@@ -146,6 +146,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(sevenDayOutlookChanged()));
     connect(actionShowPartialMatches, SIGNAL(toggled(bool)),
             this, SLOT(updateTimePeriods()));
+    connect(actionShowFailedMatches, SIGNAL(toggled(bool)),
+            this, SLOT(updateTimePeriods()));
     connect(actionMultiChannel, SIGNAL(toggled(bool)),
             this, SLOT(multiChannelChanged()));
     connect(actionWebSearch, SIGNAL(triggered()),
@@ -174,6 +176,7 @@ MainWindow::MainWindow(QWidget *parent)
     settings.beginGroup(QLatin1String("View"));
     m_fontMultiplier = qreal(settings.value(QLatin1String("zoom"), 1.0).toDouble());
     actionShowPartialMatches->setChecked(settings.value(QLatin1String("partial"), true).toBool());
+    actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), true).toBool());
     settings.endGroup();
 
     zoomUpdate();
@@ -200,6 +203,8 @@ MainWindow::~MainWindow()
     settings.setValue(QLatin1String("zoom"), m_fontMultiplier);
     settings.setValue(QLatin1String("partial"),
                       actionShowPartialMatches->isChecked());
+    settings.setValue(QLatin1String("failed"),
+                      actionShowFailedMatches->isChecked());
     settings.endGroup();
 
     settings.sync();
@@ -537,6 +542,8 @@ TvBookmark::MatchOptions MainWindow::matchOptions() const
     TvBookmark::MatchOptions options(0);
     if (actionShowPartialMatches->isChecked())
         options |= TvBookmark::PartialMatches;
+    if (actionShowFailedMatches->isChecked())
+        options |= TvBookmark::NonMatching;
     return options;
 }
 

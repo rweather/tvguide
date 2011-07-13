@@ -95,6 +95,7 @@
     <addaction name="separator"/>
     <addaction name="action7DayOutlook"/>
     <addaction name="actionShowPartialMatches"/>
+    <addaction name="actionShowFailedMatches"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -406,6 +407,17 @@
    </property>
    <property name="text">
     <string>Show &amp;Partial Matches</string>
+   </property>
+  </action>
+  <action name="actionShowFailedMatches">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show &amp;Failed Matches</string>
    </property>
   </action>
  </widget>

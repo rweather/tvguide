@@ -89,6 +89,7 @@ private:
     mutable QString m_shortDescription;
     mutable QString m_longDescription;
     TvBookmark *m_bookmark;
+    QString m_nonMatchingTitle;
     QColor m_color;
     TvProgramme *m_next;
 
