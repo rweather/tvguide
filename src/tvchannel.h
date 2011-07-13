@@ -91,6 +91,7 @@ public:
          TvBookmark::MatchOptions options) const;
 
     static QDateTime stringToDateTime(const QString &str);
+    static QDate stringToDate(const QString &str);
 
     int compare(const TvChannel *other) const;
 
@@ -105,6 +106,7 @@ private:
     QList<QDate> m_dates;
     QList<QDateTime> m_modifiedTimes;
     TvProgramme *m_programmes;
+    TvProgramme *m_lastInsert;
     QStringList m_channelNumbers;
     int m_primaryChannelNumber;
     bool m_hidden;

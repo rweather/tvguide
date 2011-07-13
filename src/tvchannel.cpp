@@ -24,6 +24,7 @@
 TvChannel::TvChannel(TvChannelList *channelList)
     : m_channelList(channelList)
     , m_programmes(0)
+    , m_lastInsert(0)
     , m_primaryChannelNumber(-1)
     , m_hidden(false)
 {
@@ -166,7 +167,7 @@ bool TvChannel::load(QXmlStreamReader *reader)
                     (QLatin1String("lastmodified")).toString();
                 QString date = reader->readElementText
                     (QXmlStreamReader::SkipChildElements);
-                addDataFor(QDate::fromString(date, QLatin1String("yyyy-MM-dd")),
+                addDataFor(stringToDate(date),
                            stringToDateTime(lastmod));
             } else if (reader->name() == QLatin1String("icon")) {
                 QString src = reader->attributes().value
@@ -205,9 +206,16 @@ bool TvChannel::load(QXmlStreamReader *reader)
 
 void TvChannel::addProgramme(TvProgramme *programme)
 {
-    TvProgramme *prog = m_programmes;
-    TvProgramme *prev = 0;
+    TvProgramme *prog;
+    TvProgramme *prev;
     TvProgramme *next;
+    if (m_lastInsert && programme->start() >= m_lastInsert->stop()) {
+        prev = m_lastInsert;
+        prog = m_lastInsert->m_next;
+    } else {
+        prog = m_programmes;
+        prev = 0;
+    }
     while (prog != 0) {
         next = prog->m_next;
         if (programme->start() >= prog->stop()) {
@@ -234,6 +242,7 @@ void TvChannel::addProgramme(TvProgramme *programme)
         prev->m_next = programme;
     else
         m_programmes = programme;
+    m_lastInsert = programme;
 }
 
 // Trim any programmes that do not apply to dates in "datafor" decls.
@@ -264,6 +273,7 @@ bool TvChannel::trimProgrammes()
     TvProgramme *next;
     bool changed = false;
     m_programmes = 0;
+    m_lastInsert = 0;
     while (prog != 0) {
         next = prog->m_next;
         if (start <= prog->stop().date() &&
@@ -394,10 +404,36 @@ QDateTime TvChannel::stringToDateTime(const QString &str)
             break;
         }
     }
-    QDateTime dt(QDate(year, month, day), QTime(hour, min, sec));
-    dt.setUtcOffset(tz * 60);
+    // FIXME: assume local time because it is too expensive
+    // to ask the system what the current timezone is.
+    return QDateTime(QDate(year, month, day), QTime(hour, min, sec));
+    //QDateTime dt(QDate(year, month, day), QTime(hour, min, sec));
+    //dt.setUtcOffset(tz * 60);
     // Converting from a UTC offset to local must go via UTC.
-    return dt.toTimeSpec(Qt::UTC).toTimeSpec(Qt::LocalTime);
+    //return dt.toTimeSpec(Qt::UTC).toTimeSpec(Qt::LocalTime);
+}
+
+static int fetchDashField(const QString &str, int *posn)
+{
+    int value = 0;
+    while (*posn < str.length()) {
+        uint ch = str.at((*posn)++).unicode();
+        if (ch >= '0' && ch <= '9')
+            value = value * 10 + int(ch - '0');
+        else if (ch == '-')
+            break;
+    }
+    return value;
+}
+
+// Format is "yyyy-MM-dd".  QDate::fromString() is too slow.
+QDate TvChannel::stringToDate(const QString &str)
+{
+    int posn = 0;
+    int year = fetchDashField(str, &posn);
+    int month = fetchDashField(str, &posn);
+    int day = fetchDashField(str, &posn);
+    return QDate(year, month, day);
 }
 
 // Compares using Australian channel number rules:
