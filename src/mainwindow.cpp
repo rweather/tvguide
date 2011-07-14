@@ -176,7 +176,7 @@ MainWindow::MainWindow(QWidget *parent)
     settings.beginGroup(QLatin1String("View"));
     m_fontMultiplier = qreal(settings.value(QLatin1String("zoom"), 1.0).toDouble());
     actionShowPartialMatches->setChecked(settings.value(QLatin1String("partial"), true).toBool());
-    actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), true).toBool());
+    actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), false).toBool());
     settings.endGroup();
 
     zoomUpdate();
