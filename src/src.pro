@@ -1,6 +1,6 @@
 TARGET = tvguide
 
-TVGUIDE_VERSION = 0.0.4
+TVGUIDE_VERSION = 0.0.5
 
 SOURCES += \
     main.cpp \
