@@ -81,7 +81,9 @@ TvBookmark::Match TvBookmark::match
         }
     } else {
         if (start >= m_stopTime && start < m_startTime) {
-            if (stop <= m_stopTime || stop > m_startTime)
+            if (stop > m_startTime || stop <= m_stopTime)
+                result = Underrun;
+            else if (stop >= m_stopTime && stop < start)
                 result = Underrun;
             else
                 result = TitleMatch;

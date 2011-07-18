@@ -34,9 +34,16 @@ public:
     ~TvProgramme();
 
     TvChannel *channel() const { return m_channel; }
+
     QDateTime start() const { return m_start; }
+    void setStart(const QDateTime &start) { m_start = start; }
+
     QDateTime stop() const { return m_stop; }
+    void setStop(const QDateTime &stop) { m_stop = stop; }
+
     QString title() const { return m_title; }
+    void setTitle(const QString &title) { m_title = title; }
+
     QString subTitle() const { return m_subTitle; }
     QString description() const { return m_description; }
     QString date() const { return m_date; }

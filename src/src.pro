@@ -1,7 +1,5 @@
 TARGET = tvguide
 
-TVGUIDE_VERSION = 0.0.5
-
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
@@ -11,14 +9,6 @@ SOURCES += \
     helpbrowser.cpp \
     serviceeditor.cpp \
     serviceselector.cpp \
-    tvbookmark.cpp \
-    tvbookmarkmodel.cpp \
-    tvchannel.cpp \
-    tvchannellist.cpp \
-    tvchannelmodel.cpp \
-    tvprogramme.cpp \
-    tvprogrammedelegate.cpp \
-    tvprogrammemodel.cpp \
     websearchdialog.cpp \
 
 HEADERS += \
@@ -29,15 +19,9 @@ HEADERS += \
     helpbrowser.h \
     serviceeditor.h \
     serviceselector.h \
-    tvbookmark.h \
-    tvbookmarkmodel.h \
-    tvchannel.h \
-    tvchannellist.h \
-    tvchannelmodel.h \
-    tvprogramme.h \
-    tvprogrammedelegate.h \
-    tvprogrammemodel.h \
     websearchdialog.h \
+
+include(library.pri)
 
 RESOURCES += \
     tvguide.qrc \
@@ -54,6 +38,3 @@ FORMS += \
     serviceeditor.ui \
     serviceselector.ui \
     websearchdialog.ui \
-
-QT += network
-DEFINES += TVGUIDE_VERSION=\\\"$$TVGUIDE_VERSION\\\"
