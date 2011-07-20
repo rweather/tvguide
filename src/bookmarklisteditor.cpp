@@ -78,7 +78,8 @@ void BookmarkListEditor::editBookmark()
     bookmarkDlg.setChannelId(bookmark->channelId());
     bookmarkDlg.setStartTime(bookmark->startTime());
     bookmarkDlg.setStopTime(bookmark->stopTime());
-    bookmarkDlg.setDayOfWeek(bookmark->dayOfWeek());
+    bookmarkDlg.setDayOfWeek
+        (bookmark->dayOfWeek(), bookmark->dayOfWeekMask());
     bookmarkDlg.setColor(bookmark->color());
 
     if (bookmarkDlg.exec() == QDialog::Accepted) {
@@ -86,7 +87,7 @@ void BookmarkListEditor::editBookmark()
         bookmark->setChannelId(bookmarkDlg.channelId());
         bookmark->setStartTime(bookmarkDlg.startTime());
         bookmark->setStopTime(bookmarkDlg.stopTime());
-        bookmark->setDayOfWeek(bookmarkDlg.dayOfWeek());
+        bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
         bookmark->setColor(bookmarkDlg.color());
         m_model->updateBookmark(index.row());
         bookmarkView->sortByColumn
@@ -113,7 +114,7 @@ void BookmarkListEditor::newBookmark()
         bookmark->setChannelId(bookmarkDlg.channelId());
         bookmark->setStartTime(bookmarkDlg.startTime());
         bookmark->setStopTime(bookmarkDlg.stopTime());
-        bookmark->setDayOfWeek(bookmarkDlg.dayOfWeek());
+        bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
         bookmark->setColor(bookmarkDlg.color());
         m_model->addBookmark(bookmark);
         bookmarkView->sortByColumn

@@ -354,7 +354,7 @@ void MainWindow::addBookmark()
         bookmarkDlg.setTitle(programme->title());
         bookmarkDlg.setStartTime(programme->start().time());
         bookmarkDlg.setStopTime(programme->stop().time());
-        bookmarkDlg.setDayOfWeek(programme->start().date().dayOfWeek());
+        bookmarkDlg.setDayOfWeek(programme->start().date().dayOfWeek(), 0);
         editBookmark = programme->bookmark();
         if (editBookmark) {
             if (QMessageBox::question
@@ -366,14 +366,17 @@ void MainWindow::addBookmark()
                 bookmarkDlg.setChannelId(editBookmark->channelId());
                 bookmarkDlg.setStartTime(editBookmark->startTime());
                 bookmarkDlg.setStopTime(editBookmark->stopTime());
-                bookmarkDlg.setDayOfWeek(editBookmark->dayOfWeek());
+                bookmarkDlg.setDayOfWeek
+                    (editBookmark->dayOfWeek(),
+                     editBookmark->dayOfWeekMask());
                 bookmarkDlg.setColor(editBookmark->color());
             } else {
                 editBookmark = 0;
             }
         }
     } else {
-        bookmarkDlg.setDayOfWeek(calendar->selectedDate().dayOfWeek());
+        bookmarkDlg.setDayOfWeek
+            (calendar->selectedDate().dayOfWeek(), 0);
     }
     if (!editBookmark)
         bookmarkDlg.setWindowTitle(tr("Add Bookmark"));
@@ -383,7 +386,7 @@ void MainWindow::addBookmark()
         bookmark->setChannelId(bookmarkDlg.channelId());
         bookmark->setStartTime(bookmarkDlg.startTime());
         bookmark->setStopTime(bookmarkDlg.stopTime());
-        bookmark->setDayOfWeek(bookmarkDlg.dayOfWeek());
+        bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
         bookmark->setColor(bookmarkDlg.color());
         if (editBookmark)
             m_channelList->removeBookmark(editBookmark, false);

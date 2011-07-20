@@ -78,15 +78,8 @@ QVariant TvBookmarkModel::data(const QModelIndex &index, int role) const
     TvBookmark *bookmark = m_bookmarks.at(row);
     if (role == Qt::DisplayRole) {
         switch (index.column()) {
-        case MODEL_DAY: {
-            int dayOfWeek = bookmark->dayOfWeek();
-            if (dayOfWeek == TvBookmark::AnyDay)
-                return tr("Any day");
-            else if (dayOfWeek == TvBookmark::MondayToFriday)
-                return tr("Mon-Fri");
-            else
-                return QDate::longDayName(dayOfWeek);
-            }
+        case MODEL_DAY:
+            return bookmark->dayOfWeekName();
         case MODEL_START_TIME:
             return bookmark->startTime().toString(Qt::LocaleDate);
         case MODEL_STOP_TIME:

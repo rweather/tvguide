@@ -41,7 +41,10 @@ public:
         Friday,
         Saturday,
         Sunday,
-        MondayToFriday
+        MondayToFriday,
+        SaturdayAndSunday,
+        Last = SaturdayAndSunday,
+        Mask = 32
     };
 
     QString title() const { return m_title; }
@@ -51,7 +54,13 @@ public:
     void setChannelId(const QString &id) { m_channelId = id; }
 
     int dayOfWeek() const { return m_dayOfWeek; }
-    void setDayOfWeek(int day) { m_dayOfWeek = day; }
+    void setDayOfWeek(int day);
+
+    int dayOfWeekMask() const { return m_dayOfWeekMask; }
+    void setDayOfWeekMask(int mask);
+
+    QString dayOfWeekName() const;
+    static QString dayOfWeekLongName(int mask);
 
     QTime startTime() const { return m_startTime; }
     void setStartTime(const QTime &time) { m_startTime = time; }
@@ -93,6 +102,7 @@ private:
     QString m_title;
     QString m_channelId;
     int m_dayOfWeek;
+    int m_dayOfWeekMask;
     bool m_enabled;
     QTime m_startTime;
     QTime m_stopTime;

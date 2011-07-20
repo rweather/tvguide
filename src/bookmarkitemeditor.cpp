@@ -17,6 +17,7 @@
 
 #include "bookmarkitemeditor.h"
 #include "tvchannellist.h"
+#include "dayselectiondialog.h"
 #include <QtGui/qcolordialog.h>
 #include <QtGui/qpixmap.h>
 #include <QtGui/qicon.h>
@@ -24,10 +25,21 @@
 BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *parent)
     : QDialog(parent)
     , m_channelList(channelList)
+    , m_extraItem(-1)
 {
     setupUi(this);
 
     dayOfWeekCombo->setCurrentIndex(0);
+    dayOfWeekCombo->setItemData(TvBookmark::AnyDay, 0xFE);
+    dayOfWeekCombo->setItemData(TvBookmark::Monday, 0x02);
+    dayOfWeekCombo->setItemData(TvBookmark::Tuesday, 0x04);
+    dayOfWeekCombo->setItemData(TvBookmark::Wednesday, 0x08);
+    dayOfWeekCombo->setItemData(TvBookmark::Thursday, 0x10);
+    dayOfWeekCombo->setItemData(TvBookmark::Friday, 0x20);
+    dayOfWeekCombo->setItemData(TvBookmark::Saturday, 0x40);
+    dayOfWeekCombo->setItemData(TvBookmark::Sunday, 0x80);
+    dayOfWeekCombo->setItemData(TvBookmark::MondayToFriday, 0x3E);
+    dayOfWeekCombo->setItemData(TvBookmark::SaturdayAndSunday, 0xC0);
     setColor(QColor(Qt::red));
 
     channelsCombo->addItem(tr("Any channel"));
@@ -42,6 +54,7 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     channelsCombo->setCurrentIndex(0);
 
     connect(colorSelect, SIGNAL(clicked()), this, SLOT(changeColor()));
+    connect(otherDay, SIGNAL(clicked()), this, SLOT(selectOtherDay()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
     connect(titleEdit, SIGNAL(textChanged(QString)), this, SLOT(titleChanged(QString)));
@@ -90,12 +103,33 @@ void BookmarkItemEditor::setChannelId(const QString &id)
 
 int BookmarkItemEditor::dayOfWeek() const
 {
-    return dayOfWeekCombo->currentIndex();
+    int index = dayOfWeekCombo->currentIndex();
+    if (index != m_extraItem)
+        return index;
+    else
+        return TvBookmark::Mask;
 }
 
-void BookmarkItemEditor::setDayOfWeek(int value)
+int BookmarkItemEditor::dayOfWeekMask() const
 {
-    dayOfWeekCombo->setCurrentIndex(value);
+    return dayOfWeekCombo->itemData(dayOfWeekCombo->currentIndex()).toInt();
+}
+
+void BookmarkItemEditor::setDayOfWeek(int value, int mask)
+{
+    if (value != TvBookmark::Mask) {
+        dayOfWeekCombo->setCurrentIndex(value);
+    } else {
+        QString name = TvBookmark::dayOfWeekLongName(mask);
+        if (m_extraItem != -1) {
+            dayOfWeekCombo->setItemText(m_extraItem, name);
+            dayOfWeekCombo->setItemData(m_extraItem, mask);
+        } else {
+            m_extraItem = dayOfWeekCombo->count();
+            dayOfWeekCombo->addItem(name, mask);
+        }
+        dayOfWeekCombo->setCurrentIndex(m_extraItem);
+    }
 }
 
 void BookmarkItemEditor::setColor(const QColor &color)
@@ -117,4 +151,21 @@ void BookmarkItemEditor::changeColor()
 void BookmarkItemEditor::titleChanged(const QString &text)
 {
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!text.isEmpty());
+}
+
+void BookmarkItemEditor::selectOtherDay()
+{
+    DaySelectionDialog dlg(this);
+    dlg.setMask(dayOfWeekMask());
+    if (dlg.exec() == QDialog::Accepted) {
+        int mask = dlg.mask();
+        int count = dayOfWeekCombo->count();
+        for (int index = 0; index < count; ++index) {
+            if (dayOfWeekCombo->itemData(index).toInt() == mask) {
+                dayOfWeekCombo->setCurrentIndex(index);
+                return;
+            }
+        }
+        setDayOfWeek(TvBookmark::Mask, mask);
+    }
 }

@@ -42,9 +42,9 @@ public:
     QTime stopTime() const { return stopTimeEdit->time(); }
     void setStopTime(const QTime &time) { stopTimeEdit->setTime(time); }
 
-    // 0 = any day, 1..7 = Mon..Sun, 8 = Mon-Fri
     int dayOfWeek() const;
-    void setDayOfWeek(int value);
+    int dayOfWeekMask() const;
+    void setDayOfWeek(int value, int mask);
 
     QColor color() const { return m_color; }
     void setColor(const QColor &color);
@@ -52,10 +52,12 @@ public:
 private Q_SLOTS:
     void changeColor();
     void titleChanged(const QString &text);
+    void selectOtherDay();
 
 private:
     TvChannelList *m_channelList;
     QColor m_color;
+    int m_extraItem;
 };
 
 #endif

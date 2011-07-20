@@ -6,6 +6,7 @@ SOURCES += \
     bookmarkitemeditor.cpp \
     bookmarklisteditor.cpp \
     channeleditor.cpp \
+    dayselectiondialog.cpp \
     helpbrowser.cpp \
     serviceeditor.cpp \
     serviceselector.cpp \
@@ -16,6 +17,7 @@ HEADERS += \
     bookmarkitemeditor.h \
     bookmarklisteditor.h \
     channeleditor.h \
+    dayselectiondialog.h \
     helpbrowser.h \
     serviceeditor.h \
     serviceselector.h \
@@ -34,6 +36,7 @@ FORMS += \
     bookmarkitemeditor.ui \
     bookmarklisteditor.ui \
     channeleditor.ui \
+    dayselectiondialog.ui \
     helpbrowser.ui \
     serviceeditor.ui \
     serviceselector.ui \

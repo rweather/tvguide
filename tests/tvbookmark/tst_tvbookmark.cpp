@@ -34,6 +34,8 @@ private slots:
     void properties();
     void match_data();
     void match();
+    void dayOfWeek_data();
+    void dayOfWeek();
 
 private:
     TvChannel *channel1;
@@ -63,6 +65,7 @@ void tst_TvBookmark::properties()
     QVERIFY(b.title().isEmpty());
     QVERIFY(b.channelId().isEmpty());
     QVERIFY(b.dayOfWeek() == TvBookmark::AnyDay);
+    QCOMPARE(b.dayOfWeekMask(), 0xFE);
     QVERIFY(!b.startTime().isValid());
     QVERIFY(!b.stopTime().isValid());
     QVERIFY(!b.color().isValid());
@@ -79,6 +82,7 @@ void tst_TvBookmark::properties()
     QCOMPARE(b.title(), QLatin1String("foo"));
     QCOMPARE(b.channelId(), QLatin1String("BAR"));
     QVERIFY(b.dayOfWeek() == TvBookmark::Wednesday);
+    QCOMPARE(b.dayOfWeekMask(), 0x08);
     QVERIFY(b.startTime() == QTime(11, 45, 23));
     QVERIFY(b.stopTime() == QTime(17, 54, 32));
     QCOMPARE(b.color().red(), 255);
@@ -90,6 +94,7 @@ void tst_TvBookmark::properties()
     QCOMPARE(b2.title(), QLatin1String("foo"));
     QCOMPARE(b2.channelId(), QLatin1String("BAR"));
     QVERIFY(b2.dayOfWeek() == TvBookmark::Wednesday);
+    QCOMPARE(b2.dayOfWeekMask(), 0x08);
     QVERIFY(b2.startTime() == QTime(11, 45, 23));
     QVERIFY(b2.stopTime() == QTime(17, 54, 32));
     QCOMPARE(b2.color().red(), 255);
@@ -301,6 +306,42 @@ void tst_TvBookmark::match_data()
         << "2011-07-19 21:30"
         << int(0)
         << int(TvBookmark::NoMatch);
+
+    QTest::newRow("next-day1")
+        << "FooTime" << "FOO" << "23:30" << "00:30"
+        << int(TvBookmark::Tuesday)
+        << "FooTime" << "FOO" << "2011-07-20 00:00"
+        << "2011-07-20 00:35"
+        << int(TvBookmark::DefaultOptions)
+        << int(TvBookmark::Overrun);
+    QTest::newRow("next-day2")
+        << "FooTime" << "FOO" << "23:30" << "00:30"
+        << int(TvBookmark::MondayToFriday)
+        << "FooTime" << "FOO" << "2011-07-22 00:00"
+        << "2011-07-22 00:35"
+        << int(TvBookmark::DefaultOptions)
+        << int(TvBookmark::Overrun);
+    QTest::newRow("next-day3")
+        << "FooTime" << "FOO" << "23:30" << "00:30"
+        << int(TvBookmark::MondayToFriday)
+        << "FooTime" << "FOO" << "2011-07-23 00:00"
+        << "2011-07-23 00:35"
+        << int(TvBookmark::DefaultOptions)
+        << int(TvBookmark::Overrun);
+    QTest::newRow("next-day4")
+        << "FooTime" << "FOO" << "23:30" << "00:30"
+        << int(TvBookmark::MondayToFriday)
+        << "FooTime" << "FOO" << "2011-07-24 00:00"
+        << "2011-07-24 00:35"
+        << int(TvBookmark::DefaultOptions)
+        << int(TvBookmark::TitleMatch);
+    QTest::newRow("next-day5")
+        << "FooTime" << "FOO" << "23:30" << "00:30"
+        << int(TvBookmark::SaturdayAndSunday)
+        << "FooTime" << "FOO" << "2011-07-25 00:00"
+        << "2011-07-25 00:35"
+        << int(TvBookmark::DefaultOptions)
+        << int(TvBookmark::Overrun);
 }
 
 void tst_TvBookmark::match()
@@ -334,6 +375,58 @@ void tst_TvBookmark::match()
 
     b.setEnabled(false);
     QCOMPARE(int(b.match(&p, TvBookmark::MatchOptions(options))), int(TvBookmark::NoMatch));
+}
+
+void tst_TvBookmark::dayOfWeek_data()
+{
+    QTest::addColumn<int>("day");
+    QTest::addColumn<int>("mask");
+
+    QTest::newRow("AnyDay")
+        << int(TvBookmark::AnyDay) << 0xFE;
+    QTest::newRow("Monday")
+        << int(TvBookmark::Monday) << 0x02;
+    QTest::newRow("Tuesday")
+        << int(TvBookmark::Tuesday) << 0x04;
+    QTest::newRow("Wednesday")
+        << int(TvBookmark::Wednesday) << 0x08;
+    QTest::newRow("Thursday")
+        << int(TvBookmark::Thursday) << 0x10;
+    QTest::newRow("Friday")
+        << int(TvBookmark::Friday) << 0x20;
+    QTest::newRow("Saturday")
+        << int(TvBookmark::Saturday) << 0x40;
+    QTest::newRow("Sunday")
+        << int(TvBookmark::Sunday) << 0x80;
+    QTest::newRow("MondayToFriday")
+        << int(TvBookmark::MondayToFriday) << 0x3E;
+    QTest::newRow("SaturdayAndSunday")
+        << int(TvBookmark::SaturdayAndSunday) << 0xC0;
+    QTest::newRow("WednesdayAndFriday")
+        << 0x0128 << 0x28;
+}
+
+void tst_TvBookmark::dayOfWeek()
+{
+    QFETCH(int, day);
+    QFETCH(int, mask);
+
+    if (!(day & 0x0100)) {
+        TvBookmark b1;
+        b1.setDayOfWeek(day);
+        QCOMPARE(b1.dayOfWeek(), day);
+        QCOMPARE(b1.dayOfWeekMask(), mask);
+
+        TvBookmark b2;
+        b2.setDayOfWeekMask(mask);
+        QCOMPARE(b2.dayOfWeek(), day);
+        QCOMPARE(b2.dayOfWeekMask(), mask);
+    } else {
+        TvBookmark b3;
+        b3.setDayOfWeekMask(day & 0xFE);
+        QCOMPARE(b3.dayOfWeek(), int(TvBookmark::Mask));
+        QCOMPARE(b3.dayOfWeekMask(), mask);
+    }
 }
 
 QTEST_MAIN(tst_TvBookmark)
