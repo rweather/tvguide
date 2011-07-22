@@ -66,32 +66,43 @@
     <display-name lang="en">Western Australia</display-name>
   </region>
 
+  <region id="regional" parent="au">
+    <display-name lang="en">Regional</display-name>
+  </region>
+
   <region id="regional-nsw" parent="nsw">
     <display-name lang="en">Regional New South Wales</display-name>
+    <other-parent>regional</other-parent>
     <selectable/>
   </region>
   <region id="regional-nt" parent="nt">
     <display-name lang="en">Regional Northern Terriority</display-name>
+    <other-parent>regional</other-parent>
     <selectable/>
   </region>
   <region id="regional-qld" parent="qld">
     <display-name lang="en">Regional Queensland</display-name>
+    <other-parent>regional</other-parent>
     <selectable/>
   </region>
   <region id="regional-sa" parent="sa">
     <display-name lang="en">Regional South Australia</display-name>
+    <other-parent>regional</other-parent>
     <selectable/>
   </region>
   <region id="regional-tas" parent="tas">
     <display-name lang="en">Regional Tasmania</display-name>
+    <other-parent>regional</other-parent>
     <selectable/>
   </region>
   <region id="regional-vic" parent="vic">
     <display-name lang="en">Regional Victoria</display-name>
+    <other-parent>regional</other-parent>
     <selectable/>
   </region>
   <region id="regional-wa" parent="wa">
     <display-name lang="en">Regional Western Australia</display-name>
+    <other-parent>regional</other-parent>
     <selectable/>
   </region>
 
@@ -1022,7 +1033,7 @@
     <todo/>
   </channel>
 
-  <channel id="IMP" region="au">
+  <channel id="IMP" region="regional">
     <display-name lang="en">Imparja</display-name>
     <icon src="http://www.lyngsat-logo.com/logo/tv/ii/imparja.jpg"/>
     <number system="digital">8</number>

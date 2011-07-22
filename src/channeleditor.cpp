@@ -320,6 +320,7 @@ void ChannelEditor::loadOzTivoRegionData(QXmlStreamReader *reader)
     region->name = region->id;
     region->parent = m_regions.value
         (reader->attributes().value(QLatin1String("parent")).toString(), 0);
+    region->otherParent = 0;
     region->isSelectable = false;
     m_regions.insert(region->id, region);
     while (!reader->hasError()) {
@@ -330,6 +331,10 @@ void ChannelEditor::loadOzTivoRegionData(QXmlStreamReader *reader)
                     (QXmlStreamReader::SkipChildElements);
             } else if (reader->name() == QLatin1String("selectable")) {
                 region->isSelectable = true;
+            } else if (reader->name() == QLatin1String("other-parent")) {
+                region->otherParent = m_regions.value
+                    (reader->readElementText
+                        (QXmlStreamReader::SkipChildElements));
             }
         } else if (token == QXmlStreamReader::EndElement) {
             if (reader->name() == QLatin1String("region"))
@@ -342,6 +347,9 @@ bool ChannelEditor::channelInRegion(const Region *cregion, const Region *region)
 {
     while (region != 0) {
         if (cregion == region)
+            return true;
+        if (region->otherParent &&
+                channelInRegion(cregion, region->otherParent))
             return true;
         region = region->parent;
     }

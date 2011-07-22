@@ -53,6 +53,7 @@ private:
     struct Region
     {
         Region *parent;
+        Region *otherParent;
         QString id;
         QString name;
         bool isSelectable;
