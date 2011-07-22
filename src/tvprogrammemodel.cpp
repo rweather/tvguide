@@ -79,10 +79,10 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
     TvProgramme *prog = static_cast<TvProgramme *>(index.internalPointer());
+    int prevrow = index.row() - 1;
     if (role == Qt::DisplayRole) {
         if (index.column() == ColumnTime) {
             QTime time = prog->start().time();
-            int prevrow = index.row() - 1;
             if (prevrow < 0 ||
                     m_programmes.at(prevrow)->start().time() != time)
                 return time.toString(Qt::LocaleDate);
@@ -93,7 +93,12 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
             return QVariant::fromValue<void *>
                 (static_cast<void *>(prog));
         } else if (index.column() == ColumnDay) {
-            return QDate::longDayName(prog->start().date().dayOfWeek());
+            QDate date = prog->start().date();
+            if (prevrow < 0 ||
+                    m_programmes.at(prevrow)->start().date() != date) {
+                return prog->start().date().toString
+                    (QLatin1String("dddd\nMMMM d"));
+            }
         } else if (index.column() == ColumnChannel) {
             return prog->channel()->name();
         }
