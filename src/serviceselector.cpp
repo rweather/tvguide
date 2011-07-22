@@ -17,6 +17,7 @@
 
 #include "serviceselector.h"
 #include "serviceeditor.h"
+#include "helpbrowser.h"
 #include <QtCore/qsettings.h>
 
 #define ROLE_SERVICE_ID         Qt::UserRole
@@ -28,12 +29,16 @@ ServiceSelector::ServiceSelector(QWidget *parent)
 {
     setupUi(this);
 
+    setWindowModality(Qt::WindowModal);
+
     connect(serviceList, SIGNAL(itemSelectionChanged()),
             this, SLOT(selectionChanged()));
 
     connect(editButton, SIGNAL(clicked()), this, SLOT(editService()));
     connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteService()));
     connect(newButton, SIGNAL(clicked()), this, SLOT(newService()));
+
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
 
     editButton->setEnabled(false);
     deleteButton->setEnabled(false);
@@ -197,4 +202,9 @@ bool ServiceSelector::hasServiceId(const QString &id) const
             return true;
     }
     return false;
+}
+
+void ServiceSelector::help()
+{
+    HelpBrowser::showContextHelp(QLatin1String("select_guide.html"), this);
 }

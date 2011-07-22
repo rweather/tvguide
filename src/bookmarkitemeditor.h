@@ -53,6 +53,7 @@ private Q_SLOTS:
     void changeColor();
     void titleChanged(const QString &text);
     void selectOtherDay();
+    void help();
 
 private:
     TvChannelList *m_channelList;

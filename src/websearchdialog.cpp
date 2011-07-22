@@ -16,6 +16,7 @@
  */
 
 #include "websearchdialog.h"
+#include "helpbrowser.h"
 #include <QtGui/qpushbutton.h>
 
 WebSearchDialog::WebSearchDialog(QWidget *parent)
@@ -23,9 +24,12 @@ WebSearchDialog::WebSearchDialog(QWidget *parent)
 {
     setupUi(this);
 
+    setWindowModality(Qt::WindowModal);
+
     connect(titleEdit, SIGNAL(textChanged(QString)), this, SLOT(titleChanged(QString)));
 
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
 }
 
 WebSearchDialog::~WebSearchDialog()
@@ -49,4 +53,9 @@ QUrl WebSearchDialog::url() const
 void WebSearchDialog::titleChanged(const QString &text)
 {
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!text.isEmpty());
+}
+
+void WebSearchDialog::help()
+{
+    HelpBrowser::showContextHelp(QLatin1String("searching.html"), this);
 }

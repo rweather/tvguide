@@ -18,6 +18,7 @@
 #include "bookmarkitemeditor.h"
 #include "tvchannellist.h"
 #include "dayselectiondialog.h"
+#include "helpbrowser.h"
 #include <QtGui/qcolordialog.h>
 #include <QtGui/qpixmap.h>
 #include <QtGui/qicon.h>
@@ -28,6 +29,8 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     , m_extraItem(-1)
 {
     setupUi(this);
+
+    setWindowModality(Qt::WindowModal);
 
     dayOfWeekCombo->setCurrentIndex(0);
     dayOfWeekCombo->setItemData(TvBookmark::AnyDay, 0xFE);
@@ -57,6 +60,7 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     connect(otherDay, SIGNAL(clicked()), this, SLOT(selectOtherDay()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
     connect(titleEdit, SIGNAL(textChanged(QString)), this, SLOT(titleChanged(QString)));
 
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
@@ -168,4 +172,9 @@ void BookmarkItemEditor::selectOtherDay()
         }
         setDayOfWeek(TvBookmark::Mask, mask);
     }
+}
+
+void BookmarkItemEditor::help()
+{
+    HelpBrowser::showContextHelp(QLatin1String("bookmarks.html"), this);
 }

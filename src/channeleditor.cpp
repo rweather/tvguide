@@ -17,6 +17,7 @@
 
 #include "channeleditor.h"
 #include "tvchannellist.h"
+#include "helpbrowser.h"
 #include <QtGui/qfiledialog.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qxmlstream.h>
@@ -27,6 +28,8 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     , m_channelList(channelList)
 {
     setupUi(this);
+
+    setWindowModality(Qt::WindowModal);
 
     activeChannels->setSortingEnabled(true);
     inactiveChannels->setSortingEnabled(true);
@@ -62,6 +65,7 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
 
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
 
     connect(makeInactive, SIGNAL(clicked()), this, SLOT(moveToInactive()));
     connect(makeActive, SIGNAL(clicked()), this, SLOT(moveToActive()));
@@ -354,4 +358,9 @@ bool ChannelEditor::channelInRegion(const Region *cregion, const Region *region)
         region = region->parent;
     }
     return false;
+}
+
+void ChannelEditor::help()
+{
+    HelpBrowser::showContextHelp(QLatin1String("edit_channels.html"), this);
 }

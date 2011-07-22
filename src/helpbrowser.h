@@ -28,6 +28,10 @@ public:
     explicit HelpBrowser(QWidget *parent = 0);
     ~HelpBrowser();
 
+    void setContextHelp(const QString &name);
+
+    static void showContextHelp(const QString &name, QWidget *widget);
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 

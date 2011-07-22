@@ -36,6 +36,7 @@ public:
 
 private Q_SLOTS:
     void titleChanged(const QString &text);
+    void help();
 };
 
 #endif

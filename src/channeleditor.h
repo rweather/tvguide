@@ -48,6 +48,7 @@ private Q_SLOTS:
     void itemDoubleClicked(QListWidgetItem *item);
     void largeIconsChanged(bool value);
     void regionChanged(int index);
+    void help();
 
 private:
     struct Region

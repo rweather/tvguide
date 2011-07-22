@@ -455,6 +455,12 @@ void MainWindow::refineChannels()
         editChannels();
 }
 
+void MainWindow::showContextHelp(const QString &name)
+{
+    help();
+    m_helpBrowser->setContextHelp(name);
+}
+
 void MainWindow::help()
 {
     if (m_helpBrowser) {

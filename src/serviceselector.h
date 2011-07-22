@@ -36,6 +36,7 @@ private Q_SLOTS:
     void deleteService();
     void newService();
     void selectionChanged();
+    void help();
 
 private:
     QString createServiceId(const QString &name) const;

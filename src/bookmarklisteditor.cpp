@@ -18,6 +18,7 @@
 #include "bookmarklisteditor.h"
 #include "bookmarkitemeditor.h"
 #include "tvchannellist.h"
+#include "helpbrowser.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qapplication.h>
 #include <QtGui/qstyle.h>
@@ -28,6 +29,9 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
     , m_channelList(channelList)
 {
     setupUi(this);
+
+    setWindowModality(Qt::WindowModal);
+
     m_model = new TvBookmarkModel(channelList, this);
     bookmarkView->setModel(m_model);
     bookmarkView->verticalHeader()->hide();
@@ -56,6 +60,8 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
     QStyleOptionButton opt;
     QSize size = style->sizeFromContents(QStyle::CT_CheckBox, &opt, QSize(3, 1), bookmarkView);
     bookmarkView->setColumnWidth(0, size.width());
+
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
 }
 
 BookmarkListEditor::~BookmarkListEditor()
@@ -134,4 +140,9 @@ void BookmarkListEditor::currentChanged(const QModelIndex &index)
         editButton->setEnabled(false);
         deleteButton->setEnabled(false);
     }
+}
+
+void BookmarkListEditor::help()
+{
+    HelpBrowser::showContextHelp(QLatin1String("bookmarks.html"), this);
 }

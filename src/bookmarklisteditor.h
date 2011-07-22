@@ -39,6 +39,7 @@ private Q_SLOTS:
     void deleteBookmark();
     void newBookmark();
     void currentChanged(const QModelIndex &index);
+    void help();
 
 private:
     TvChannelList *m_channelList;

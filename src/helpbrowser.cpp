@@ -16,6 +16,7 @@
  */
 
 #include "helpbrowser.h"
+#include "mainwindow.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qevent.h>
 
@@ -63,4 +64,23 @@ void HelpBrowser::keyPressEvent(QKeyEvent *event)
 void HelpBrowser::sourceChanged(const QUrl &)
 {
     setWindowTitle(textBrowser->documentTitle());
+}
+
+void HelpBrowser::setContextHelp(const QString &name)
+{
+    QUrl url(QLatin1String("qrc:/help/en/") + name);
+    textBrowser->setSource(url);
+}
+
+void HelpBrowser::showContextHelp(const QString &name, QWidget *widget)
+{
+    MainWindow *mw = 0;
+    while (widget != 0) {
+        mw = qobject_cast<MainWindow *>(widget);
+        if (mw)
+            break;
+        widget = widget->parentWidget();
+    }
+    if (mw)
+        mw->showContextHelp(name);
 }

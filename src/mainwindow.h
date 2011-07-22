@@ -34,6 +34,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void showContextHelp(const QString &name);
+
 private Q_SLOTS:
     void busyChanged(bool value);
     void progressChanged(qreal progress);

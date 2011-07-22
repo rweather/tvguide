@@ -16,6 +16,7 @@
  */
 
 #include "serviceeditor.h"
+#include "helpbrowser.h"
 #include <QtGui/qpushbutton.h>
 
 ServiceEditor::ServiceEditor(QWidget *parent)
@@ -23,10 +24,13 @@ ServiceEditor::ServiceEditor(QWidget *parent)
 {
     setupUi(this);
 
+    setWindowModality(Qt::WindowModal);
+
     connect(serviceName, SIGNAL(textChanged(QString)), this, SLOT(textChanged()));
     connect(serviceUrl, SIGNAL(textChanged(QString)), this, SLOT(textChanged()));
 
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
 }
 
 ServiceEditor::~ServiceEditor()
@@ -64,4 +68,9 @@ void ServiceEditor::textChanged()
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled
         (!serviceName->text().isEmpty() &&
          !serviceUrl->text().isEmpty());
+}
+
+void ServiceEditor::help()
+{
+    HelpBrowser::showContextHelp(QLatin1String("select_guide.html"), this);
 }

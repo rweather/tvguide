@@ -39,6 +39,7 @@ public:
 
 private Q_SLOTS:
     void textChanged();
+    void help();
 };
 
 #endif
