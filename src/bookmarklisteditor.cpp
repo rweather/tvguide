@@ -37,6 +37,8 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
     connect(bookmarkView->selectionModel(),
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(currentChanged(QModelIndex)));
+    connect(bookmarkView, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(editBookmark()));
 
     connect(editButton, SIGNAL(clicked()), this, SLOT(editBookmark()));
     connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteBookmark()));
