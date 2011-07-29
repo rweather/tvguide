@@ -437,7 +437,7 @@ QDate TvChannel::stringToDate(const QString &str)
 }
 
 // Compares using Australian channel number rules:
-// 1, 2, 20, 21, 3, 30, 31, ..., 9, 90, 91, ..., 10, 11, ...
+// 2, 20, 21, 3, 30, 31, ..., 9, 90, 91, ..., 10, 11, 1, ...
 int TvChannel::compare(const TvChannel *other) const
 {
     int num1 = primaryChannelNumber();
@@ -448,8 +448,23 @@ int TvChannel::compare(const TvChannel *other) const
         else if (uint(num1) > uint(num2))
             return 1;
     } else {
-        int high1 = (num1 < 10 ? num1 : (num1 < 20 ? 10 : (num1 / 10)));
-        int high2 = (num2 < 10 ? num2 : (num2 < 20 ? 10 : (num2 / 10)));
+        int high1, high2;
+        if (num1 == 1)
+            high1 = 11;
+        else if (num1 < 10)
+            high1 = num1;
+        else if (num1 < 20)
+            high1 = 10;
+        else
+            high1 = num1 / 10;
+        if (num2 == 1)
+            high2 = 11;
+        else if (num2 < 10)
+            high2 = num2;
+        else if (num2 < 20)
+            high2 = 10;
+        else
+            high2 = num2 / 10;
         if (high1 < high2)
             return -1;
         else if (high1 > high2)
