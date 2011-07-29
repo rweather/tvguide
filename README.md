@@ -46,6 +46,20 @@ e-mail address).
 
 ## Change log
 
+### 0.0.5
+
+* Unit tests for bookmark class, to assist with refactoring.
+* Add "Saturday and Sunday" as a valid bookmark matching option.
+* "Other" button added to bookmark dialog to select arbitrary
+  combinations of days for bookmark matching.
+* Double-clicking a bookmark in "Organize Bookmarks" will Edit it.
+* Display the first column of the 7 day view as "Monday July 25"
+  rather than just "Monday".  Also suppress repeated displays
+  of the same date to delineate the days better.
+* Imparja no longer appears in capital cities, only regional areas.
+* Add "Help" buttons to the dialogs with context-sensitive help.
+* Sort "One" to appear after "Ten".
+
 ### 0.0.4
 
 * Region selection on the "Edit Channels" dialog for OzTivo data.
