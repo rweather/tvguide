@@ -43,7 +43,7 @@ QUrl WebSearchDialog::url() const
         if (buttons.at(index)->isChecked()) {
             QString url = buttons.at(index)->property("url").toString();
             url += QString::fromLatin1
-                (QUrl::toPercentEncoding(title()));
+                (QUrl::toPercentEncoding(title(), "/?:"));
             return QUrl(url);
         }
     }
