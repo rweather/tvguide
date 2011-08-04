@@ -46,14 +46,28 @@ void WebSearchDialog::addSearchItems(const QStringList &list)
     searchFor->addItems(list);
 }
 
+static QString toPercentEncoding(const QString &text)
+{
+    QString encoded;
+    for (int index = 0; index < text.length(); ++index) {
+        uint ch = text.at(index).unicode();
+        if (ch >= ' ' && ch <= 0x7E && ch != '&' && ch != '%') {
+            encoded += QChar(ch);
+        } else {
+            encoded += QString::fromLatin1
+                (QUrl::toPercentEncoding(text.mid(index, 1)));
+        }
+    }
+    return encoded;
+}
+
 QUrl WebSearchDialog::url() const
 {
     QList<QRadioButton *> buttons = groupBox->findChildren<QRadioButton *>();
     for (int index = 0; index < buttons.size(); ++index) {
         if (buttons.at(index)->isChecked()) {
             QString url = buttons.at(index)->property("url").toString();
-            url += QString::fromLatin1
-                (QUrl::toPercentEncoding(searchText(), "/?:"));
+            url += toPercentEncoding(searchText());
             return QUrl(url);
         }
     }
