@@ -177,6 +177,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_fontMultiplier = qreal(settings.value(QLatin1String("zoom"), 1.0).toDouble());
     actionShowPartialMatches->setChecked(settings.value(QLatin1String("partial"), true).toBool());
     actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), false).toBool());
+    action7DayOutlook->setChecked(settings.value(QLatin1String("outlook7days"), false).toBool());
+    actionMultiChannel->setChecked(settings.value(QLatin1String("allchannels"), false).toBool());
     settings.endGroup();
 
     zoomUpdate();
@@ -205,6 +207,10 @@ MainWindow::~MainWindow()
                       actionShowPartialMatches->isChecked());
     settings.setValue(QLatin1String("failed"),
                       actionShowFailedMatches->isChecked());
+    settings.setValue(QLatin1String("outlook7days"),
+                      action7DayOutlook->isChecked());
+    settings.setValue(QLatin1String("allchannels"),
+                      actionMultiChannel->isChecked());
     settings.endGroup();
 
     settings.sync();
@@ -449,6 +455,7 @@ void MainWindow::channelIndexLoaded()
     channels->setColumnHidden
         (TvChannelModel::ColumnNumber, !m_channelList->haveChannelNumbers());
     channels->resizeRowsToContents();
+    updateTimePeriods();
 }
 
 void MainWindow::refineChannels()
