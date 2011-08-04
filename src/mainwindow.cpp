@@ -433,8 +433,10 @@ void MainWindow::webSearch()
         searchDlg.addSearchItems(programme->actors());
         searchDlg.addSearchItems(programme->directors());
     }
-    if (searchDlg.exec() == QDialog::Accepted)
+    if (searchDlg.exec() == QDialog::Accepted) {
+        searchDlg.saveSettings();
         QDesktopServices::openUrl(searchDlg.url());
+    }
 }
 
 void MainWindow::hiddenChannelsChanged()

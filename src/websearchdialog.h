@@ -37,6 +37,8 @@ public:
 
     QUrl url() const;
 
+    void saveSettings();
+
 private Q_SLOTS:
     void titleChanged(const QString &text);
     void help();

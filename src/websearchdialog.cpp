@@ -18,6 +18,7 @@
 #include "websearchdialog.h"
 #include "helpbrowser.h"
 #include <QtGui/qpushbutton.h>
+#include <QtCore/qsettings.h>
 
 WebSearchDialog::WebSearchDialog(QWidget *parent)
     : QDialog(parent)
@@ -30,6 +31,22 @@ WebSearchDialog::WebSearchDialog(QWidget *parent)
 
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
+
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("WebSearch"));
+    QString engine = settings.value(QLatin1String("engine")).toString();
+    settings.endGroup();
+
+    if (!engine.isEmpty()) {
+        QList<QRadioButton *> buttons = groupBox->findChildren<QRadioButton *>();
+        for (int index = 0; index < buttons.size(); ++index) {
+            if (buttons.at(index)->objectName() == engine) {
+                buttons.at(index)->setChecked(true);
+                break;
+            }
+        }
+    }
 }
 
 WebSearchDialog::~WebSearchDialog()
@@ -72,6 +89,25 @@ QUrl WebSearchDialog::url() const
         }
     }
     return QUrl();
+}
+
+void WebSearchDialog::saveSettings()
+{
+    QString engine;
+    QList<QRadioButton *> buttons = groupBox->findChildren<QRadioButton *>();
+    for (int index = 0; index < buttons.size(); ++index) {
+        if (buttons.at(index)->isChecked()) {
+            engine = buttons.at(index)->objectName();
+            break;
+        }
+    }
+
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("WebSearch"));
+    settings.setValue(QLatin1String("engine"), engine);
+    settings.endGroup();
+    settings.sync();
 }
 
 void WebSearchDialog::titleChanged(const QString &text)

@@ -45,7 +45,7 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QRadioButton" name="googleButton">
+       <widget class="QRadioButton" name="google">
         <property name="text">
          <string>Google</string>
         </property>
@@ -58,7 +58,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="imdbButton">
+       <widget class="QRadioButton" name="imdb">
         <property name="text">
          <string>IMDb</string>
         </property>
@@ -68,7 +68,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="epguidesButton">
+       <widget class="QRadioButton" name="epguides">
         <property name="text">
          <string>epguides</string>
         </property>
@@ -106,9 +106,9 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>googleButton</tabstop>
-  <tabstop>imdbButton</tabstop>
-  <tabstop>epguidesButton</tabstop>
+  <tabstop>google</tabstop>
+  <tabstop>imdb</tabstop>
+  <tabstop>epguides</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
