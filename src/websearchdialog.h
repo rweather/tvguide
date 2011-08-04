@@ -29,8 +29,11 @@ public:
     explicit WebSearchDialog(QWidget *parent = 0);
     ~WebSearchDialog();
 
-    QString title() const { return titleEdit->text(); }
-    void setTitle(const QString &title) { titleEdit->setText(title); }
+    QString searchText() const { return searchFor->currentText(); }
+    void setSearchText(const QString &text) { searchFor->setEditText(text); }
+
+    void addSearchItem(const QString &text);
+    void addSearchItems(const QStringList &list);
 
     QUrl url() const;
 

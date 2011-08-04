@@ -19,12 +19,22 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Title:</string>
+        <string>Search For:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="titleEdit"/>
+      <widget class="QComboBox" name="searchFor">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -96,7 +106,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>titleEdit</tabstop>
   <tabstop>googleButton</tabstop>
   <tabstop>imdbButton</tabstop>
   <tabstop>epguidesButton</tabstop>

@@ -417,7 +417,15 @@ void MainWindow::webSearch()
     QModelIndex index = programmes->selectionModel()->currentIndex();
     if (index.isValid()) {
         TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
-        searchDlg.setTitle(programme->title());
+        searchDlg.setSearchText(programme->title());
+        searchDlg.addSearchItem(programme->title());
+        if (!programme->subTitle().isEmpty()) {
+            searchDlg.addSearchItem
+                (programme->title() + QLatin1Char(' ') +
+                 programme->subTitle());
+        }
+        searchDlg.addSearchItems(programme->actors());
+        searchDlg.addSearchItems(programme->directors());
     }
     if (searchDlg.exec() == QDialog::Accepted)
         QDesktopServices::openUrl(searchDlg.url());

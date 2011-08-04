@@ -26,7 +26,7 @@ WebSearchDialog::WebSearchDialog(QWidget *parent)
 
     setWindowModality(Qt::WindowModal);
 
-    connect(titleEdit, SIGNAL(textChanged(QString)), this, SLOT(titleChanged(QString)));
+    connect(searchFor, SIGNAL(editTextChanged(QString)), this, SLOT(titleChanged(QString)));
 
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
@@ -36,6 +36,16 @@ WebSearchDialog::~WebSearchDialog()
 {
 }
 
+void WebSearchDialog::addSearchItem(const QString &text)
+{
+    searchFor->addItem(text);
+}
+
+void WebSearchDialog::addSearchItems(const QStringList &list)
+{
+    searchFor->addItems(list);
+}
+
 QUrl WebSearchDialog::url() const
 {
     QList<QRadioButton *> buttons = groupBox->findChildren<QRadioButton *>();
@@ -43,7 +53,7 @@ QUrl WebSearchDialog::url() const
         if (buttons.at(index)->isChecked()) {
             QString url = buttons.at(index)->property("url").toString();
             url += QString::fromLatin1
-                (QUrl::toPercentEncoding(title(), "/?:"));
+                (QUrl::toPercentEncoding(searchText(), "/?:"));
             return QUrl(url);
         }
     }
