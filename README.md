@@ -46,6 +46,15 @@ e-mail address).
 
 ## Change log
 
+### 0.0.6
+
+* Fix a web search problem related to non-alphanumeric characters
+  like colons and exclaimation marks in show names.
+* Add a drop-down list of actors, directors, and the episode title
+  when searching for a show in the "Web Search" dialog.
+* 7 Day Outlook and All Channels state is saved on exit.
+* Save the previous search engine from the "Web Search" dialog.
+
 ### 0.0.5
 
 * Unit tests for bookmark class, to assist with refactoring.
