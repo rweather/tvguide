@@ -77,6 +77,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QRadioButton" name="wikipedia">
+        <property name="text">
+         <string>Wikipedia</string>
+        </property>
+        <property name="url" stdset="0">
+         <string>http://en.wikipedia.org/wiki/Special:Search?search=</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -109,6 +119,7 @@
   <tabstop>google</tabstop>
   <tabstop>imdb</tabstop>
   <tabstop>epguides</tabstop>
+  <tabstop>wikipedia</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
