@@ -361,6 +361,10 @@ void MainWindow::addBookmark()
         bookmarkDlg.setStartTime(programme->start().time());
         bookmarkDlg.setStopTime(programme->stop().time());
         bookmarkDlg.setDayOfWeek(programme->start().date().dayOfWeek(), 0);
+        int season = programme->season();
+        if (season > 0)
+            bookmarkDlg.setSeasons(QString::number(season));
+        bookmarkDlg.setSeasonsEnabled(false);
         editBookmark = programme->bookmark();
         if (editBookmark) {
             if (QMessageBox::question
@@ -376,6 +380,8 @@ void MainWindow::addBookmark()
                     (editBookmark->dayOfWeek(),
                      editBookmark->dayOfWeekMask());
                 bookmarkDlg.setColor(editBookmark->color());
+                bookmarkDlg.setSeasons(editBookmark->seasons());
+                bookmarkDlg.setSeasonsEnabled(!editBookmark->seasonList().isEmpty());
             } else {
                 editBookmark = 0;
             }
@@ -394,6 +400,10 @@ void MainWindow::addBookmark()
         bookmark->setStopTime(bookmarkDlg.stopTime());
         bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
         bookmark->setColor(bookmarkDlg.color());
+        if (bookmarkDlg.seasonsEnabled())
+            bookmark->setSeasons(bookmarkDlg.seasons());
+        else
+            bookmark->setSeasons(QString());
         if (editBookmark)
             m_channelList->removeBookmark(editBookmark, false);
         m_channelList->addBookmark(bookmark);

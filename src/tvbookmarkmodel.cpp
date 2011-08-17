@@ -96,8 +96,13 @@ QVariant TvBookmarkModel::data(const QModelIndex &index, int role) const
                     return id;
             }
             break; }
-        case MODEL_TITLE:
-            return bookmark->title();
+        case MODEL_TITLE: {
+            QString title = bookmark->title();
+            if (!bookmark->seasonList().isEmpty()) {
+                title = QObject::tr("%1, Season %2")
+                            .arg(title).arg(bookmark->seasons());
+            }
+            return title; }
         default: break;
         }
     } else if (role == Qt::ForegroundRole) {

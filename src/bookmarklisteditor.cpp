@@ -89,6 +89,8 @@ void BookmarkListEditor::editBookmark()
     bookmarkDlg.setDayOfWeek
         (bookmark->dayOfWeek(), bookmark->dayOfWeekMask());
     bookmarkDlg.setColor(bookmark->color());
+    bookmarkDlg.setSeasons(bookmark->seasons());
+    bookmarkDlg.setSeasonsEnabled(!bookmark->seasonList().isEmpty());
 
     if (bookmarkDlg.exec() == QDialog::Accepted) {
         bookmark->setTitle(bookmarkDlg.title());
@@ -97,6 +99,10 @@ void BookmarkListEditor::editBookmark()
         bookmark->setStopTime(bookmarkDlg.stopTime());
         bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
         bookmark->setColor(bookmarkDlg.color());
+        if (bookmarkDlg.seasonsEnabled())
+            bookmark->setSeasons(bookmarkDlg.seasons());
+        else
+            bookmark->setSeasons(QString());
         m_model->updateBookmark(index.row());
         bookmarkView->sortByColumn
             (bookmarkView->horizontalHeader()->sortIndicatorSection(),
@@ -124,6 +130,10 @@ void BookmarkListEditor::newBookmark()
         bookmark->setStopTime(bookmarkDlg.stopTime());
         bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
         bookmark->setColor(bookmarkDlg.color());
+        if (bookmarkDlg.seasonsEnabled())
+            bookmark->setSeasons(bookmarkDlg.seasons());
+        else
+            bookmark->setSeasons(QString());
         m_model->addBookmark(bookmark);
         bookmarkView->sortByColumn
             (bookmarkView->horizontalHeader()->sortIndicatorSection(),

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>556</width>
-    <height>221</height>
+    <height>257</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -181,6 +181,34 @@
        </property>
       </widget>
      </item>
+     <item row="5" column="0">
+      <widget class="QCheckBox" name="seasonEnable">
+       <property name="text">
+        <string>Season:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLineEdit" name="seasonEdit">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>e.g., 1, 3-5, 7+</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
     </layout>
    </item>
    <item>
@@ -203,6 +231,8 @@
   <tabstop>startTimeEdit</tabstop>
   <tabstop>stopTimeEdit</tabstop>
   <tabstop>colorSelect</tabstop>
+  <tabstop>seasonEnable</tabstop>
+  <tabstop>seasonEdit</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>

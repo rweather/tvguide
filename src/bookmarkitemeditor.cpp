@@ -56,12 +56,17 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
         channelsCombo->setIconSize(QSize(64, 64));
     channelsCombo->setCurrentIndex(0);
 
+    seasonEdit->setEnabled(false);
+
     connect(colorSelect, SIGNAL(clicked()), this, SLOT(changeColor()));
     connect(otherDay, SIGNAL(clicked()), this, SLOT(selectOtherDay()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
     connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
-    connect(titleEdit, SIGNAL(textChanged(QString)), this, SLOT(titleChanged(QString)));
+    connect(titleEdit, SIGNAL(textChanged(QString)), this, SLOT(updateOk()));
+    connect(seasonEdit, SIGNAL(textChanged(QString)), this, SLOT(updateOk()));
+    connect(seasonEnable, SIGNAL(toggled(bool)), seasonEdit, SLOT(setEnabled(bool)));
+    connect(seasonEnable, SIGNAL(stateChanged(int)), this, SLOT(updateOk()));
 
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
@@ -152,9 +157,19 @@ void BookmarkItemEditor::changeColor()
         setColor(color);
 }
 
-void BookmarkItemEditor::titleChanged(const QString &text)
+void BookmarkItemEditor::updateOk()
 {
-    buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!text.isEmpty());
+    bool ok = !titleEdit->text().isEmpty();
+    if (ok && seasonEnable->isChecked()) {
+        QString seasons = seasonEdit->text();
+        if (!seasons.isEmpty()) {
+            bool sok = false;
+            TvBookmark::parseSeasons(seasons, &sok);
+            if (!sok)
+                ok = false;
+        }
+    }
+    buttonBox->button(QDialogButtonBox::Ok)->setEnabled(ok);
 }
 
 void BookmarkItemEditor::selectOtherDay()

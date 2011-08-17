@@ -36,6 +36,8 @@ private slots:
     void match();
     void dayOfWeek_data();
     void dayOfWeek();
+    void parseSeasons_data();
+    void parseSeasons();
 
 private:
     TvChannel *channel1;
@@ -70,6 +72,13 @@ void tst_TvBookmark::properties()
     QVERIFY(!b.stopTime().isValid());
     QVERIFY(!b.color().isValid());
     QVERIFY(b.isEnabled());
+    QVERIFY(b.seasons().isEmpty());
+    QVERIFY(b.seasonList().isEmpty());
+
+    QList< QPair<int, int> > list;
+    list.append(QPair<int, int>(1, 1));
+    list.append(QPair<int, int>(3, 5));
+    list.append(QPair<int, int>(7, 0x7fffffff));
 
     b.setTitle(QLatin1String("foo"));
     b.setChannelId(QLatin1String("BAR"));
@@ -78,6 +87,7 @@ void tst_TvBookmark::properties()
     b.setStopTime(QTime(17, 54, 32));
     b.setColor(Qt::red);
     b.setEnabled(false);
+    b.setSeasons(QLatin1String("1,3-5, 7+"));
 
     QCOMPARE(b.title(), QLatin1String("foo"));
     QCOMPARE(b.channelId(), QLatin1String("BAR"));
@@ -89,6 +99,8 @@ void tst_TvBookmark::properties()
     QCOMPARE(b.color().blue(), 0);
     QCOMPARE(b.color().green(), 0);
     QVERIFY(!b.isEnabled());
+    QCOMPARE(b.seasons(), QLatin1String("1,3-5,7+"));
+    QVERIFY(b.seasonList() == list);
 
     TvBookmark b2(b);
     QCOMPARE(b2.title(), QLatin1String("foo"));
@@ -101,6 +113,8 @@ void tst_TvBookmark::properties()
     QCOMPARE(b2.color().blue(), 0);
     QCOMPARE(b2.color().green(), 0);
     QVERIFY(!b2.isEnabled());
+    QCOMPARE(b2.seasons(), QLatin1String("1,3-5,7+"));
+    QVERIFY(b2.seasonList() == list);
 }
 
 void tst_TvBookmark::match_data()
@@ -426,6 +440,87 @@ void tst_TvBookmark::dayOfWeek()
         b3.setDayOfWeekMask(day & 0xFE);
         QCOMPARE(b3.dayOfWeek(), int(TvBookmark::Mask));
         QCOMPARE(b3.dayOfWeekMask(), mask);
+    }
+}
+
+void tst_TvBookmark::parseSeasons_data()
+{
+    QTest::addColumn<QString>("seasons");
+    QTest::addColumn<QString>("listStr");
+    QTest::addColumn<QString>("formatted");
+
+    QTest::newRow("empty")
+        << "" << "" << "";
+
+    QTest::newRow("single1")
+        << "1" << "1-1" << "1";
+    QTest::newRow("single2")
+        << " 142 \t" << "142-142" << "142";
+
+    QTest::newRow("multiple1")
+        << "1,3,5-9" << "1-1|3-3|5-9" << "1,3,5-9";
+    QTest::newRow("multiple2")
+        << "1,3,5+" << "1-1|3-3|5+" << "1,3,5+";
+    QTest::newRow("multiple3")
+        << "1 3-7 9+" << "1-1|3-7|9+" << "1,3-7,9+";
+    QTest::newRow("multiple4")
+        << "1 3 - 6 4-4" << "1-1|3-6|4-4" << "1,3-6,4";
+
+    QTest::newRow("error1")
+        << "1 x" << "error" << "";
+    QTest::newRow("error2")
+        << "1,-41" << "error" << "";
+    QTest::newRow("error3")
+        << "+42" << "error" << "";
+    QTest::newRow("error4")
+        << "4-" << "error" << "";
+    QTest::newRow("error5")
+        << "4--6" << "error" << "";
+    QTest::newRow("error6")
+        << "6-4" << "error" << "";
+    QTest::newRow("error7")
+        << "0" << "error" << "";
+}
+
+void tst_TvBookmark::parseSeasons()
+{
+    QFETCH(QString, seasons);
+    QFETCH(QString, listStr);
+    QFETCH(QString, formatted);
+
+    QList< QPair<int, int> > list;
+    if (listStr != QLatin1String("error")) {
+        QStringList temp = listStr.split('|');
+        foreach (QString pair, temp) {
+            if (pair.isEmpty())
+                continue;
+            if (pair.contains(QLatin1Char('+'))) {
+                QStringList p = pair.split(QLatin1String("+"));
+                list.append(QPair<int, int>(p[0].toInt(), 0x7fffffff));
+            } else {
+                QStringList p = pair.split(QLatin1String("-"));
+                list.append(QPair<int, int>(p[0].toInt(), p[1].toInt()));
+            }
+        }
+        bool ok = false;
+        QVERIFY(TvBookmark::parseSeasons(seasons, &ok) == list);
+        QVERIFY(ok);
+
+        TvBookmark bookmark;
+        bookmark.setSeasons(seasons);
+        QCOMPARE(bookmark.seasons(), formatted);
+        QVERIFY(bookmark.seasonList() == list);
+    } else {
+        bool ok = true;
+        QVERIFY(TvBookmark::parseSeasons(seasons, &ok).isEmpty());
+        QVERIFY(!ok);
+
+        TvBookmark bookmark;
+        bookmark.setSeasons(QLatin1String("1,3"));
+        QVERIFY(!bookmark.seasonList().isEmpty());
+        bookmark.setSeasons(seasons);
+        QCOMPARE(bookmark.seasons(), formatted);
+        QVERIFY(bookmark.seasonList().isEmpty());
     }
 }
 

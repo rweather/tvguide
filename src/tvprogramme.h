@@ -53,6 +53,7 @@ public:
     QString rating() const { return m_rating; }
     QString starRating() const { return m_starRating; }
     QString episodeNumber() const { return m_episodeNumber; }
+    int season() const { return m_season; }
     QString language() const { return m_language; }
     QString originalLanguage() const { return m_originalLanguage; }
     QString country() const { return m_country; }
@@ -86,6 +87,7 @@ private:
     QString m_rating;
     QString m_starRating;
     QString m_episodeNumber;
+    int m_season;
     QString m_language;
     QString m_originalLanguage;
     QString m_country;

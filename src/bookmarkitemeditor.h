@@ -49,9 +49,15 @@ public:
     QColor color() const { return m_color; }
     void setColor(const QColor &color);
 
+    QString seasons() const { return seasonEdit->text(); }
+    void setSeasons(const QString &seasons) { seasonEdit->setText(seasons); }
+
+    bool seasonsEnabled() const { return seasonEnable->isChecked(); }
+    void setSeasonsEnabled(bool value) { seasonEnable->setChecked(value); }
+
 private Q_SLOTS:
     void changeColor();
-    void titleChanged(const QString &text);
+    void updateOk();
     void selectOtherDay();
     void help();
 

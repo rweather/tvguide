@@ -36,6 +36,7 @@ TvBookmark::TvBookmark(const TvBookmark &other)
     , m_startTime(other.startTime())
     , m_stopTime(other.stopTime())
     , m_color(other.color())
+    , m_seasons(other.seasonList())
 {
 }
 
@@ -147,6 +148,105 @@ QString TvBookmark::dayOfWeekLongName(int mask)
         return dayOfWeekMaskName(mask, true);
 }
 
+QString TvBookmark::seasons() const
+{
+    QString result;
+    for (int index = 0; index < m_seasons.size(); ++index) {
+        int first = m_seasons.at(index).first;
+        int last = m_seasons.at(index).second;
+        if (index != 0)
+            result += QLatin1Char(',');
+        if (first == last) {
+            result += QString::number(first);
+        } else if (last == 0x7fffffff) {
+            result += QString::number(first);
+            result += QLatin1Char('+');
+        } else {
+            result += QString::number(first);
+            result += QLatin1Char('-');
+            result += QString::number(last);
+        }
+    }
+    return result;
+}
+
+void TvBookmark::setSeasons(const QString &seasons)
+{
+    m_seasons = parseSeasons(seasons, 0);
+}
+
+static const int ST_End     = -1;
+static const int ST_Error   = -2;
+static const int ST_Dash    = -3;
+static const int ST_Plus    = -4;
+static const int ST_Comma   = -5;
+
+static int seasonToken(const QString &seasons, int *index)
+{
+    while (*index < seasons.length()) {
+        int ch = seasons.at((*index)++).unicode();
+        if (ch >= '0' && ch <= '9') {
+            int number = ch - '0';
+            while (*index < seasons.length()) {
+                ch = seasons.at(*index).unicode();
+                if (ch >= '0' && ch <= '9') {
+                    number = number * 10 + ch - '0';
+                    ++(*index);
+                } else {
+                    break;
+                }
+            }
+            return number;
+        } else if (ch == '-') {
+            return ST_Dash;
+        } else if (ch == '+') {
+            return ST_Plus;
+        } else if (ch == ',') {
+            return ST_Comma;
+        } else if (ch != ' ' && ch != '\t') {
+            return ST_Error;
+        }
+    }
+    return ST_End;
+}
+
+QList< QPair<int, int> > TvBookmark::parseSeasons(const QString &seasons, bool *ok)
+{
+    QList< QPair<int, int> > list;
+    int index = 0;
+    int token = seasonToken(seasons, &index);
+    while (token != ST_End) {
+        if (token > 0) {
+            int first = token;
+            token = seasonToken(seasons, &index);
+            if (token == ST_Dash) {
+                token = seasonToken(seasons, &index);
+                if (token >= 0 && token >= first) {
+                    list.append(QPair<int, int>(first, token));
+                    token = seasonToken(seasons, &index);
+                } else {
+                    token = ST_Error;
+                    break;
+                }
+            } else if (token == ST_Plus) {
+                list.append(QPair<int, int>(first, 0x7fffffff));
+                token = seasonToken(seasons, &index);
+            } else {
+                list.append(QPair<int, int>(first, first));
+            }
+        } else if (token != ST_Comma) {
+            break;
+        } else {
+            token = seasonToken(seasons, &index);
+        }
+    }
+    if (token != ST_End)
+        list.clear();
+    if (ok)
+        *ok = (token == ST_End);
+    return list;
+}
+
 TvBookmark::Match TvBookmark::match
     (const TvProgramme *programme, MatchOptions options) const
 {
@@ -219,6 +319,24 @@ TvBookmark::Match TvBookmark::match
     if (should && result != ShouldMatch)
         result = NoMatch;
 
+    // Match the season number.
+    if (!m_seasons.isEmpty() && result != ShouldMatch &&
+            result != NoMatch) {
+        int season = programme->season();
+        if (season) {
+            int index;
+            for (index = 0; index < m_seasons.size(); ++index) {
+                if (season >= m_seasons.at(index).first &&
+                        season <= m_seasons.at(index).second)
+                    break;
+            }
+            if (index >= m_seasons.size())
+                result = NoMatch;
+        } else {
+            result = NoMatch;
+        }
+    }
+
     return result;
 }
 
@@ -239,6 +357,7 @@ void TvBookmark::load(QSettings *settings)
     m_startTime = QTime::fromString(settings->value(QLatin1String("startTime")).toString(), Qt::TextDate);
     m_stopTime = QTime::fromString(settings->value(QLatin1String("stopTime")).toString(), Qt::TextDate);
     m_color = QColor(settings->value(QLatin1String("color")).toString());
+    setSeasons(settings->value(QLatin1String("seasons")).toString());
 }
 
 void TvBookmark::save(QSettings *settings)
@@ -253,4 +372,5 @@ void TvBookmark::save(QSettings *settings)
     settings->setValue(QLatin1String("startTime"), m_startTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("stopTime"), m_stopTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("color"), m_color.name());
+    settings->setValue(QLatin1String("seasons"), seasons());
 }

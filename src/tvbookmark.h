@@ -21,6 +21,8 @@
 #include <QtCore/qstring.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qsettings.h>
+#include <QtCore/qlist.h>
+#include <QtCore/qpair.h>
 #include <QtGui/qcolor.h>
 
 class TvProgramme;
@@ -74,6 +76,13 @@ public:
     bool isEnabled() const { return m_enabled; }
     void setEnabled(bool value) { m_enabled = value; }
 
+    QString seasons() const;
+    void setSeasons(const QString &seasons);
+
+    QList< QPair<int, int> > seasonList() const { return m_seasons; }
+
+    static QList< QPair<int, int> > parseSeasons(const QString &seasons, bool *ok);
+
     enum Match
     {
         NoMatch,
@@ -107,6 +116,7 @@ private:
     QTime m_startTime;
     QTime m_stopTime;
     QColor m_color;
+    QList< QPair<int, int> > m_seasons;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TvBookmark::MatchOptions)

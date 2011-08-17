@@ -22,6 +22,7 @@
 
 TvProgramme::TvProgramme(TvChannel *channel)
     : m_channel(channel)
+    , m_season(0)
     , m_isPremiere(false)
     , m_isRepeat(false)
     , m_isMovie(false)
@@ -38,11 +39,12 @@ TvProgramme::~TvProgramme()
 // A.B.C, where each of the numbers is 0-based, not 1-based.
 // The numbers could also have the form X/Y for multiple parts.
 // Fix the number so it is closer to what the user expects.
-static QString fixEpisodeNumber(const QString &str)
+static QString fixEpisodeNumber(const QString &str, int *season)
 {
     QStringList components = str.split(QLatin1String("."));
     QString result;
     bool needDot = false;
+    *season = 0;
     for (int index = 0; index < components.size(); ++index) {
         QString comp = components.at(index);
         int slash = comp.indexOf(QLatin1Char('/'));
@@ -57,6 +59,8 @@ static QString fixEpisodeNumber(const QString &str)
                 result += QLatin1Char('.');
         }
         result += QString::number(comp.toInt() + 1);
+        if (!needDot)
+            *season = comp.toInt() + 1;
         needDot = true;
     }
     return result;
@@ -116,7 +120,8 @@ void TvProgramme::load(QXmlStreamReader *reader)
                 if (system == QLatin1String("xmltv_ns")) {
                     m_episodeNumber = fixEpisodeNumber
                         (reader->readElementText
-                            (QXmlStreamReader::IncludeChildElements));
+                            (QXmlStreamReader::IncludeChildElements),
+                         &m_season);
                 }
             } else if (reader->name() == QLatin1String("language")) {
                 m_language = reader->readElementText
