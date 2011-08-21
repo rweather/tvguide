@@ -299,6 +299,9 @@ QList<TvProgramme *> TvChannel::programmesForDay
 {
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
+    TvProgramme *prev = 0;
+    TvBookmark::Match prevMatch = TvBookmark::NoMatch;
+    TvBookmark *prevBookmark = 0;
     QDateTime morningStart = QDateTime(date, QTime(6, 0, 0));
     QDateTime afternoonStart = QDateTime(date, QTime(12, 0, 0));
     QDateTime nightStart = QDateTime(date, QTime(18, 0, 0));
@@ -331,8 +334,29 @@ QList<TvProgramme *> TvChannel::programmesForDay
             TvBookmark *bookmark = 0;
             TvBookmark::Match match;
             match = channelList()->matchBookmarks(prog, &bookmark, options);
-            prog->setBookmark(bookmark, match);
+            TvBookmark *addBookmark = bookmark;
+            TvBookmark::Match addMatch = match;
+            if (match != TvBookmark::NoMatch) {
+                if (prev && prevBookmark == bookmark) {
+                    // Trim redundant failed match indications.
+                    if (prevMatch == TvBookmark::ShouldMatch) {
+                        if (match == TvBookmark::ShouldMatch) {
+                            addBookmark = 0;
+                            addMatch = TvBookmark::NoMatch;
+                        } else {
+                            prev->setBookmark(0, TvBookmark::NoMatch);
+                        }
+                    } else if (match == TvBookmark::ShouldMatch) {
+                        addBookmark = 0;
+                        addMatch = TvBookmark::NoMatch;
+                    }
+                }
+            }
+            prog->setBookmark(addBookmark, addMatch);
             list.append(prog);
+            prev = prog;
+            prevMatch = match;
+            prevBookmark = bookmark;
         }
         prog = prog->m_next;
     }
@@ -346,6 +370,9 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
 {
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
+    TvProgramme *prev = 0;
+    TvBookmark::Match prevMatch = TvBookmark::NoMatch;
+    TvBookmark *prevBookmark = 0;
     QDateTime startTime = QDateTime(first, QTime(6, 0, 0));
     QDateTime stopTime = QDateTime(last.addDays(1), QTime(6, 0, 0));
     while (prog != 0) {
@@ -356,9 +383,26 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
             TvBookmark *bookmark = 0;
             TvBookmark::Match match;
             match = channelList()->matchBookmarks(prog, &bookmark, options);
+            TvProgramme *addProg = prog;
             if (match != TvBookmark::NoMatch) {
-                prog->setBookmark(bookmark, match);
-                list.append(prog);
+                if (prev && prevBookmark == bookmark) {
+                    // Trim redundant failed match indications.
+                    if (prevMatch == TvBookmark::ShouldMatch) {
+                        if (match == TvBookmark::ShouldMatch)
+                            addProg = 0;
+                        else
+                            list.removeAt(list.size() - 1);
+                    } else if (match == TvBookmark::ShouldMatch) {
+                        addProg = 0;
+                    }
+                }
+                if (addProg) {
+                    addProg->setBookmark(bookmark, match);
+                    list.append(addProg);
+                    prev = addProg;
+                    prevMatch = match;
+                    prevBookmark = bookmark;
+                }
             }
         }
         prog = prog->m_next;
