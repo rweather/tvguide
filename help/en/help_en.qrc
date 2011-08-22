@@ -6,6 +6,7 @@
     <file>edit_channels.html</file>
     <file>searching.html</file>
     <file>select_guide.html</file>
+    <file>ticks.html</file>
     <file>viewing.html</file>
 
     <file>bookmark_7days.png</file>
@@ -20,6 +21,7 @@
     <file>search_web.png</file>
     <file>search_web_options.png</file>
     <file>select_service.png</file>
+    <file>tick_shown.png</file>
     <file>view_all_channels.png</file>
     <file>view_channels.png</file>
     <file>view_date.png</file>

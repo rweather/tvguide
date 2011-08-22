@@ -1,10 +1,13 @@
 Icons sourced from ftp://ftp.kde.org/pub/kde/snapshots/kdeartwork.tar.bz2
 
 The following is from the LICENSE file in the IconThemes directory where
-the icons were copied from:
+most of the icons were copied from:
 
 ----
 The images inside this directory are COMPLETELY FREE for commercial
 and non-commercial use.
 Clarification: this means you can copy, modify and redistribute them.
 ----
+
+The tick.png file came from the nuvola theme (originally called
+endturn.png), and is covered under the LGPL version 2.1.

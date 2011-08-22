@@ -27,6 +27,7 @@ TvProgramme::TvProgramme(TvChannel *channel)
     , m_isRepeat(false)
     , m_isMovie(false)
     , m_suppressed(false)
+    , m_ticked(false)
     , m_bookmark(0)
     , m_match(TvBookmark::NoMatch)
     , m_next(0)
@@ -190,7 +191,7 @@ void TvProgramme::setBookmark
 {
     m_bookmark = bookmark;
     m_match = match;
-    if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch)
+    if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch || match == TvBookmark::TickMatch)
         setColor(QColor());
     else if (match == TvBookmark::FullMatch)
         setColor(bookmark->color());

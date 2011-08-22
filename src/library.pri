@@ -12,6 +12,7 @@ SOURCES += \
     tvprogramme.cpp \
     tvprogrammedelegate.cpp \
     tvprogrammemodel.cpp \
+    tvtick.cpp \
 
 HEADERS += \
     tvbookmark.h \
@@ -22,6 +23,7 @@ HEADERS += \
     tvprogramme.h \
     tvprogrammedelegate.h \
     tvprogrammemodel.h \
+    tvtick.h \
 
 QT += network
 DEFINES += TVGUIDE_VERSION=\\\"$$TVGUIDE_VERSION\\\"

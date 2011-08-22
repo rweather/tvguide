@@ -81,6 +81,9 @@ public:
     bool isSuppressed() const { return m_suppressed; }
     void setSuppressed(bool value) { m_suppressed = value; }
 
+    bool isTicked() const { return m_ticked; }
+    void setTicked(bool value) { m_ticked = value; }
+
 private:
     TvChannel *m_channel;
     QDateTime m_start;
@@ -104,6 +107,7 @@ private:
     bool m_isRepeat;
     bool m_isMovie;
     bool m_suppressed;
+    bool m_ticked;
     mutable QString m_shortDescription;
     mutable QString m_longDescription;
     TvBookmark *m_bookmark;

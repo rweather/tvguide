@@ -45,11 +45,14 @@ public:
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
+    void updateTick(int row);
+
 private:
     QList<TvProgramme *> m_programmes;
     TvChannel *m_channel;
     QDate m_date;
     QIcon m_bookmarkIcon;
+    QIcon m_tickIcon;
 };
 
 #endif

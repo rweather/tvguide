@@ -62,6 +62,7 @@ TvChannelList::~TvChannelList()
 {
     qDeleteAll(m_channels);
     qDeleteAll(m_bookmarks);
+    qDeleteAll(m_ticks);
 }
 
 TvChannel *TvChannelList::channel(const QString &id) const
@@ -316,6 +317,7 @@ void TvChannelList::reloadService()
 
     qDeleteAll(m_channels);
     qDeleteAll(m_bookmarks);
+    qDeleteAll(m_ticks);
     m_channels.clear();
     m_activeChannels.clear();
     m_hiddenChannelIds.clear();
@@ -328,6 +330,7 @@ void TvChannelList::reloadService()
     m_serviceId = QString();
     m_serviceName = QString();
     m_startUrl = QUrl();
+    m_ticks.clear();
 
     emit channelsChanged();
     emit bookmarksChanged();
@@ -680,6 +683,22 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
         m_indexedBookmarks.insert(bookmark->title().toLower(), bookmark);
     }
     settings->endArray();
+
+    qDeleteAll(m_ticks);
+    m_ticks.clear();
+    size = settings->beginReadArray(QLatin1String("ticks"));
+    QDateTime expiry = QDateTime::currentDateTime().addDays(-30);
+    for (int index = 0; index < size; ++index) {
+        settings->setArrayIndex(index);
+        TvTick *tick = new TvTick();
+        tick->load(settings);
+        if (tick->timestamp() < expiry)
+            delete tick;
+        else
+            m_ticks.insert(tick->title(), tick);
+    }
+    settings->endArray();
+
     settings->endGroup();
 }
 
@@ -729,6 +748,25 @@ void TvChannelList::saveBookmarks()
     settings.sync();
 }
 
+void TvChannelList::saveTicks()
+{
+    if (m_serviceId.isEmpty())
+        return;
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(m_serviceId);
+    settings.beginWriteArray(QLatin1String("ticks"));
+    int index = 0;
+    QMultiMap<QString, TvTick *>::ConstIterator it;
+    for (it = m_ticks.constBegin(); it != m_ticks.constEnd(); ++it) {
+        settings.setArrayIndex(index++);
+        it.value()->save(&settings);
+    }
+    settings.endArray();
+    settings.endGroup();
+    settings.sync();
+}
+
 void TvChannelList::addBookmark(TvBookmark *bookmark)
 {
     Q_ASSERT(bookmark);
@@ -753,12 +791,29 @@ TvBookmark::Match TvChannelList::matchBookmarks
     (const TvProgramme *programme, TvBookmark **bookmark,
      TvBookmark::MatchOptions options) const
 {
+    TvBookmark::Match result = TvBookmark::NoMatch;
+
+    // Check the list of ticked programmes first as ticking takes
+    // precedence over bookmark matching.
+    QMultiMap<QString, TvTick *>::ConstIterator tickit;
+    tickit = m_ticks.constFind(programme->title());
+    while (tickit != m_ticks.constEnd()) {
+        const TvTick *tick = tickit.value();
+        if (tick->match(programme)) {
+            const_cast<TvProgramme *>(programme)->setTicked(true);
+            *bookmark = 0;
+            result = TvBookmark::TickMatch;
+            break;
+        }
+        ++tickit;
+    }
+
+    // Look for a bookmark match.
     QMultiMap<QString, TvBookmark *>::ConstIterator it;
     if (options & TvBookmark::NonMatching)
         it = m_indexedBookmarks.constBegin();
     else
         it = m_indexedBookmarks.constFind(programme->title().toLower());
-    TvBookmark::Match result = TvBookmark::NoMatch;
     while (it != m_indexedBookmarks.constEnd()) {
         TvBookmark::Match match = it.value()->match(programme, options);
         if (match != TvBookmark::NoMatch) {
@@ -791,4 +846,31 @@ void TvChannelList::replaceBookmarks(const QList<TvBookmark *> &bookmarks)
     }
     emit bookmarksChanged();
     saveBookmarks();
+}
+
+void TvChannelList::addTick(const TvProgramme *programme)
+{
+    TvTick *tick = new TvTick();
+    tick->setTitle(programme->title());
+    tick->setChannelId(programme->channel()->id());
+    tick->setStart(programme->start());
+    tick->setTimestamp(QDateTime::currentDateTime());
+    m_ticks.insert(tick->title(), tick);
+    saveTicks();
+}
+
+void TvChannelList::removeTick(const TvProgramme *programme)
+{
+    QMultiMap<QString, TvTick *>::Iterator it;
+    it = m_ticks.find(programme->title());
+    while (it != m_ticks.end()) {
+        TvTick *tick = it.value();
+        if (tick->start() == programme->start() &&
+                tick->channelId() == programme->channel()->id()) {
+            m_ticks.erase(it);
+            break;
+        }
+        ++it;
+    }
+    saveTicks();
 }

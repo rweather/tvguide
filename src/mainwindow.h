@@ -41,6 +41,8 @@ private Q_SLOTS:
     void progressChanged(qreal progress);
     void dateChanged();
     void channelChanged(const QModelIndex &index);
+    void programmeChanged(const QModelIndex &index);
+    void programmesReset();
     void programmesChanged(TvChannel *channel);
     void networkRequest(TvChannel *channel, const QDate &date);
 
@@ -57,6 +59,8 @@ private Q_SLOTS:
     void editChannels();
     void addBookmark();
     void organizeBookmarks();
+    void tickShow();
+
     void selectService();
     void webSearch();
 

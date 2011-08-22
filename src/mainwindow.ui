@@ -96,6 +96,8 @@
     <addaction name="action7DayOutlook"/>
     <addaction name="actionShowPartialMatches"/>
     <addaction name="actionShowFailedMatches"/>
+    <addaction name="separator"/>
+    <addaction name="actionTickShow"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
@@ -173,6 +175,7 @@
    <addaction name="action7DayOutlook"/>
    <addaction name="actionMultiChannel"/>
    <addaction name="separator"/>
+   <addaction name="actionTickShow"/>
    <addaction name="actionAddBookmark"/>
    <addaction name="actionWebSearch"/>
   </widget>
@@ -418,6 +421,21 @@
    </property>
    <property name="text">
     <string>Show &amp;Failed Matches</string>
+   </property>
+  </action>
+  <action name="actionTickShow">
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/tick.png</normaloff>:/images/tick.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Tick Show</string>
+   </property>
+   <property name="toolTip">
+    <string>Tick Show</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
  </widget>

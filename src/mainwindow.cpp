@@ -148,6 +148,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(updateTimePeriods()));
     connect(actionShowFailedMatches, SIGNAL(toggled(bool)),
             this, SLOT(updateTimePeriods()));
+    connect(actionTickShow, SIGNAL(triggered()),
+            this, SLOT(tickShow()));
     connect(actionMultiChannel, SIGNAL(toggled(bool)),
             this, SLOT(multiChannelChanged()));
     connect(actionWebSearch, SIGNAL(triggered()),
@@ -163,6 +165,13 @@ MainWindow::MainWindow(QWidget *parent)
     connect(channels->selectionModel(),
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(channelChanged(QModelIndex)));
+
+    connect(programmes->selectionModel(),
+            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+            this, SLOT(programmeChanged(QModelIndex)));
+    connect(m_programmeModel, SIGNAL(modelReset()),
+            this, SLOT(programmesReset()));
+    actionTickShow->setEnabled(false);
 
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
@@ -270,6 +279,16 @@ void MainWindow::channelChanged(const QModelIndex &index)
         calendar->setMaximumDate(QDate(7999, 12, 31));
     }
     setDay(index, calendar->selectedDate());
+}
+
+void MainWindow::programmeChanged(const QModelIndex &index)
+{
+    actionTickShow->setEnabled(index.isValid());
+}
+
+void MainWindow::programmesReset()
+{
+    actionTickShow->setEnabled(false);
 }
 
 void MainWindow::programmesChanged(TvChannel *channel)
@@ -414,6 +433,22 @@ void MainWindow::organizeBookmarks()
 {
     BookmarkListEditor dialog(m_channelList, this);
     dialog.exec();
+}
+
+void MainWindow::tickShow()
+{
+    QModelIndex index = programmes->selectionModel()->currentIndex();
+    if (!index.isValid())
+        return;
+    TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
+    if (programme->isTicked()) {
+        programme->setTicked(false);
+        m_channelList->removeTick(programme);
+    } else {
+        programme->setTicked(true);
+        m_channelList->addTick(programme);
+    }
+    m_programmeModel->updateTick(index.row());
 }
 
 void MainWindow::selectService()
@@ -685,14 +720,14 @@ QList<TvProgramme *> MainWindow::combineShowings
             if (prog->isSuppressed())
                 continue;   // We've already combined this programme.
             TvBookmark *bookmark = prog->bookmark();
-            if (!bookmark) {
-                // Failed match - there will be no other showings.
+            if (!bookmark || prog->isTicked()) {
+                // Failed or ticked - there will be no other showings.
                 newProgrammes.append(prog);
                 continue;
             }
             for (index2 = index + 1; index2 < programmes.size(); ++index2) {
                 TvProgramme *prog2 = programmes.at(index2);
-                if (prog2->isSuppressed() || prog2->bookmark() != bookmark)
+                if (prog2->isSuppressed() || prog2->bookmark() != bookmark || prog2->isTicked())
                     continue;
                 if (prog->subTitle() != prog2->subTitle() ||
                         prog->episodeNumber() != prog2->episodeNumber())

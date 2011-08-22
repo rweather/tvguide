@@ -25,6 +25,7 @@ TvProgrammeModel::TvProgrammeModel(QObject *parent)
     : QAbstractItemModel(parent)
     , m_channel(0)
     , m_bookmarkIcon(QLatin1String(":/images/bookmark.png"))
+    , m_tickIcon(QLatin1String(":/images/tick.png"))
 {
 }
 
@@ -110,6 +111,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
             return prog->longDescription();
     } else if (role == Qt::DecorationRole) {
         if (index.column() == ColumnTime) {
+            if (prog->isTicked())
+                return m_tickIcon;
             if (prog->color().isValid())
                 return m_bookmarkIcon;
         }
@@ -157,4 +160,10 @@ QVariant TvProgrammeModel::headerData(int section, Qt::Orientation orientation, 
             return tr("Channel");
     }
     return QVariant();
+}
+
+void TvProgrammeModel::updateTick(int row)
+{
+    QModelIndex idx = index(row, ColumnTime, QModelIndex());
+    emit dataChanged(idx, idx);
 }

@@ -20,6 +20,7 @@
 
 #include "tvchannel.h"
 #include "tvbookmark.h"
+#include "tvtick.h"
 #include <QtCore/qmap.h>
 #include <QtCore/qset.h>
 #include <QtCore/qurl.h>
@@ -65,6 +66,9 @@ public:
 
     QList<TvBookmark *> bookmarks() const { return m_bookmarks; }
     void replaceBookmarks(const QList<TvBookmark *> &bookmarks);
+
+    void addTick(const TvProgramme *programme);
+    void removeTick(const TvProgramme *programme);
 
 public Q_SLOTS:
     void refreshChannels(bool forceReload = false);
@@ -128,6 +132,7 @@ private:
     QMap<QUrl, QDateTime> m_lastFetch;
     QList<TvBookmark *> m_bookmarks;
     QMultiMap<QString, TvBookmark *> m_indexedBookmarks;
+    QMultiMap<QString, TvTick *> m_ticks;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
     void loadOzTivoChannelData();
@@ -139,6 +144,7 @@ private:
     void loadServiceSettings(QSettings *settings);
     void saveChannelSettings();
     void saveBookmarks();
+    void saveTicks();
 
     friend class TvChannel;
 };
