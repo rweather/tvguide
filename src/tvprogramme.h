@@ -68,10 +68,18 @@ public:
     void setColor(const QColor &color);
 
     TvBookmark *bookmark() const { return m_bookmark; }
+    TvBookmark::Match match() const { return m_match; }
     void setBookmark(TvBookmark *bookmark, TvBookmark::Match match);
 
     QString shortDescription() const;
     QString longDescription() const;
+
+    void clearOtherShowings();
+    void addOtherShowing(TvProgramme *programme);
+    void moveShowings(TvProgramme *from);
+
+    bool isSuppressed() const { return m_suppressed; }
+    void setSuppressed(bool value) { m_suppressed = value; }
 
 private:
     TvChannel *m_channel;
@@ -95,12 +103,15 @@ private:
     bool m_isPremiere;
     bool m_isRepeat;
     bool m_isMovie;
+    bool m_suppressed;
     mutable QString m_shortDescription;
     mutable QString m_longDescription;
     TvBookmark *m_bookmark;
+    TvBookmark::Match m_match;
     QString m_nonMatchingTitle;
     QColor m_color;
     TvProgramme *m_next;
+    QList<TvProgramme *> m_otherShowings;
 
     friend class TvChannel;
 };

@@ -615,6 +615,7 @@ void MainWindow::updateProgrammes
             m_channelList->requestChannelDay(channel, date);
         programmes = channel->programmesForDay(date, timePeriods(), matchOptions());
     }
+    programmes = combineShowings(programmes);
     m_programmeModel->setProgrammes(programmes, channel, date);
     this->programmes->resizeRowsToContents();
     m_fetching = false;
@@ -652,10 +653,67 @@ void MainWindow::updateMultiChannelProgrammes
         }
     }
 
+    // Combine multiple showings of the same episode.
+    programmes = combineShowings(programmes);
+
     // Sort the programmes to intermix the channel data and
     // then display them.
     qSort(programmes.begin(), programmes.end(), sortByStartTimeAndChannel);
     m_programmeModel->setProgrammes(programmes, 0, date);
     this->programmes->resizeRowsToContents();
     m_fetching = false;
+}
+
+QList<TvProgramme *> MainWindow::combineShowings
+    (const QList<TvProgramme *> &programmes)
+{
+    int index, index2;
+    QList<TvProgramme *> newProgrammes;
+    TvProgramme *prog;
+
+    // Clear all "other showings" indications.
+    for (index = 0; index < programmes.size(); ++index) {
+        prog = programmes.at(index);
+        prog->clearOtherShowings();
+        prog->setSuppressed(false);
+    }
+
+    // Filter the list in 7-day mode to combine the showings.
+    if (action7DayOutlook->isChecked()) {
+        for (index = 0; index < programmes.size(); ++index) {
+            TvProgramme *prog = programmes.at(index);
+            if (prog->isSuppressed())
+                continue;   // We've already combined this programme.
+            TvBookmark *bookmark = prog->bookmark();
+            if (!bookmark) {
+                // Failed match - there will be no other showings.
+                newProgrammes.append(prog);
+                continue;
+            }
+            for (index2 = index + 1; index2 < programmes.size(); ++index2) {
+                TvProgramme *prog2 = programmes.at(index2);
+                if (prog2->isSuppressed() || prog2->bookmark() != bookmark)
+                    continue;
+                if (prog->subTitle() != prog2->subTitle() ||
+                        prog->episodeNumber() != prog2->episodeNumber())
+                    continue;
+                if (prog2->match() != TvBookmark::TitleMatch &&
+                        prog->match() == TvBookmark::TitleMatch) {
+                    // The new programme is a better candidate for the
+                    // "primary match" amongst the showings.
+                    prog2->moveShowings(prog);
+                    prog = 0;
+                    break;
+                } else {
+                    prog->addOtherShowing(prog2);
+                    prog2->setSuppressed(true);
+                }
+            }
+            if (prog)
+                newProgrammes.append(prog);
+        }
+        return newProgrammes;
+    } else {
+        return programmes;
+    }
 }

@@ -26,7 +26,9 @@ TvProgramme::TvProgramme(TvChannel *channel)
     , m_isPremiere(false)
     , m_isRepeat(false)
     , m_isMovie(false)
+    , m_suppressed(false)
     , m_bookmark(0)
+    , m_match(TvBookmark::NoMatch)
     , m_next(0)
 {
 }
@@ -187,6 +189,7 @@ void TvProgramme::setBookmark
     (TvBookmark *bookmark, TvBookmark::Match match)
 {
     m_bookmark = bookmark;
+    m_match = match;
     if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch)
         setColor(QColor());
     else if (match == TvBookmark::FullMatch)
@@ -289,6 +292,26 @@ QString TvProgramme::shortDescription() const
                 Qt::escape(m_nonMatchingTitle) +
                 QLatin1String("</s>");
     }
+    if (!m_otherShowings.isEmpty()) {
+        desc += QLatin1String("<br>") +
+                QObject::tr("Other showings:");
+        for (int index = 0; index < m_otherShowings.size(); ++index) {
+            TvProgramme *other = m_otherShowings.at(index);
+            if (index)
+                desc += QLatin1String(", ");
+            else
+                desc += QLatin1Char(' ');
+            if (m_channel != other->channel()) {
+                desc += other->channel()->name();
+                desc += QLatin1Char(' ');
+            }
+            if (m_start.date() != other->start().date()) {
+                desc += QDate::longDayName(other->start().date().dayOfWeek());
+                desc += QLatin1Char(' ');
+            }
+            desc += other->start().time().toString(Qt::LocaleDate);
+        }
+    }
     m_shortDescription = desc;
     return desc;
 }
@@ -335,4 +358,28 @@ QString TvProgramme::longDescription() const
     desc += QLatin1String("</qt>");
     m_longDescription = desc;
     return desc;
+}
+
+void TvProgramme::clearOtherShowings()
+{
+    if (!m_otherShowings.isEmpty()) {
+        m_otherShowings.clear();
+        m_shortDescription = QString();
+    }
+}
+
+void TvProgramme::addOtherShowing(TvProgramme *programme)
+{
+    m_otherShowings.append(programme);
+    m_shortDescription = QString();
+}
+
+void TvProgramme::moveShowings(TvProgramme *from)
+{
+    m_shortDescription = QString();
+    m_otherShowings.clear();
+    m_otherShowings.append(from);
+    m_otherShowings.append(from->m_otherShowings);
+    from->m_otherShowings.clear();
+    from->m_shortDescription = QString();
 }

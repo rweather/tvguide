@@ -94,6 +94,7 @@ private:
     void setDay(const QModelIndex &index, const QDate &date);
     void updateProgrammes(TvChannel *channel, const QDate &date, bool request);
     void updateMultiChannelProgrammes(const QDate &date, bool request);
+    QList<TvProgramme *> combineShowings(const QList<TvProgramme *> &programmes);
 };
 
 #endif
