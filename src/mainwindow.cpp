@@ -391,16 +391,7 @@ void MainWindow::addBookmark()
                      tr("Do you wish to edit the existing bookmark?"),
                      QMessageBox::Yes | QMessageBox::No,
                      QMessageBox::Yes) == QMessageBox::Yes) {
-                bookmarkDlg.setTitle(editBookmark->title());
-                bookmarkDlg.setChannelId(editBookmark->channelId());
-                bookmarkDlg.setStartTime(editBookmark->startTime());
-                bookmarkDlg.setStopTime(editBookmark->stopTime());
-                bookmarkDlg.setDayOfWeek
-                    (editBookmark->dayOfWeek(),
-                     editBookmark->dayOfWeekMask());
-                bookmarkDlg.setColor(editBookmark->color());
-                bookmarkDlg.setSeasons(editBookmark->seasons());
-                bookmarkDlg.setSeasonsEnabled(!editBookmark->seasonList().isEmpty());
+                bookmarkDlg.copyFromBookmark(editBookmark);
             } else {
                 editBookmark = 0;
             }
@@ -413,16 +404,7 @@ void MainWindow::addBookmark()
         bookmarkDlg.setWindowTitle(tr("Add Bookmark"));
     if (bookmarkDlg.exec() == QDialog::Accepted) {
         TvBookmark *bookmark = new TvBookmark();
-        bookmark->setTitle(bookmarkDlg.title());
-        bookmark->setChannelId(bookmarkDlg.channelId());
-        bookmark->setStartTime(bookmarkDlg.startTime());
-        bookmark->setStopTime(bookmarkDlg.stopTime());
-        bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
-        bookmark->setColor(bookmarkDlg.color());
-        if (bookmarkDlg.seasonsEnabled())
-            bookmark->setSeasons(bookmarkDlg.seasons());
-        else
-            bookmark->setSeasons(QString());
+        bookmarkDlg.copyToBookmark(bookmark);
         if (editBookmark)
             m_channelList->removeBookmark(editBookmark, false);
         m_channelList->addBookmark(bookmark);

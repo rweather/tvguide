@@ -22,6 +22,7 @@
 #include "ui_bookmarkitemeditor.h"
 
 class TvChannelList;
+class TvBookmark;
 
 class BookmarkItemEditor : public QDialog, private Ui::BookmarkItemEditor
 {
@@ -42,6 +43,9 @@ public:
     QTime stopTime() const { return stopTimeEdit->time(); }
     void setStopTime(const QTime &time) { stopTimeEdit->setTime(time); }
 
+    bool anyTime() const { return anyTimeCheck->isChecked(); }
+    void setAnyTime(bool value) { anyTimeCheck->setChecked(value); }
+
     int dayOfWeek() const;
     int dayOfWeekMask() const;
     void setDayOfWeek(int value, int mask);
@@ -55,11 +59,15 @@ public:
     bool seasonsEnabled() const { return seasonEnable->isChecked(); }
     void setSeasonsEnabled(bool value) { seasonEnable->setChecked(value); }
 
+    void copyFromBookmark(const TvBookmark *bookmark);
+    void copyToBookmark(TvBookmark *bookmark);
+
 private Q_SLOTS:
     void changeColor();
     void updateOk();
     void selectOtherDay();
     void help();
+    void anyTimeChanged(bool value);
 
 private:
     TvChannelList *m_channelList;

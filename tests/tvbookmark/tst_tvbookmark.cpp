@@ -70,6 +70,7 @@ void tst_TvBookmark::properties()
     QCOMPARE(b.dayOfWeekMask(), 0xFE);
     QVERIFY(!b.startTime().isValid());
     QVERIFY(!b.stopTime().isValid());
+    QVERIFY(!b.anyTime());
     QVERIFY(!b.color().isValid());
     QVERIFY(b.isEnabled());
     QVERIFY(b.seasons().isEmpty());
@@ -85,6 +86,7 @@ void tst_TvBookmark::properties()
     b.setDayOfWeek(TvBookmark::Wednesday);
     b.setStartTime(QTime(11, 45, 23));
     b.setStopTime(QTime(17, 54, 32));
+    b.setAnyTime(true);
     b.setColor(Qt::red);
     b.setEnabled(false);
     b.setSeasons(QLatin1String("1,3-5, 7+"));
@@ -95,6 +97,7 @@ void tst_TvBookmark::properties()
     QCOMPARE(b.dayOfWeekMask(), 0x08);
     QVERIFY(b.startTime() == QTime(11, 45, 23));
     QVERIFY(b.stopTime() == QTime(17, 54, 32));
+    QVERIFY(b.anyTime());
     QCOMPARE(b.color().red(), 255);
     QCOMPARE(b.color().blue(), 0);
     QCOMPARE(b.color().green(), 0);
@@ -109,6 +112,7 @@ void tst_TvBookmark::properties()
     QCOMPARE(b2.dayOfWeekMask(), 0x08);
     QVERIFY(b2.startTime() == QTime(11, 45, 23));
     QVERIFY(b2.stopTime() == QTime(17, 54, 32));
+    QVERIFY(b2.anyTime());
     QCOMPARE(b2.color().red(), 255);
     QCOMPARE(b2.color().blue(), 0);
     QCOMPARE(b2.color().green(), 0);

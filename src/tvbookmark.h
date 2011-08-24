@@ -70,6 +70,9 @@ public:
     QTime stopTime() const { return m_stopTime; }
     void setStopTime(const QTime &time) { m_stopTime = time; }
 
+    bool anyTime() const { return m_anyTime; }
+    void setAnyTime(bool value) { m_anyTime = value; }
+
     QColor color() const { return m_color; }
     void setColor(const QColor &color) { m_color = color; }
 
@@ -114,6 +117,7 @@ private:
     int m_dayOfWeek;
     int m_dayOfWeekMask;
     bool m_enabled;
+    bool m_anyTime;
     QTime m_startTime;
     QTime m_stopTime;
     QColor m_color;

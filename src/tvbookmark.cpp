@@ -24,6 +24,7 @@ TvBookmark::TvBookmark()
     : m_dayOfWeek(TvBookmark::AnyDay)
     , m_dayOfWeekMask(0xFE)
     , m_enabled(true)
+    , m_anyTime(false)
 {
 }
 
@@ -33,6 +34,7 @@ TvBookmark::TvBookmark(const TvBookmark &other)
     , m_dayOfWeek(other.dayOfWeek())
     , m_dayOfWeekMask(other.dayOfWeekMask())
     , m_enabled(other.isEnabled())
+    , m_anyTime(other.anyTime())
     , m_startTime(other.startTime())
     , m_stopTime(other.stopTime())
     , m_color(other.color())
@@ -274,7 +276,12 @@ TvBookmark::Match TvBookmark::match
     QTime start = programme->start().time();
     QTime stop = programme->stop().time();
     int dayOfWeekMask = m_dayOfWeekMask;
-    if (m_startTime < m_stopTime) {
+    if (m_anyTime) {
+        // If we are matching at any time of day, then don't show
+        // failed matches.  Otherwise everything will show as failed!
+        if (result == ShouldMatch)
+            return NoMatch;
+    } else if (m_startTime < m_stopTime) {
         if (start < m_startTime) {
             if (stop > m_startTime)
                 result = Underrun;
@@ -354,6 +361,7 @@ void TvBookmark::load(QSettings *settings)
         setDayOfWeek(dayOfWeek);
     }
     m_enabled = settings->value(QLatin1String("enabled"), true).toBool();
+    m_anyTime = settings->value(QLatin1String("anyTime"), false).toBool();
     m_startTime = QTime::fromString(settings->value(QLatin1String("startTime")).toString(), Qt::TextDate);
     m_stopTime = QTime::fromString(settings->value(QLatin1String("stopTime")).toString(), Qt::TextDate);
     m_color = QColor(settings->value(QLatin1String("color")).toString());
@@ -369,6 +377,7 @@ void TvBookmark::save(QSettings *settings)
     else
         settings->setValue(QLatin1String("dayOfWeek"), m_dayOfWeek);
     settings->setValue(QLatin1String("enabled"), m_enabled);
+    settings->setValue(QLatin1String("anyTime"), m_anyTime);
     settings->setValue(QLatin1String("startTime"), m_startTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("stopTime"), m_stopTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("color"), m_color.name());

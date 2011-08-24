@@ -165,6 +165,13 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="anyTimeCheck">
+         <property name="text">
+          <string>Any time</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </item>
      <item row="4" column="0">
@@ -230,6 +237,7 @@
   <tabstop>otherDay</tabstop>
   <tabstop>startTimeEdit</tabstop>
   <tabstop>stopTimeEdit</tabstop>
+  <tabstop>anyTimeCheck</tabstop>
   <tabstop>colorSelect</tabstop>
   <tabstop>seasonEnable</tabstop>
   <tabstop>seasonEdit</tabstop>

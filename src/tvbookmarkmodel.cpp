@@ -81,8 +81,12 @@ QVariant TvBookmarkModel::data(const QModelIndex &index, int role) const
         case MODEL_DAY:
             return bookmark->dayOfWeekName();
         case MODEL_START_TIME:
+            if (bookmark->anyTime())
+                return tr("Any time");
             return bookmark->startTime().toString(Qt::LocaleDate);
         case MODEL_STOP_TIME:
+            if (bookmark->anyTime())
+                return QString();
             return bookmark->stopTime().toString(Qt::LocaleDate);
         case MODEL_CHANNEL: {
             QString id = bookmark->channelId();

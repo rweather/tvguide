@@ -82,27 +82,10 @@ void BookmarkListEditor::editBookmark()
     TvBookmark *bookmark = m_model->bookmarkAt(index.row());
 
     BookmarkItemEditor bookmarkDlg(m_channelList, this);
-    bookmarkDlg.setTitle(bookmark->title());
-    bookmarkDlg.setChannelId(bookmark->channelId());
-    bookmarkDlg.setStartTime(bookmark->startTime());
-    bookmarkDlg.setStopTime(bookmark->stopTime());
-    bookmarkDlg.setDayOfWeek
-        (bookmark->dayOfWeek(), bookmark->dayOfWeekMask());
-    bookmarkDlg.setColor(bookmark->color());
-    bookmarkDlg.setSeasons(bookmark->seasons());
-    bookmarkDlg.setSeasonsEnabled(!bookmark->seasonList().isEmpty());
+    bookmarkDlg.copyFromBookmark(bookmark);
 
     if (bookmarkDlg.exec() == QDialog::Accepted) {
-        bookmark->setTitle(bookmarkDlg.title());
-        bookmark->setChannelId(bookmarkDlg.channelId());
-        bookmark->setStartTime(bookmarkDlg.startTime());
-        bookmark->setStopTime(bookmarkDlg.stopTime());
-        bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
-        bookmark->setColor(bookmarkDlg.color());
-        if (bookmarkDlg.seasonsEnabled())
-            bookmark->setSeasons(bookmarkDlg.seasons());
-        else
-            bookmark->setSeasons(QString());
+        bookmarkDlg.copyToBookmark(bookmark);
         m_model->updateBookmark(index.row());
         bookmarkView->sortByColumn
             (bookmarkView->horizontalHeader()->sortIndicatorSection(),
@@ -124,16 +107,7 @@ void BookmarkListEditor::newBookmark()
     bookmarkDlg.setWindowTitle(tr("New Bookmark"));
     if (bookmarkDlg.exec() == QDialog::Accepted) {
         TvBookmark *bookmark = new TvBookmark();
-        bookmark->setTitle(bookmarkDlg.title());
-        bookmark->setChannelId(bookmarkDlg.channelId());
-        bookmark->setStartTime(bookmarkDlg.startTime());
-        bookmark->setStopTime(bookmarkDlg.stopTime());
-        bookmark->setDayOfWeekMask(bookmarkDlg.dayOfWeekMask());
-        bookmark->setColor(bookmarkDlg.color());
-        if (bookmarkDlg.seasonsEnabled())
-            bookmark->setSeasons(bookmarkDlg.seasons());
-        else
-            bookmark->setSeasons(QString());
+        bookmarkDlg.copyToBookmark(bookmark);
         m_model->addBookmark(bookmark);
         bookmarkView->sortByColumn
             (bookmarkView->horizontalHeader()->sortIndicatorSection(),

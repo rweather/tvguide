@@ -68,6 +68,8 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     connect(seasonEnable, SIGNAL(toggled(bool)), seasonEdit, SLOT(setEnabled(bool)));
     connect(seasonEnable, SIGNAL(stateChanged(int)), this, SLOT(updateOk()));
 
+    connect(anyTimeCheck, SIGNAL(toggled(bool)), this, SLOT(anyTimeChanged(bool)));
+
     buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
 
@@ -149,6 +151,34 @@ void BookmarkItemEditor::setColor(const QColor &color)
     colorSelect->setIcon(QIcon(pixmap));
 }
 
+void BookmarkItemEditor::copyFromBookmark(const TvBookmark *bookmark)
+{
+    setTitle(bookmark->title());
+    setChannelId(bookmark->channelId());
+    setStartTime(bookmark->startTime());
+    setStopTime(bookmark->stopTime());
+    setAnyTime(bookmark->anyTime());
+    setDayOfWeek (bookmark->dayOfWeek(), bookmark->dayOfWeekMask());
+    setColor(bookmark->color());
+    setSeasons(bookmark->seasons());
+    setSeasonsEnabled(!bookmark->seasonList().isEmpty());
+}
+
+void BookmarkItemEditor::copyToBookmark(TvBookmark *bookmark)
+{
+    bookmark->setTitle(title());
+    bookmark->setChannelId(channelId());
+    bookmark->setStartTime(startTime());
+    bookmark->setStopTime(stopTime());
+    bookmark->setAnyTime(anyTime());
+    bookmark->setDayOfWeekMask(dayOfWeekMask());
+    bookmark->setColor(color());
+    if (seasonsEnabled())
+        bookmark->setSeasons(seasons());
+    else
+        bookmark->setSeasons(QString());
+}
+
 void BookmarkItemEditor::changeColor()
 {
     QColor color = QColorDialog::getColor
@@ -192,4 +222,10 @@ void BookmarkItemEditor::selectOtherDay()
 void BookmarkItemEditor::help()
 {
     HelpBrowser::showContextHelp(QLatin1String("bookmarks.html"), this);
+}
+
+void BookmarkItemEditor::anyTimeChanged(bool value)
+{
+    startTimeEdit->setEnabled(!value);
+    stopTimeEdit->setEnabled(!value);
 }
