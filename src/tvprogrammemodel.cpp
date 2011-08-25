@@ -27,6 +27,8 @@ TvProgrammeModel::TvProgrammeModel(QObject *parent)
     , m_bookmarkIcon(QLatin1String(":/images/bookmark.png"))
     , m_tickIcon(QLatin1String(":/images/tick.png"))
 {
+    m_bookmarkIcon = m_bookmarkIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    m_tickIcon = m_tickIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
 TvProgrammeModel::~TvProgrammeModel()

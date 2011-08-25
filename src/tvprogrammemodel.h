@@ -52,8 +52,8 @@ private:
     QList<TvProgramme *> m_programmes;
     TvChannel *m_channel;
     QDate m_date;
-    QIcon m_bookmarkIcon;
-    QIcon m_tickIcon;
+    QPixmap m_bookmarkIcon;
+    QPixmap m_tickIcon;
 };
 
 #endif
