@@ -49,6 +49,7 @@ public:
     QString date() const { return m_date; }
     QStringList directors() const { return m_directors; }
     QStringList actors() const { return m_actors; }
+    QStringList presenters() const { return m_presenters; }
     QStringList categories() const { return m_categories; }
     QString rating() const { return m_rating; }
     QString starRating() const { return m_starRating; }
@@ -94,6 +95,7 @@ private:
     QString m_date;
     QStringList m_directors;
     QStringList m_actors;
+    QStringList m_presenters;
     QStringList m_categories;
     QString m_rating;
     QString m_starRating;

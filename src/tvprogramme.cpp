@@ -105,6 +105,9 @@ void TvProgramme::load(QXmlStreamReader *reader)
             } else if (reader->name() == QLatin1String("actor")) {
                 m_actors += reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
+            } else if (reader->name() == QLatin1String("presenter")) {
+                m_presenters += reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements);
             } else if (reader->name() == QLatin1String("category")) {
                 QString category = reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
@@ -160,7 +163,6 @@ void TvProgramme::load(QXmlStreamReader *reader)
                        reader->name() == QLatin1String("producer") ||
                        reader->name() == QLatin1String("composer") ||
                        reader->name() == QLatin1String("editor") ||
-                       reader->name() == QLatin1String("presenter") ||
                        reader->name() == QLatin1String("commentator") ||
                        reader->name() == QLatin1String("guest") ||
                        reader->name() == QLatin1String("length") ||
@@ -248,6 +250,9 @@ QString TvProgramme::shortDescription() const
     if (!m_actors.isEmpty()) {
         desc += QLatin1String(", ") +
                 Qt::escape(m_actors.at(0));
+    } else if (!m_presenters.isEmpty()) {
+        desc += QLatin1String(", ") +
+                Qt::escape(m_presenters.at(0));
     } else if (!m_directors.isEmpty()) {
         desc += QLatin1String(", ") +
                 Qt::escape(QObject::tr("Director: %1").arg(m_directors.at(0)));
@@ -329,9 +334,13 @@ QString TvProgramme::longDescription() const
         desc += QObject::tr("<p><b>Categories:</b> %1</p>")
             .arg(Qt::escape(m_categories.join(QLatin1String(", "))));
     }
-    if (m_actors.size() > 1) {
+    if (!m_actors.isEmpty()) {
         desc += QObject::tr("<p><b>Starring:</b> %1</p>")
             .arg(Qt::escape(m_actors.join(QLatin1String(", "))));
+    }
+    if (!m_presenters.isEmpty()) {
+        desc += QObject::tr("<p><b>Presenter:</b> %1</p>")
+            .arg(Qt::escape(m_presenters.join(QLatin1String(", "))));
     }
     if (!m_directors.isEmpty()) {
         desc += QObject::tr("<p><b>Director:</b> %1</p>")
