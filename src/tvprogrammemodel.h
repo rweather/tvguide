@@ -46,6 +46,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
     void updateTick(int row);
+    void updateIcons();
 
 private:
     QList<TvProgramme *> m_programmes;

@@ -19,6 +19,7 @@
 #include "tvprogramme.h"
 #include <QtCore/qset.h>
 #include <QtCore/qdir.h>
+#include <QtCore/qfile.h>
 #include <QtCore/qdebug.h>
 #include <QtNetwork/qnetworkdiskcache.h>
 
@@ -163,8 +164,10 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
             emit programmesChanged(*it);
         }
     }
-    if (url == m_startUrl)
+    if (url == m_startUrl) {
+        refreshIcons();
         emit channelIndexLoaded();
+    }
 }
 
 void TvChannelList::loadOzTivoChannelData()
@@ -209,6 +212,23 @@ void TvChannelList::loadOzTivoChannelData
                     (QXmlStreamReader::SkipChildElements);
                 channel->addChannelNumber(num);
                 m_haveChannelNumbers = true;
+            } else if (reader->name() == QLatin1String("icon")) {
+                QString src = reader->attributes().value
+                    (QLatin1String("src")).toString();
+                channel->setIconUrl(src);
+                channel->setIconFile(m_iconFiles.value(channel->id(), QString()));
+                if (!channel->iconFile().isEmpty()) {
+                    if (QFile::exists(channel->iconFile())) {
+                        channel->setIcon(QIcon(channel->iconFile()));
+                    } else {
+                        // Icon file no longer exists.
+                        channel->setIcon(QIcon());
+                        channel->setIconFile(QString());
+                        m_iconFiles.remove(channel->id());
+                    }
+                } else {
+                    channel->setIcon(QIcon());
+                }
             }
         } else if (token == QXmlStreamReader::EndElement) {
             if (reader->name() == QLatin1String("channel"))
@@ -225,6 +245,7 @@ void TvChannelList::refreshChannels(bool forceReload)
         Request req;
         req.urls += m_startUrl;
         req.priority = 0;
+        req.isIconFetch = false;
         req.channel = 0;
         req.date = QDate();
         requestData(req, QDateTime(),
@@ -255,6 +276,7 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int
     Request req;
     req.urls = urls;
     req.priority = 1;
+    req.isIconFetch = false;
     req.channel = channel;
     req.date = date;
     requestData(req, channel->dayLastModified(date));
@@ -270,6 +292,7 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int
             if (!urls.isEmpty()) {
                 req.urls = urls;
                 req.priority = 2;
+                req.isIconFetch = false;
                 req.channel = channel;
                 req.date = nextDay;
                 requestData(req, channel->dayLastModified(nextDay));
@@ -281,7 +304,7 @@ void TvChannelList::requestChannelDay(TvChannel *channel, const QDate &date, int
 
 void TvChannelList::abort()
 {
-    m_currentRequest = QUrl();
+    m_currentRequest = Request();
     m_requests.clear();
     m_contents.clear();
     m_busy = false;
@@ -374,6 +397,7 @@ void TvChannelList::updateChannels(bool largeIcons)
         m_largeIcons = largeIcons;
         saveChannelSettings();
         emit hiddenChannelsChanged();
+        refreshIcons();
     }
 }
 
@@ -421,38 +445,43 @@ void TvChannelList::requestFinished()
         return;
     m_reply->deleteLater();
     m_reply = 0;
+    QUrl currentUrl = m_currentRequest.url();
     if (!m_contents.isEmpty()) {
 #ifdef DEBUG_NETWORK
-        qWarning() << "fetch succeeded:" << m_currentRequest << "size:" << m_contents.size();
+        qWarning() << "fetch succeeded:" << currentUrl << "size:" << m_contents.size();
 #endif
-        m_lastFetch.insert(m_currentRequest, QDateTime::currentDateTime());
-        QXmlStreamReader reader(m_contents);
-        while (!reader.hasError()) {
-            QXmlStreamReader::TokenType tokenType = reader.readNext();
-            if (tokenType == QXmlStreamReader::StartElement) {
-                if (reader.name() == QLatin1String("tv"))
-                    load(&reader, m_currentRequest);
-            } else if (tokenType == QXmlStreamReader::EndDocument) {
-                break;
+        m_lastFetch.insert(currentUrl, QDateTime::currentDateTime());
+        if (!m_currentRequest.isIconFetch) {
+            QXmlStreamReader reader(m_contents);
+            while (!reader.hasError()) {
+                QXmlStreamReader::TokenType tokenType = reader.readNext();
+                if (tokenType == QXmlStreamReader::StartElement) {
+                    if (reader.name() == QLatin1String("tv"))
+                        load(&reader, currentUrl);
+                } else if (tokenType == QXmlStreamReader::EndDocument) {
+                    break;
+                }
             }
+        } else {
+            setIconData(m_currentRequest.channel, m_contents, currentUrl);
         }
         m_contents = QByteArray();
     } else {
 #ifdef DEBUG_NETWORK
-        qWarning() << "fetch failed:" << m_currentRequest;
+        qWarning() << "fetch failed:" << currentUrl;
 #endif
     }
     int index = 0;
     while (index < m_requests.size()) {
         // Remove repeated entries for the same URL at other priorities.
-        if (m_requests.at(index).urls.contains(m_currentRequest)) {
+        if (m_requests.at(index).urls.contains(currentUrl)) {
             m_requests.removeAt(index);
             --m_requestsToDo;
         } else {
             ++index;
         }
     }
-    m_currentRequest = QUrl();
+    m_currentRequest = Request();
     ++m_requestsDone;
     nextPending();
     if (!m_currentRequest.isValid() && m_busy && m_requests.isEmpty()) {
@@ -469,14 +498,15 @@ void TvChannelList::requestFinished()
 void TvChannelList::requestError(QNetworkReply::NetworkError error)
 {
     qWarning() << "TvChannelList: request for url"
-               << m_currentRequest << "failed, error =" << int(error);
+               << m_currentRequest.url() << "failed, error =" << int(error);
 }
 
 void TvChannelList::requestData
     (const Request &req, const QDateTime &lastmod, int refreshAge)
 {
     // Bail out if the url is currently being requested.
-    if (m_currentRequest.isValid() && req.urls.contains(m_currentRequest))
+    QUrl currentUrl = m_currentRequest.url();
+    if (currentUrl.isValid() && req.urls.contains(currentUrl))
         return;
 
     // Look in the cache to see if the data is fresh enough.
@@ -491,6 +521,8 @@ void TvChannelList::requestData
     QDateTime refAge = QDateTime::currentDateTime().addSecs(-(60 * 60 * refreshAge));
     QDateTime lastFetch;
     for (int index = 0; index < req.urls.size(); ++index) {
+        if (req.isIconFetch)
+            break;      // Don't look in the cache for icon fetches.
         url = req.urls.at(index);
         if (lastmod.isValid()) {
             QNetworkCacheMetaData meta = m_nam.cache()->metaData(url);
@@ -603,9 +635,10 @@ void TvChannelList::nextPending()
 
     // Initiate a GET request for the next pending URL.
     Request req = m_requests.takeFirst();
-    m_currentRequest = req.urls.at(0);
+    m_currentRequest = req;
+    QUrl currentUrl = m_currentRequest.url();
     QNetworkRequest request;
-    request.setUrl(m_currentRequest);
+    request.setUrl(currentUrl);
     request.setRawHeader("User-Agent", "qtvguide/" TVGUIDE_VERSION);
     m_contents = QByteArray();
     m_reply = m_nam.get(request);
@@ -613,9 +646,9 @@ void TvChannelList::nextPending()
     connect(m_reply, SIGNAL(finished()), this, SLOT(requestFinished()));
     connect(m_reply, SIGNAL(error(QNetworkReply::NetworkError)),
             this, SLOT(requestError(QNetworkReply::NetworkError)));
-    m_lastFetch.remove(m_currentRequest);
+    m_lastFetch.remove(currentUrl);
 #ifdef DEBUG_NETWORK
-    qWarning() << "fetching from network:" << m_currentRequest;
+    qWarning() << "fetching from network:" << currentUrl;
 #endif
 
     // Start the throttle timer.  According to the OzTivo guidelines,
@@ -630,11 +663,14 @@ void TvChannelList::nextPending()
     // for interactive use and when fetching the data for multiple
     // days or channels, while still technically sending no more than
     // one request per second.
-    m_throttleTimer->start(1000);
+    //
+    // For icon fetches we start the next request immediately as they
+    // typically won't be going to the XML data server.
+    m_throttleTimer->start(req.isIconFetch ? 0 : 1000);
     m_throttled = true;
 
     // Tell the UI that a network request has been initiated.
-    emit networkRequest(req.channel, req.date);
+    emit networkRequest(req.channel, req.date, req.isIconFetch);
 
     // Turn on the busy flag and report the progress.
     if (!m_busy) {
@@ -879,4 +915,57 @@ void TvChannelList::removeTick(const TvProgramme *programme)
         ++it;
     }
     saveTicks();
+}
+
+void TvChannelList::refreshIcons()
+{
+    for (int index = 0; index < m_activeChannels.size(); ++index) {
+        TvChannel *channel = m_activeChannels.at(index);
+        if (channel->isHidden())
+            continue;
+        if (!channel->iconFile().isEmpty())
+            continue;
+        if (channel->iconUrl().isEmpty())
+            continue;
+
+        // Queue up a request to fetch the icon for this channel.
+        Request req;
+        req.urls += QUrl(channel->iconUrl());
+        req.priority = 10;
+        req.isIconFetch = true;
+        req.channel = channel;
+        requestData(req, QDateTime());
+    }
+}
+
+void TvChannelList::setIconData(TvChannel *channel, const QByteArray &data, const QUrl &url)
+{
+    // Construct the local file pathname to hold the icon data.
+    QString path = url.path();
+    QString filename = QDir::homePath() +
+                       QLatin1String("/.qtvguide");
+    QString dirPath = QLatin1String("icons/") + m_serviceId;
+    QDir dir(filename);
+    if (!dir.mkpath(dirPath))
+        return;
+    filename += QLatin1Char('/') + dirPath +
+                QLatin1Char('/') + channel->id();
+    if (path.endsWith(".jpg", Qt::CaseInsensitive))
+        filename += QLatin1String(".jpg");
+    else if (path.endsWith(".png", Qt::CaseInsensitive))
+        filename += QLatin1String(".png");
+    else
+        return;
+
+    // Save the icon data and then update the channel information.
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return;
+    file.write(data);
+    file.close();
+    channel->setIconFile(filename);
+    channel->setIcon(QIcon(filename));
+    m_iconFiles.insert(channel->id(), filename);
+    saveChannelSettings();
+    emit channelIconsChanged();
 }

@@ -97,15 +97,22 @@ Q_SIGNALS:
     void busyChanged(bool value);
     void progressChanged(qreal value);
     void bookmarksChanged();
-    void networkRequest(TvChannel *channel, const QDate &date);
+    void networkRequest(TvChannel *channel, const QDate &date, bool isIconFetch);
+    void channelIconsChanged();
 
 private:
     struct Request
     {
         QList<QUrl> urls;
         int priority;
+        bool isIconFetch;
         TvChannel *channel;
         QDate date;
+
+        QUrl url() const { return urls.isEmpty() ? QUrl() : urls.at(0); }
+        bool isValid() const { return !urls.isEmpty(); }
+
+        Request() { priority = 0; isIconFetch = false; channel = 0; }
     };
 
     QMap<QString, TvChannel *> m_channels;
@@ -118,7 +125,7 @@ private:
     QUrl m_startUrl;
     int m_startUrlRefresh;
     QList<Request> m_requests;
-    QUrl m_currentRequest;
+    Request m_currentRequest;
     QTimer *m_throttleTimer;
     bool m_hasDataFor;
     bool m_throttled;
@@ -146,6 +153,8 @@ private:
     void saveChannelSettings();
     void saveBookmarks();
     void saveTicks();
+    void refreshIcons();
+    void setIconData(TvChannel *channel, const QByteArray &data, const QUrl &url);
 
     friend class TvChannel;
 };

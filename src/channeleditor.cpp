@@ -58,9 +58,12 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     }
 
     if (channelList->largeIcons()) {
-        activeChannels->setIconSize(QSize(64, 64));
-        inactiveChannels->setIconSize(QSize(64, 64));
+        activeChannels->setIconSize(QSize(32, 32));
+        inactiveChannels->setIconSize(QSize(32, 32));
         largeIcons->setChecked(true);
+    } else {
+        activeChannels->setIconSize(QSize(16, 16));
+        inactiveChannels->setIconSize(QSize(16, 16));
     }
 
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
@@ -198,7 +201,7 @@ void ChannelEditor::setIcon()
     QString iconFile = item->data(Qt::UserRole + 2).toString();
     QString result = QFileDialog::getOpenFileName
         (this, tr("Select Icon"), iconFile,
-         tr("Images (*.png *.xpm *.jpg)"));
+         tr("Images (*.png *.jpg)"));
     if (!result.isEmpty() && result != iconFile) {
         item->setData(Qt::UserRole + 2, result);
         item->setIcon(QIcon(result));
@@ -254,11 +257,11 @@ void ChannelEditor::itemDoubleClicked(QListWidgetItem *item)
 void ChannelEditor::largeIconsChanged(bool value)
 {
     if (value) {
-        activeChannels->setIconSize(QSize(64, 64));
-        inactiveChannels->setIconSize(QSize(64, 64));
+        activeChannels->setIconSize(QSize(32, 32));
+        inactiveChannels->setIconSize(QSize(32, 32));
     } else {
-        activeChannels->setIconSize(QSize());
-        inactiveChannels->setIconSize(QSize());
+        activeChannels->setIconSize(QSize(16, 16));
+        inactiveChannels->setIconSize(QSize(16, 16));
     }
 }
 

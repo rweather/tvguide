@@ -25,6 +25,8 @@ TvChannelModel::TvChannelModel(TvChannelList *channelList, QObject *parent)
             this, SLOT(channelsChanged()));
     connect(channelList, SIGNAL(hiddenChannelsChanged()),
             this, SLOT(channelsChanged()));
+    connect(channelList, SIGNAL(channelIconsChanged()),
+            this, SLOT(channelIconsChanged()));
     loadVisibleChannels();
 }
 
@@ -78,8 +80,13 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
         //if (index.column() == ColumnNumber)
             //return int(Qt::AlignRight | Qt::AlignVCenter);
     } else if (role == Qt::DecorationRole) {
-        if (index.column() == ColumnName)
-            return channel->icon();
+        if (m_channelList->haveChannelNumbers()) {
+            if (index.column() == ColumnNumber)
+                return channel->icon();
+        } else {
+            if (index.column() == ColumnName)
+                return channel->icon();
+        }
     }
     return QVariant();
 }
@@ -98,6 +105,11 @@ QVariant TvChannelModel::headerData(int section, Qt::Orientation orientation, in
 void TvChannelModel::channelsChanged()
 {
     loadVisibleChannels();
+    reset();
+}
+
+void TvChannelModel::channelIconsChanged()
+{
     reset();
 }
 

@@ -75,15 +75,20 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(hiddenChannelsChanged()));
     connect(m_channelList, SIGNAL(channelIndexLoaded()),
             this, SLOT(channelIndexLoaded()));
-    connect(m_channelList, SIGNAL(networkRequest(TvChannel *, QDate)),
-            this, SLOT(networkRequest(TvChannel *, QDate)));
+    connect(m_channelList, SIGNAL(channelIconsChanged()),
+            this, SLOT(channelIconsChanged()));
+    connect(m_channelList, SIGNAL(networkRequest(TvChannel *, QDate, bool)),
+            this, SLOT(networkRequest(TvChannel *, QDate, bool)));
     m_channelModel = new TvChannelModel(m_channelList, this);
     channels->setModel(m_channelModel);
 
-    if (m_channelList->largeIcons())
-        channels->setIconSize(QSize(64, 64));
-    else
-        channels->setIconSize(QSize());
+    if (m_channelList->largeIcons()) {
+        channels->setIconSize(QSize(32, 32));
+        programmes->setIconSize(QSize(32, 32));
+    } else {
+        channels->setIconSize(QSize(16, 16));
+        programmes->setIconSize(QSize(16, 16));
+    }
     channels->verticalHeader()->hide();
     channels->horizontalHeader()->hide();
     channels->horizontalHeader()->setStretchLastSection(true);
@@ -251,10 +256,13 @@ void MainWindow::progressChanged(qreal progress)
     }
 }
 
-void MainWindow::networkRequest(TvChannel *channel, const QDate &date)
+void MainWindow::networkRequest(TvChannel *channel, const QDate &date, bool isIconFetch)
 {
     if (channel) {
-        statusBar()->showMessage(tr("Fetching %1, %2...").arg(channel->name(), date.toString(Qt::DefaultLocaleLongDate)));
+        if (isIconFetch)
+            statusBar()->showMessage(tr("Fetching channel logo for %1 ...").arg(channel->name()));
+        else
+            statusBar()->showMessage(tr("Fetching %1, %2...").arg(channel->name(), date.toString(Qt::DefaultLocaleLongDate)));
     } else {
         statusBar()->showMessage(tr("Fetching channel list ..."));
     }
@@ -470,11 +478,15 @@ void MainWindow::webSearch()
 
 void MainWindow::hiddenChannelsChanged()
 {
-    if (m_channelList->largeIcons())
-        channels->setIconSize(QSize(64, 64));
-    else
-        channels->setIconSize(QSize());
+    if (m_channelList->largeIcons()) {
+        channels->setIconSize(QSize(32, 32));
+        programmes->setIconSize(QSize(32, 32));
+    } else {
+        channels->setIconSize(QSize(16, 16));
+        programmes->setIconSize(QSize(16, 16));
+    }
     channels->resizeRowsToContents();
+    channels->resizeColumnsToContents();
 }
 
 void MainWindow::channelIndexLoaded()
@@ -486,7 +498,18 @@ void MainWindow::channelIndexLoaded()
     channels->setColumnHidden
         (TvChannelModel::ColumnNumber, !m_channelList->haveChannelNumbers());
     channels->resizeRowsToContents();
+    channels->resizeColumnsToContents();
     updateTimePeriods();
+}
+
+void MainWindow::channelIconsChanged()
+{
+    channels->resizeRowsToContents();
+    channels->resizeColumnsToContents();
+    if (actionMultiChannel->isChecked()) {
+        m_programmeModel->updateIcons();
+        programmes->resizeRowsToContents();
+    }
 }
 
 void MainWindow::refineChannels()

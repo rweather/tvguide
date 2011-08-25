@@ -44,7 +44,7 @@ private Q_SLOTS:
     void programmeChanged(const QModelIndex &index);
     void programmesReset();
     void programmesChanged(TvChannel *channel);
-    void networkRequest(TvChannel *channel, const QDate &date);
+    void networkRequest(TvChannel *channel, const QDate &date, bool isIconFetch);
 
     void showToday();
     void showNextDay();
@@ -66,6 +66,7 @@ private Q_SLOTS:
 
     void hiddenChannelsChanged();
     void channelIndexLoaded();
+    void channelIconsChanged();
     void refineChannels();
 
     void help();

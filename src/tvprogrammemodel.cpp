@@ -115,6 +115,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
                 return m_tickIcon;
             if (prog->color().isValid())
                 return m_bookmarkIcon;
+        } else if (index.column() == ColumnChannel) {
+            return prog->channel()->icon();
         }
     } else if (role == Qt::BackgroundRole) {
         // Paint the times for different parts of the day
@@ -166,4 +168,9 @@ void TvProgrammeModel::updateTick(int row)
 {
     QModelIndex idx = index(row, ColumnTime, QModelIndex());
     emit dataChanged(idx, idx);
+}
+
+void TvProgrammeModel::updateIcons()
+{
+    reset();
 }

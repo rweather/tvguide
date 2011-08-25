@@ -20,6 +20,7 @@
 #include "tvprogramme.h"
 #include "tvbookmark.h"
 #include <QtCore/qdebug.h>
+#include <QtCore/qfile.h>
 
 TvChannel::TvChannel(TvChannelList *channelList)
     : m_channelList(channelList)
@@ -186,10 +187,18 @@ bool TvChannel::load(QXmlStreamReader *reader)
     if (m_iconFile != iconFile) {
         m_iconFile = iconFile;
         changed = true;
-        if (!iconFile.isEmpty())
-            m_icon = QIcon(iconFile);
-        else
+        if (!iconFile.isEmpty()) {
+            if (QFile::exists(iconFile)) {
+                m_icon = QIcon(iconFile);
+            } else {
+                // Icon file no longer exists.
+                m_icon = QIcon();
+                m_iconFile = QString();
+                m_channelList->m_iconFiles.remove(m_id);
+            }
+        } else {
             m_icon = QIcon();
+        }
     }
     if (baseUrls != m_baseUrls) {
         m_baseUrls = baseUrls;

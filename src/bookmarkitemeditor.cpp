@@ -53,7 +53,9 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
             channelsCombo->addItem(channel->icon(), channel->name(), channel->id());
     }
     if (channelList->largeIcons())
-        channelsCombo->setIconSize(QSize(64, 64));
+        channelsCombo->setIconSize(QSize(32, 32));
+    else
+        channelsCombo->setIconSize(QSize(16, 16));
     channelsCombo->setCurrentIndex(0);
 
     seasonEdit->setEnabled(false);

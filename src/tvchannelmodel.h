@@ -42,6 +42,7 @@ public:
 
 private Q_SLOTS:
     void channelsChanged();
+    void channelIconsChanged();
 
 private:
     TvChannelList *m_channelList;
