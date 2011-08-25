@@ -78,6 +78,7 @@
     </property>
     <addaction name="actionEditChannels"/>
     <addaction name="actionWebSearch"/>
+    <addaction name="actionClearCache"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -314,7 +315,7 @@
   </action>
   <action name="actionEditChannels">
    <property name="text">
-    <string>Edit &amp;Channels ...</string>
+    <string>&amp;Edit Channels ...</string>
    </property>
   </action>
   <action name="actionOrganizeBookmarks">
@@ -436,6 +437,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>
+   </property>
+  </action>
+  <action name="actionClearCache">
+   <property name="text">
+    <string>&amp;Clear Cache</string>
    </property>
   </action>
  </widget>

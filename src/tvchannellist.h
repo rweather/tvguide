@@ -77,6 +77,7 @@ public Q_SLOTS:
     void reload();
     void reloadService();
     void updateChannels(bool largeIcons);
+    void clearCache();
 
 private Q_SLOTS:
     void authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);

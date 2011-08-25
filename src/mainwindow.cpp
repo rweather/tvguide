@@ -159,6 +159,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(actionZoomIn, SIGNAL(triggered()), this, SLOT(zoomIn()));
     connect(actionZoomOut, SIGNAL(triggered()), this, SLOT(zoomOut()));
     connect(actionZoomReset, SIGNAL(triggered()), this, SLOT(zoomReset()));
+    connect(actionClearCache, SIGNAL(triggered()),
+            m_channelList, SLOT(clearCache()));
 
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));

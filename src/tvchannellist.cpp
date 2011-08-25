@@ -377,6 +377,12 @@ void TvChannelList::updateChannels(bool largeIcons)
     }
 }
 
+void TvChannelList::clearCache()
+{
+    m_nam.cache()->clear();
+    reload();
+}
+
 void TvChannelList::authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator)
 {
     // TODO
