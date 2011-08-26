@@ -1,5 +1,20 @@
 ## Change log
 
+### 0.0.7
+
+* Add Wikipedia to the list of search engines for Web Search.
+* Season number matching in bookmarks.
+* Remove redundant failed matches before and after a successful match.
+* Combine multiple showings of the same episode into a single
+  entry in the 7-day outlook.  The extra showings are displayed
+  as "Other showings".
+* Temporary "tick" bookmarks for marking one-off shows such as movies.
+* Matching bookmarks on "Any time".  Makes it easier to watch for
+  future shows with "Any channel, Any day, and Any time".
+* Option on the "Tools" menu to clear the disk cache.
+* Load channel icons.
+* Handle the XMLTV "presenter" tag.
+
 ### 0.0.6
 
 * Fix a web search problem related to non-alphanumeric characters
