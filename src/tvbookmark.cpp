@@ -330,8 +330,8 @@ TvBookmark::Match TvBookmark::match
     if (!m_seasons.isEmpty() && result != ShouldMatch &&
             result != NoMatch) {
         int season = programme->season();
+        int index;
         if (season) {
-            int index;
             for (index = 0; index < m_seasons.size(); ++index) {
                 if (season >= m_seasons.at(index).first &&
                         season <= m_seasons.at(index).second)
@@ -340,7 +340,18 @@ TvBookmark::Match TvBookmark::match
             if (index >= m_seasons.size())
                 result = NoMatch;
         } else {
-            result = NoMatch;
+            // If the programme does not have a season, then match
+            // it against a bookmark with N+ as one of the ranges.
+            // Usually the programme does not have a season number
+            // because it is a new episode in the most recent season
+            // and the upstream XMLTV database doesn't have a season
+            // and episode number for it yet.
+            for (index = 0; index < m_seasons.size(); ++index) {
+                if (m_seasons.at(index).second == 0x7fffffff)
+                    break;
+            }
+            if (index >= m_seasons.size())
+                result = NoMatch;
         }
     }
 
