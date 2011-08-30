@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="time_color_late_night">#ff808080</drawable>
+    <drawable name="time_color_morning">#ff00c040</drawable>
+    <drawable name="time_color_afternoon">#ffc0c040</drawable>
+    <drawable name="time_color_night">#ffffff00</drawable>
+</resources>
