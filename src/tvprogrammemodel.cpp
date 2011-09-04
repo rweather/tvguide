@@ -26,9 +26,11 @@ TvProgrammeModel::TvProgrammeModel(QObject *parent)
     , m_channel(0)
     , m_bookmarkIcon(QLatin1String(":/images/bookmark.png"))
     , m_tickIcon(QLatin1String(":/images/tick.png"))
+    , m_returnedIcon(QLatin1String(":/images/ktip.png"))
 {
     m_bookmarkIcon = m_bookmarkIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     m_tickIcon = m_tickIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    m_returnedIcon = m_returnedIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
 TvProgrammeModel::~TvProgrammeModel()
@@ -115,6 +117,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
         if (index.column() == ColumnTime) {
             if (prog->isTicked())
                 return m_tickIcon;
+            if (prog->bookmark() && !prog->bookmark()->isOnAir())
+                return m_returnedIcon;
             if (prog->color().isValid())
                 return m_bookmarkIcon;
         } else if (index.column() == ColumnChannel) {

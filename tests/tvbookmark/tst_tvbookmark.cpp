@@ -72,7 +72,7 @@ void tst_TvBookmark::properties()
     QVERIFY(!b.stopTime().isValid());
     QVERIFY(!b.anyTime());
     QVERIFY(!b.color().isValid());
-    QVERIFY(b.isEnabled());
+    QVERIFY(b.isOnAir());
     QVERIFY(b.seasons().isEmpty());
     QVERIFY(b.seasonList().isEmpty());
 
@@ -88,7 +88,7 @@ void tst_TvBookmark::properties()
     b.setStopTime(QTime(17, 54, 32));
     b.setAnyTime(true);
     b.setColor(Qt::red);
-    b.setEnabled(false);
+    b.setOnAir(false);
     b.setSeasons(QLatin1String("1,3-5, 7+"));
 
     QCOMPARE(b.title(), QLatin1String("foo"));
@@ -101,7 +101,7 @@ void tst_TvBookmark::properties()
     QCOMPARE(b.color().red(), 255);
     QCOMPARE(b.color().blue(), 0);
     QCOMPARE(b.color().green(), 0);
-    QVERIFY(!b.isEnabled());
+    QVERIFY(!b.isOnAir());
     QCOMPARE(b.seasons(), QLatin1String("1,3-5,7+"));
     QVERIFY(b.seasonList() == list);
 
@@ -116,7 +116,7 @@ void tst_TvBookmark::properties()
     QCOMPARE(b2.color().red(), 255);
     QCOMPARE(b2.color().blue(), 0);
     QCOMPARE(b2.color().green(), 0);
-    QVERIFY(!b2.isEnabled());
+    QVERIFY(!b2.isOnAir());
     QCOMPARE(b2.seasons(), QLatin1String("1,3-5,7+"));
     QVERIFY(b2.seasonList() == list);
 }
@@ -390,9 +390,6 @@ void tst_TvBookmark::match()
     p.setStop(QDateTime::fromString(pstop, QLatin1String("yyyy-MM-dd hh:mm")));
 
     QCOMPARE(int(b.match(&p, TvBookmark::MatchOptions(options))), result);
-
-    b.setEnabled(false);
-    QCOMPARE(int(b.match(&p, TvBookmark::MatchOptions(options))), int(TvBookmark::NoMatch));
 }
 
 void tst_TvBookmark::dayOfWeek_data()

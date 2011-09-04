@@ -110,20 +110,21 @@ QVariant TvBookmarkModel::data(const QModelIndex &index, int role) const
         default: break;
         }
     } else if (role == Qt::ForegroundRole) {
-        if (bookmark->isEnabled()) {
-            if (index.column() == MODEL_TITLE)
-                return QBrush(bookmark->color());
-        } else {
-            QWidget *w = qobject_cast<QWidget *>
-                (static_cast<const QObject *>(this)->parent());
-            return w->palette().brush(QPalette::Disabled, QPalette::WindowText);
-        }
+        if (index.column() == MODEL_TITLE)
+            return QBrush(bookmark->color());
     } else if (role == Qt::CheckStateRole) {
         if (index.column() == MODEL_CHECK) {
-            if (bookmark->isEnabled())
+            if (bookmark->isOnAir())
                 return int(Qt::Checked);
             else
                 return int(Qt::Unchecked);
+        }
+    } else if (role == Qt::ToolTipRole) {
+        if (index.column() == MODEL_CHECK) {
+            if (bookmark->isOnAir())
+                return tr("On Air");
+            else
+                return tr("Off Air");
         }
     }
     return QVariant();
@@ -140,7 +141,7 @@ bool TvBookmarkModel::setData
     if (row < 0 || row >= m_bookmarks.size())
         return false;
     TvBookmark *bookmark = m_bookmarks.at(row);
-    bookmark->setEnabled(value.toInt() == int(Qt::Checked));
+    bookmark->setOnAir(value.toInt() == int(Qt::Checked));
     return true;
 }
 

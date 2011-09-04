@@ -96,7 +96,6 @@
     <addaction name="separator"/>
     <addaction name="action7DayOutlook"/>
     <addaction name="actionShowPartialMatches"/>
-    <addaction name="actionShowFailedMatches"/>
     <addaction name="separator"/>
     <addaction name="actionTickShow"/>
    </widget>

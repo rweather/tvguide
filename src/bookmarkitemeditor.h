@@ -59,6 +59,15 @@ public:
     bool seasonsEnabled() const { return seasonEnable->isChecked(); }
     void setSeasonsEnabled(bool value) { seasonEnable->setChecked(value); }
 
+    bool isOnAir() const { return onAirButton->isChecked(); }
+    void setOnAir(bool value)
+    {
+        if (value)
+            onAirButton->setChecked(true);
+        else
+            offAirButton->setChecked(true);
+    }
+
     void copyFromBookmark(const TvBookmark *bookmark);
     void copyToBookmark(TvBookmark *bookmark);
 

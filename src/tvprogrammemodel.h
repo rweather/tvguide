@@ -54,6 +54,7 @@ private:
     QDate m_date;
     QPixmap m_bookmarkIcon;
     QPixmap m_tickIcon;
+    QPixmap m_returnedIcon;
 };
 
 #endif

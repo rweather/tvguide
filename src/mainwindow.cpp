@@ -192,7 +192,8 @@ MainWindow::MainWindow(QWidget *parent)
     settings.beginGroup(QLatin1String("View"));
     m_fontMultiplier = qreal(settings.value(QLatin1String("zoom"), 1.0).toDouble());
     actionShowPartialMatches->setChecked(settings.value(QLatin1String("partial"), true).toBool());
-    actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), false).toBool());
+    //actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), false).toBool());
+    actionShowFailedMatches->setChecked(true);
     action7DayOutlook->setChecked(settings.value(QLatin1String("outlook7days"), false).toBool());
     actionMultiChannel->setChecked(settings.value(QLatin1String("allchannels"), false).toBool());
     settings.endGroup();
@@ -221,8 +222,9 @@ MainWindow::~MainWindow()
     settings.setValue(QLatin1String("zoom"), m_fontMultiplier);
     settings.setValue(QLatin1String("partial"),
                       actionShowPartialMatches->isChecked());
-    settings.setValue(QLatin1String("failed"),
-                      actionShowFailedMatches->isChecked());
+    //settings.setValue(QLatin1String("failed"),
+    //                  actionShowFailedMatches->isChecked());
+    settings.remove(QLatin1String("failed"));
     settings.setValue(QLatin1String("outlook7days"),
                       action7DayOutlook->isChecked());
     settings.setValue(QLatin1String("allchannels"),

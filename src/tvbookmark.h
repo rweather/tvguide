@@ -76,8 +76,8 @@ public:
     QColor color() const { return m_color; }
     void setColor(const QColor &color) { m_color = color; }
 
-    bool isEnabled() const { return m_enabled; }
-    void setEnabled(bool value) { m_enabled = value; }
+    bool isOnAir() const { return m_onair; }
+    void setOnAir(bool value) { m_onair = value; }
 
     QString seasons() const;
     void setSeasons(const QString &seasons);
@@ -116,7 +116,7 @@ private:
     QString m_channelId;
     int m_dayOfWeek;
     int m_dayOfWeekMask;
-    bool m_enabled;
+    bool m_onair;
     bool m_anyTime;
     QTime m_startTime;
     QTime m_stopTime;

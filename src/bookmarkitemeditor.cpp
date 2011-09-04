@@ -164,6 +164,7 @@ void BookmarkItemEditor::copyFromBookmark(const TvBookmark *bookmark)
     setColor(bookmark->color());
     setSeasons(bookmark->seasons());
     setSeasonsEnabled(!bookmark->seasonList().isEmpty());
+    setOnAir(bookmark->isOnAir());
 }
 
 void BookmarkItemEditor::copyToBookmark(TvBookmark *bookmark)
@@ -179,6 +180,7 @@ void BookmarkItemEditor::copyToBookmark(TvBookmark *bookmark)
         bookmark->setSeasons(seasons());
     else
         bookmark->setSeasons(QString());
+    bookmark->setOnAir(isOnAir());
 }
 
 void BookmarkItemEditor::changeColor()

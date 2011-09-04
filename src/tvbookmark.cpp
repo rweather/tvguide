@@ -23,7 +23,7 @@
 TvBookmark::TvBookmark()
     : m_dayOfWeek(TvBookmark::AnyDay)
     , m_dayOfWeekMask(0xFE)
-    , m_enabled(true)
+    , m_onair(true)
     , m_anyTime(false)
 {
 }
@@ -33,7 +33,7 @@ TvBookmark::TvBookmark(const TvBookmark &other)
     , m_channelId(other.channelId())
     , m_dayOfWeek(other.dayOfWeek())
     , m_dayOfWeekMask(other.dayOfWeekMask())
-    , m_enabled(other.isEnabled())
+    , m_onair(other.isOnAir())
     , m_anyTime(other.anyTime())
     , m_startTime(other.startTime())
     , m_stopTime(other.stopTime())
@@ -255,9 +255,6 @@ TvBookmark::Match TvBookmark::match
     TvBookmark::Match result = FullMatch;
     bool should = false;
 
-    if (!m_enabled)
-        return NoMatch;
-
     if (m_title.compare(programme->title(), Qt::CaseInsensitive) != 0) {
         if (!(options & NonMatching))
             return NoMatch;
@@ -326,6 +323,10 @@ TvBookmark::Match TvBookmark::match
     if (should && result != ShouldMatch)
         result = NoMatch;
 
+    // Off-air bookmarks don't show failed matches.
+    if (!m_onair && result == ShouldMatch)
+        result = NoMatch;
+
     // Match the season number.
     if (!m_seasons.isEmpty() && result != ShouldMatch &&
             result != NoMatch) {
@@ -371,12 +372,12 @@ void TvBookmark::load(QSettings *settings)
     } else {
         setDayOfWeek(dayOfWeek);
     }
-    m_enabled = settings->value(QLatin1String("enabled"), true).toBool();
     m_anyTime = settings->value(QLatin1String("anyTime"), false).toBool();
     m_startTime = QTime::fromString(settings->value(QLatin1String("startTime")).toString(), Qt::TextDate);
     m_stopTime = QTime::fromString(settings->value(QLatin1String("stopTime")).toString(), Qt::TextDate);
     m_color = QColor(settings->value(QLatin1String("color")).toString());
     setSeasons(settings->value(QLatin1String("seasons")).toString());
+    m_onair = settings->value(QLatin1String("onair"), true).toBool();
 }
 
 void TvBookmark::save(QSettings *settings)
@@ -387,10 +388,11 @@ void TvBookmark::save(QSettings *settings)
         settings->setValue(QLatin1String("dayOfWeek"), m_dayOfWeekMask | 0x0100);
     else
         settings->setValue(QLatin1String("dayOfWeek"), m_dayOfWeek);
-    settings->setValue(QLatin1String("enabled"), m_enabled);
+    settings->remove(QLatin1String("enabled")); // Obsolete
     settings->setValue(QLatin1String("anyTime"), m_anyTime);
     settings->setValue(QLatin1String("startTime"), m_startTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("stopTime"), m_stopTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("color"), m_color.name());
     settings->setValue(QLatin1String("seasons"), seasons());
+    settings->setValue(QLatin1String("onair"), m_onair);
 }

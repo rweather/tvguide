@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>556</width>
-    <height>257</height>
+    <height>292</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -216,6 +216,51 @@
        </item>
       </layout>
      </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_7">
+       <property name="text">
+        <string>Currently:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QGroupBox" name="groupBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string/>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <property name="margin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QRadioButton" name="onAirButton">
+          <property name="text">
+           <string>On Air</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="offAirButton">
+          <property name="text">
+           <string>Off Air</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -241,6 +286,8 @@
   <tabstop>colorSelect</tabstop>
   <tabstop>seasonEnable</tabstop>
   <tabstop>seasonEdit</tabstop>
+  <tabstop>onAirButton</tabstop>
+  <tabstop>offAirButton</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>
