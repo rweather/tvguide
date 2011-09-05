@@ -320,6 +320,8 @@ TvBookmark::Match TvBookmark::match
         result = NoMatch;
 
     // Deal with non-matching bookmarks that cover the same timeslot.
+    if (should && (result == Underrun || result == Overrun))
+        result = ShouldMatch;
     if (should && result != ShouldMatch)
         result = NoMatch;
 
