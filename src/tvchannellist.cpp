@@ -31,7 +31,7 @@ TvChannelList::TvChannelList(QObject *parent)
     , m_hasDataFor(false)
     , m_throttled(false)
     , m_busy(false)
-    , m_largeIcons(false)
+    , m_largeIcons(true)
     , m_haveChannelNumbers(false)
     , m_progress(1.0f)
     , m_requestsToDo(0)
@@ -346,7 +346,7 @@ void TvChannelList::reloadService()
     m_hiddenChannelIds.clear();
     m_iconFiles.clear();
     m_hasDataFor = false;
-    m_largeIcons = false;
+    m_largeIcons = true;
     m_haveChannelNumbers = false;
     m_bookmarks.clear();
     m_indexedBookmarks.clear();
@@ -695,7 +695,7 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
         return;
 
     settings->beginGroup(m_serviceId);
-    m_largeIcons = settings->value(QLatin1String("largeIcons"), false).toBool();
+    m_largeIcons = settings->value(QLatin1String("largeIcons"), true).toBool();
     m_hiddenChannelIds.clear();
     m_iconFiles.clear();
     int size = settings->beginReadArray(QLatin1String("channels"));
