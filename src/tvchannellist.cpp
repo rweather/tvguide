@@ -337,6 +337,7 @@ void TvChannelList::reload()
     // If-Modified-Since to reuse the local disk copy if possible,
     // but we want to know if the cache is up to date on reload.
     m_lastFetch.clear();
+    m_loaded.clear();
     refreshChannels(true);
 }
 
@@ -357,6 +358,7 @@ void TvChannelList::reloadService()
     m_serviceId = QString();
     m_serviceName = QString();
     m_startUrl = QUrl();
+    m_loaded.clear();
 
     emit channelsChanged();
     emit bookmarksChanged();
@@ -459,8 +461,11 @@ void TvChannelList::requestFinished()
             while (!reader.hasError()) {
                 QXmlStreamReader::TokenType tokenType = reader.readNext();
                 if (tokenType == QXmlStreamReader::StartElement) {
-                    if (reader.name() == QLatin1String("tv"))
+                    if (reader.name() == QLatin1String("tv")) {
                         load(&reader, currentUrl);
+                        if (m_currentRequest.channel)
+                            m_loaded += QPair<TvChannel *, int>(m_currentRequest.channel, m_currentRequest.date.toJulianDay());
+                    }
                 } else if (tokenType == QXmlStreamReader::EndDocument) {
                     break;
                 }
@@ -565,13 +570,24 @@ void TvChannelList::requestData
             }
         }
     }
+    QPair<TvChannel *, int> loadedKey(req.channel, req.date.toJulianDay());
     if (device) {
+        if (m_loaded.contains(loadedKey)) {
+#ifdef DEBUG_NETWORK
+            qWarning() << "skipping reparse for:" << url;
+#endif
+            delete device;
+            return;
+        }
         QXmlStreamReader *reader = new QXmlStreamReader(device);
         while (!reader->hasError()) {
             QXmlStreamReader::TokenType tokenType = reader->readNext();
             if (tokenType == QXmlStreamReader::StartElement) {
-                if (reader->name() == QLatin1String("tv"))
+                if (reader->name() == QLatin1String("tv")) {
                     load(reader, url);
+                    if (req.channel)
+                        m_loaded += loadedKey;
+                }
             } else if (tokenType == QXmlStreamReader::EndDocument) {
                 break;
             }
@@ -580,6 +596,7 @@ void TvChannelList::requestData
         delete device;
         return;
     }
+    m_loaded -= loadedKey;
 
     // Add the request to the queue, in priority order.
     int index = 0;

@@ -24,6 +24,7 @@
 #include "tvtick.h"
 #include <QtCore/qmap.h>
 #include <QtCore/qset.h>
+#include <QtCore/qpair.h>
 #include <QtCore/qurl.h>
 #include <QtCore/qtimer.h>
 #include <QtCore/qsettings.h>
@@ -120,6 +121,7 @@ private:
     QList<Request> m_requests;
     Request m_currentRequest;
     QTimer *m_throttleTimer;
+    QSet< QPair<TvChannel *, int> > m_loaded;
     bool m_hasDataFor;
     bool m_throttled;
     bool m_busy;
