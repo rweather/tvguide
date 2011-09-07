@@ -42,7 +42,10 @@ public:
     void setStop(const QDateTime &stop) { m_stop = stop; }
 
     QString title() const { return m_title; }
-    void setTitle(const QString &title) { m_title = title; }
+    void setTitle(const QString &title)
+        { m_title = title; m_indexTitle = title.toLower(); }
+
+    QString indexTitle() const { return m_indexTitle; }
 
     QString subTitle() const { return m_subTitle; }
     QString description() const { return m_description; }
@@ -90,6 +93,7 @@ private:
     QDateTime m_start;
     QDateTime m_stop;
     QString m_title;
+    QString m_indexTitle;
     QString m_subTitle;
     QString m_description;
     QString m_date;

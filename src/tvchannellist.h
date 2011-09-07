@@ -20,6 +20,7 @@
 
 #include "tvchannel.h"
 #include "tvbookmark.h"
+#include "tvbookmarklist.h"
 #include "tvtick.h"
 #include <QtCore/qmap.h>
 #include <QtCore/qset.h>
@@ -58,17 +59,7 @@ public:
     bool largeIcons() const { return m_largeIcons; }
     void setLargeIcons(bool value) { m_largeIcons = value; }
 
-    void addBookmark(TvBookmark *bookmark);
-    void removeBookmark(TvBookmark *bookmark, bool notify = true);
-    TvBookmark::Match matchBookmarks
-        (const TvProgramme *programme, TvBookmark **bookmark,
-         TvBookmark::MatchOptions options) const;
-
-    QList<TvBookmark *> bookmarks() const { return m_bookmarks; }
-    void replaceBookmarks(const QList<TvBookmark *> &bookmarks);
-
-    void addTick(const TvProgramme *programme);
-    void removeTick(const TvProgramme *programme);
+    TvBookmarkList *bookmarkList() { return &m_bookmarkList; }
 
 public Q_SLOTS:
     void refreshChannels(bool forceReload = false);
@@ -88,6 +79,8 @@ private Q_SLOTS:
     void requestReadyRead();
     void requestFinished();
     void requestError(QNetworkReply::NetworkError);
+    void saveBookmarks();
+    void saveTicks();
 
 Q_SIGNALS:
     void channelIndexLoaded();
@@ -138,9 +131,7 @@ private:
     QNetworkReply *m_reply;
     QByteArray m_contents;
     QMap<QUrl, QDateTime> m_lastFetch;
-    QList<TvBookmark *> m_bookmarks;
-    QMultiMap<QString, TvBookmark *> m_indexedBookmarks;
-    QMultiMap<QString, TvTick *> m_ticks;
+    TvBookmarkList m_bookmarkList;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
     void loadOzTivoChannelData();
@@ -151,8 +142,6 @@ private:
     void forceProgressUpdate();
     void loadServiceSettings(QSettings *settings);
     void saveChannelSettings();
-    void saveBookmarks();
-    void saveTicks();
     void refreshIcons();
     void setIconData(TvChannel *channel, const QByteArray &data, const QUrl &url);
 

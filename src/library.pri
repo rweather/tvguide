@@ -5,6 +5,7 @@ INCLUDEPATH += $$PWD
 
 SOURCES += \
     tvbookmark.cpp \
+    tvbookmarklist.cpp \
     tvbookmarkmodel.cpp \
     tvchannel.cpp \
     tvchannellist.cpp \
@@ -16,6 +17,7 @@ SOURCES += \
 
 HEADERS += \
     tvbookmark.h \
+    tvbookmarklist.h \
     tvbookmarkmodel.h \
     tvchannel.h \
     tvchannellist.h \

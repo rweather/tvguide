@@ -56,14 +56,20 @@ TvChannelList::TvChannelList(QObject *parent)
     connect(m_throttleTimer, SIGNAL(timeout()),
             this, SLOT(throttleTimeout()));
 
+    connect(&m_bookmarkList, SIGNAL(bookmarksChanged()),
+            this, SIGNAL(bookmarksChanged()));
+    connect(&m_bookmarkList, SIGNAL(bookmarksChanged()),
+            this, SLOT(saveBookmarks()));
+
+    connect(&m_bookmarkList, SIGNAL(ticksChanged()),
+            this, SLOT(saveTicks()));
+
     reloadService();
 }
 
 TvChannelList::~TvChannelList()
 {
     qDeleteAll(m_channels);
-    qDeleteAll(m_bookmarks);
-    qDeleteAll(m_ticks);
 }
 
 TvChannel *TvChannelList::channel(const QString &id) const
@@ -339,8 +345,6 @@ void TvChannelList::reloadService()
     abort();
 
     qDeleteAll(m_channels);
-    qDeleteAll(m_bookmarks);
-    qDeleteAll(m_ticks);
     m_channels.clear();
     m_activeChannels.clear();
     m_hiddenChannelIds.clear();
@@ -348,12 +352,11 @@ void TvChannelList::reloadService()
     m_hasDataFor = false;
     m_largeIcons = true;
     m_haveChannelNumbers = false;
-    m_bookmarks.clear();
-    m_indexedBookmarks.clear();
+    m_bookmarkList.clearBookmarks();
+    m_bookmarkList.clearTicks();
     m_serviceId = QString();
     m_serviceName = QString();
     m_startUrl = QUrl();
-    m_ticks.clear();
 
     emit channelsChanged();
     emit bookmarksChanged();
@@ -713,33 +716,17 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
     }
     settings->endArray();
 
-    qDeleteAll(m_bookmarks);
-    m_bookmarks.clear();
-    m_indexedBookmarks.clear();
+    m_bookmarkList.clearBookmarks();
     size = settings->beginReadArray(QLatin1String("bookmarks"));
     for (int index = 0; index < size; ++index) {
         settings->setArrayIndex(index);
         TvBookmark *bookmark = new TvBookmark();
         bookmark->load(settings);
-        m_bookmarks.append(bookmark);
-        m_indexedBookmarks.insert(bookmark->title().toLower(), bookmark);
+        m_bookmarkList.addBookmark(bookmark, false);
     }
     settings->endArray();
 
-    qDeleteAll(m_ticks);
-    m_ticks.clear();
-    size = settings->beginReadArray(QLatin1String("ticks"));
-    QDateTime expiry = QDateTime::currentDateTime().addDays(-30);
-    for (int index = 0; index < size; ++index) {
-        settings->setArrayIndex(index);
-        TvTick *tick = new TvTick();
-        tick->load(settings);
-        if (tick->timestamp() < expiry)
-            delete tick;
-        else
-            m_ticks.insert(tick->title(), tick);
-    }
-    settings->endArray();
+    m_bookmarkList.loadTicks(settings);
 
     settings->endGroup();
 }
@@ -780,8 +767,9 @@ void TvChannelList::saveBookmarks()
                        QLatin1String("qtvguide"));
     settings.beginGroup(m_serviceId);
     settings.beginWriteArray(QLatin1String("bookmarks"));
-    for (int index = 0; index < m_bookmarks.size(); ++index) {
-        TvBookmark *bookmark = m_bookmarks.at(index);
+    QList<TvBookmark *> bookmarks = m_bookmarkList.bookmarks();
+    for (int index = 0; index < bookmarks.size(); ++index) {
+        TvBookmark *bookmark = bookmarks.at(index);
         settings.setArrayIndex(index);
         bookmark->save(&settings);
     }
@@ -797,124 +785,9 @@ void TvChannelList::saveTicks()
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
     settings.beginGroup(m_serviceId);
-    settings.beginWriteArray(QLatin1String("ticks"));
-    int index = 0;
-    QMultiMap<QString, TvTick *>::ConstIterator it;
-    for (it = m_ticks.constBegin(); it != m_ticks.constEnd(); ++it) {
-        settings.setArrayIndex(index++);
-        it.value()->save(&settings);
-    }
-    settings.endArray();
+    m_bookmarkList.saveTicks(&settings);
     settings.endGroup();
     settings.sync();
-}
-
-void TvChannelList::addBookmark(TvBookmark *bookmark)
-{
-    Q_ASSERT(bookmark);
-    m_bookmarks.append(bookmark);
-    m_indexedBookmarks.insert(bookmark->title().toLower(), bookmark);
-    emit bookmarksChanged();
-    saveBookmarks();
-}
-
-void TvChannelList::removeBookmark(TvBookmark *bookmark, bool notify)
-{
-    Q_ASSERT(bookmark);
-    m_bookmarks.removeAll(bookmark);
-    m_indexedBookmarks.remove(bookmark->title().toLower(), bookmark);
-    if (notify) {
-        emit bookmarksChanged();
-        saveBookmarks();
-    }
-}
-
-TvBookmark::Match TvChannelList::matchBookmarks
-    (const TvProgramme *programme, TvBookmark **bookmark,
-     TvBookmark::MatchOptions options) const
-{
-    TvBookmark::Match result = TvBookmark::NoMatch;
-
-    // Check the list of ticked programmes first as ticking takes
-    // precedence over bookmark matching.
-    QMultiMap<QString, TvTick *>::ConstIterator tickit;
-    tickit = m_ticks.constFind(programme->title());
-    while (tickit != m_ticks.constEnd()) {
-        const TvTick *tick = tickit.value();
-        if (tick->match(programme)) {
-            const_cast<TvProgramme *>(programme)->setTicked(true);
-            *bookmark = 0;
-            result = TvBookmark::TickMatch;
-            break;
-        }
-        ++tickit;
-    }
-
-    // Look for a bookmark match.
-    QMultiMap<QString, TvBookmark *>::ConstIterator it;
-    if (options & TvBookmark::NonMatching)
-        it = m_indexedBookmarks.constBegin();
-    else
-        it = m_indexedBookmarks.constFind(programme->title().toLower());
-    while (it != m_indexedBookmarks.constEnd()) {
-        TvBookmark::Match match = it.value()->match(programme, options);
-        if (match != TvBookmark::NoMatch) {
-            if (match == TvBookmark::ShouldMatch) {
-                if (result != TvBookmark::TitleMatch) {
-                    *bookmark = it.value();
-                    result = TvBookmark::ShouldMatch;
-                }
-            } else if (match != TvBookmark::TitleMatch) {
-                *bookmark = it.value();
-                return match;
-            } else {
-                *bookmark = it.value();
-                result = TvBookmark::TitleMatch;
-            }
-        }
-        ++it;
-    }
-    return result;
-}
-
-void TvChannelList::replaceBookmarks(const QList<TvBookmark *> &bookmarks)
-{
-    qDeleteAll(m_bookmarks);
-    m_bookmarks = bookmarks;
-    m_indexedBookmarks.clear();
-    for (int index = 0; index < bookmarks.size(); ++index) {
-        TvBookmark *bookmark = bookmarks.at(index);
-        m_indexedBookmarks.insert(bookmark->title().toLower(), bookmark);
-    }
-    emit bookmarksChanged();
-    saveBookmarks();
-}
-
-void TvChannelList::addTick(const TvProgramme *programme)
-{
-    TvTick *tick = new TvTick();
-    tick->setTitle(programme->title());
-    tick->setChannelId(programme->channel()->id());
-    tick->setStart(programme->start());
-    tick->setTimestamp(QDateTime::currentDateTime());
-    m_ticks.insert(tick->title(), tick);
-    saveTicks();
-}
-
-void TvChannelList::removeTick(const TvProgramme *programme)
-{
-    QMultiMap<QString, TvTick *>::Iterator it;
-    it = m_ticks.find(programme->title());
-    while (it != m_ticks.end()) {
-        TvTick *tick = it.value();
-        if (tick->start() == programme->start() &&
-                tick->channelId() == programme->channel()->id()) {
-            m_ticks.erase(it);
-            break;
-        }
-        ++it;
-    }
-    saveTicks();
 }
 
 void TvChannelList::refreshIcons()

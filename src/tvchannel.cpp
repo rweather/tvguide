@@ -342,7 +342,7 @@ QList<TvProgramme *> TvChannel::programmesForDay
         if (candidate) {
             TvBookmark *bookmark = 0;
             TvBookmark::Match match;
-            match = channelList()->matchBookmarks(prog, &bookmark, options);
+            match = channelList()->bookmarkList()->match(prog, &bookmark, options);
             TvBookmark *addBookmark = bookmark;
             TvBookmark::Match addMatch = match;
             if (match != TvBookmark::NoMatch) {
@@ -391,7 +391,7 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
                     prog->stop() <= stopTime)) {
             TvBookmark *bookmark = 0;
             TvBookmark::Match match;
-            match = channelList()->matchBookmarks(prog, &bookmark, options);
+            match = channelList()->bookmarkList()->match(prog, &bookmark, options);
             TvProgramme *addProg = prog;
             if (match != TvBookmark::NoMatch) {
                 if (prev && prevBookmark == bookmark) {

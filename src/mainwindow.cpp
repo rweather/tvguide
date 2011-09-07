@@ -418,8 +418,8 @@ void MainWindow::addBookmark()
         TvBookmark *bookmark = new TvBookmark();
         bookmarkDlg.copyToBookmark(bookmark);
         if (editBookmark)
-            m_channelList->removeBookmark(editBookmark, false);
-        m_channelList->addBookmark(bookmark);
+            m_channelList->bookmarkList()->removeBookmark(editBookmark, false);
+        m_channelList->bookmarkList()->addBookmark(bookmark);
     }
 }
 
@@ -437,10 +437,10 @@ void MainWindow::tickShow()
     TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
     if (programme->isTicked()) {
         programme->setTicked(false);
-        m_channelList->removeTick(programme);
+        m_channelList->bookmarkList()->removeTick(programme);
     } else {
         programme->setTicked(true);
-        m_channelList->addTick(programme);
+        m_channelList->bookmarkList()->addTick(programme);
     }
     m_programmeModel->updateTick(index.row());
 }

@@ -26,7 +26,7 @@ TvBookmarkModel::TvBookmarkModel(TvChannelList *channelList, QObject *parent)
     : QAbstractItemModel(parent)
     , m_channelList(channelList)
 {
-    QList<TvBookmark *> bookmarks = channelList->bookmarks();
+    QList<TvBookmark *> bookmarks = channelList->bookmarkList()->bookmarks();
     for (int index = 0; index < bookmarks.size(); ++index)
         m_bookmarks.append(new TvBookmark(*bookmarks.at(index)));
 }

@@ -70,7 +70,7 @@ BookmarkListEditor::~BookmarkListEditor()
 
 void BookmarkListEditor::accept()
 {
-    m_channelList->replaceBookmarks(m_model->detachBookmarks());
+    m_channelList->bookmarkList()->replaceBookmarks(m_model->detachBookmarks());
     QDialog::accept();
 }
 

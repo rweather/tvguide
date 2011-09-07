@@ -90,6 +90,7 @@ void TvProgramme::load(QXmlStreamReader *reader)
             if (reader->name() == QLatin1String("title")) {
                 m_title = reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
+                m_indexTitle = m_title.toLower();
             } else if (reader->name() == QLatin1String("sub-title")) {
                 m_subTitle = reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);

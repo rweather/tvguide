@@ -52,6 +52,8 @@ public:
     QString title() const { return m_title; }
     void setTitle(const QString &title) { m_title = title; }
 
+    QString indexTitle() const { return m_title.toLower(); }
+
     QString channelId() const { return m_channelId; }
     void setChannelId(const QString &id) { m_channelId = id; }
 
