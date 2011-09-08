@@ -65,6 +65,8 @@ void TvBookmarkList::removeBookmark(TvBookmark *bookmark, bool notify)
 
     adjustTimeIndex(bookmark, false);
 
+    delete bookmark;
+
     if (notify)
         emit bookmarksChanged();
 }

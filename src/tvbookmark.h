@@ -124,6 +124,12 @@ private:
     QTime m_stopTime;
     QColor m_color;
     QList< QPair<int, int> > m_seasons;
+    QList<TvProgramme *> m_matchingProgrammes;
+
+    friend class TvProgramme;
+
+    void addProgramme(TvProgramme *programme);
+    void removeProgramme(TvProgramme *programme);
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TvBookmark::MatchOptions)

@@ -117,7 +117,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
         if (index.column() == ColumnTime) {
             if (prog->isTicked())
                 return m_tickIcon;
-            if (prog->bookmark() && !prog->bookmark()->isOnAir())
+            if (prog->bookmark() && !prog->bookmark()->isOnAir() &&
+                    prog->match() != TvBookmark::ShouldMatch)
                 return m_returnedIcon;
             if (prog->color().isValid())
                 return m_bookmarkIcon;

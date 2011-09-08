@@ -124,6 +124,10 @@ private:
     QList<TvProgramme *> m_otherShowings;
 
     friend class TvChannel;
+    friend class TvBookmark;
+
+    void clearBookmarkMatch();
+    void markDirty() { m_shortDescription = QString(); }
 };
 
 #endif

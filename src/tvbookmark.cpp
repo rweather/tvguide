@@ -44,6 +44,10 @@ TvBookmark::TvBookmark(const TvBookmark &other)
 
 TvBookmark::~TvBookmark()
 {
+    for (int index = 0; index < m_matchingProgrammes.size(); ++index) {
+        TvProgramme *programme = m_matchingProgrammes.at(index);
+        programme->clearBookmarkMatch();
+    }
 }
 
 static int const dayOfWeekMasks[] = {
@@ -397,4 +401,22 @@ void TvBookmark::save(QSettings *settings)
     settings->setValue(QLatin1String("color"), m_color.name());
     settings->setValue(QLatin1String("seasons"), seasons());
     settings->setValue(QLatin1String("onair"), m_onair);
+}
+
+void TvBookmark::addProgramme(TvProgramme *programme)
+{
+    for (int index = 0; index < m_matchingProgrammes.size(); ++index) {
+        TvProgramme *prog = m_matchingProgrammes.at(index);
+        prog->markDirty();
+    }
+    m_matchingProgrammes.append(programme);
+}
+
+void TvBookmark::removeProgramme(TvProgramme *programme)
+{
+    m_matchingProgrammes.removeOne(programme);
+    for (int index = 0; index < m_matchingProgrammes.size(); ++index) {
+        TvProgramme *prog = m_matchingProgrammes.at(index);
+        prog->markDirty();
+    }
 }

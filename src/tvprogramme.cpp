@@ -36,6 +36,8 @@ TvProgramme::TvProgramme(TvChannel *channel)
 
 TvProgramme::~TvProgramme()
 {
+    if (m_bookmark)
+        m_bookmark->removeProgramme(this);
 }
 
 // Episode numbers in the "xmltv_ns" system are of the form
@@ -192,7 +194,18 @@ void TvProgramme::setColor(const QColor &color)
 void TvProgramme::setBookmark
     (TvBookmark *bookmark, TvBookmark::Match match)
 {
-    m_bookmark = bookmark;
+    if (m_bookmark) {
+        if (m_bookmark != bookmark) {
+            m_bookmark->removeProgramme(this);
+            if (bookmark)
+                bookmark->addProgramme(this);
+            m_bookmark = bookmark;
+        }
+    } else {
+        m_bookmark = bookmark;
+        if (bookmark)
+            bookmark->addProgramme(this);
+    }
     m_match = match;
     if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch || match == TvBookmark::TickMatch)
         setColor(QColor());
@@ -204,14 +217,29 @@ void TvProgramme::setBookmark
         setColor(bookmark->color().lighter(150));
 
     QString title;
-    if (match == TvBookmark::ShouldMatch) {
+    if (match == TvBookmark::ShouldMatch)
         title = bookmark->title();
-        m_bookmark = 0;
-    }
     if (m_nonMatchingTitle != title) {
         m_nonMatchingTitle = title;
         m_shortDescription = QString();
     }
+}
+
+void TvProgramme::clearBookmarkMatch()
+{
+    m_bookmark = 0;
+    m_match = TvBookmark::NoMatch;
+    m_color = QColor();
+    m_nonMatchingTitle = QString();
+    m_shortDescription = QString();
+}
+
+static bool sortMovedProgrammes(TvProgramme *p1, TvProgramme *p2)
+{
+    int cmp = p1->channel()->compare(p2->channel());
+    if (cmp != 0)
+        return cmp < 0;
+    return p1->start() < p2->start();
 }
 
 QString TvProgramme::shortDescription() const
@@ -298,6 +326,25 @@ QString TvProgramme::shortDescription() const
         desc += QLatin1String("<br><s>") +
                 Qt::escape(m_nonMatchingTitle) +
                 QLatin1String("</s>");
+        QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
+        bool needComma = false;
+        qSort(others.begin(), others.end(), sortMovedProgrammes);
+        for (int index = 0; index < others.size(); ++index) {
+            TvProgramme *other = others.at(index);
+            if (other->match() != TvBookmark::TitleMatch)
+                continue;
+            if (needComma) {
+                desc += QLatin1String("</li><li>");
+            } else {
+                desc += QObject::tr(" may have moved to:<ul><li>");
+                needComma = true;
+            }
+            desc += other->channel()->name();
+            desc += other->start().date().toString(QLatin1String(" dddd, MMMM d, "));
+            desc += other->start().time().toString(Qt::LocaleDate);
+        }
+        if (needComma)
+            desc += QLatin1String("</li></ul>");
     }
     if (!m_otherShowings.isEmpty()) {
         desc += QLatin1String("<br>") +
