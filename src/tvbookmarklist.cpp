@@ -175,7 +175,7 @@ QList<TvBookmark *> TvBookmarkList::candidates(const TvProgramme *programme) con
     for (int timeslot = start; timeslot < stop; ++timeslot) {
         int key = timeslot;
         if (key >= TimeSlots)
-            key = TimeSlots;
+            key -= TimeSlots;
         mergeBookmarkLists(list, m_timeIndex[key]);
     }
 
@@ -253,7 +253,7 @@ void TvBookmarkList::adjustTimeIndex(TvBookmark *bookmark, bool add)
         for (int timeslot = start; timeslot < stop; ++timeslot) {
             int key = timeslot;
             if (key >= TimeSlots)
-                key = TimeSlots;
+                key -= TimeSlots;
             if (add)
                 m_timeIndex[key].append(bookmark);
             else
