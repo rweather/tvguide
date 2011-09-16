@@ -209,10 +209,8 @@ void TvProgramme::setBookmark
     m_match = match;
     if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch || match == TvBookmark::TickMatch)
         setColor(QColor());
-    else if (match == TvBookmark::FullMatch)
+    else if (match == TvBookmark::FullMatch || match == TvBookmark::TitleMatch)
         setColor(bookmark->color());
-    else if (match == TvBookmark::TitleMatch)
-        setColor(bookmark->color().darker(300));
     else
         setColor(bookmark->color().lighter(150));
 
@@ -247,19 +245,28 @@ QString TvProgramme::shortDescription() const
     if (!m_shortDescription.isEmpty())
         return m_shortDescription;
     QString desc;
-    if (m_color.isValid()) {
+    bool bold = false;
+    if (m_match == TvBookmark::NoMatch || m_match == TvBookmark::ShouldMatch) {
+        desc += QLatin1String("<font color=\"#000000\">");
+    } else if (m_match == TvBookmark::TitleMatch) {
         desc += QLatin1String("<font color=\"") +
                 m_color.name() +
                 QLatin1String("\">");
+    } else {
+        desc += QLatin1String("<font color=\"") +
+                m_color.name() +
+                QLatin1String("\">");
+        desc += QLatin1String("<b>");
+        bold = true;
     }
-    desc += QLatin1String("<b>");
     if (m_isMovie)
         desc += QObject::tr("MOVIE: %1").arg(Qt::escape(m_title));
     else
         desc += Qt::escape(m_title);
-    desc += QLatin1String("</b>");
-    if (m_color.isValid())
-        desc += QLatin1String("</font>");
+    if (bold)
+        desc += QLatin1String("</b>");
+    desc += QLatin1String("</font>");
+    desc += QLatin1String("<font color=\"#606060\">");
     if (!m_date.isEmpty() && m_date != QLatin1String("0")) {
         desc += QLatin1String(" (") +
                 Qt::escape(m_date) + QLatin1String(")");
@@ -366,6 +373,7 @@ QString TvProgramme::shortDescription() const
             desc += other->start().time().toString(Qt::LocaleDate);
         }
     }
+    desc += QLatin1String("</font>");
     m_shortDescription = desc;
     return desc;
 }

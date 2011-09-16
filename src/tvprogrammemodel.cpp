@@ -120,7 +120,8 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
             if (prog->bookmark() && !prog->bookmark()->isOnAir() &&
                     prog->match() != TvBookmark::ShouldMatch)
                 return m_returnedIcon;
-            if (prog->color().isValid())
+            if (prog->color().isValid() &&
+                    prog->match() != TvBookmark::TitleMatch)
                 return m_bookmarkIcon;
         } else if (index.column() == ColumnChannel) {
             return prog->channel()->icon();
