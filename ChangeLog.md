@@ -1,5 +1,21 @@
 ## Change log
 
+### 0.0.8
+
+* Match programmes with no season number against bookmarks with N+
+  as the season specification.  This can happen with new episodes
+  where the upstream XMLTV data lacks a season number yet.
+* On-Air/Off-Air indicator on bookmarks to alter the matching
+  algorithm for shows that are expected to be on vs shows that
+  are not on and returning later.
+* Show a failed match if the non-matching show causes an overrun
+  or underrun on the bookmark.
+* Make large channel logos the default setting, as they look better.
+* Performance improvements to XML parsing and bookmark matching.
+* On failed matches, attempt to show where the show may have moved to
+  by listing partial matches elsewhere in the week (requires 7 Day
+  Outlook and All Channels to be selected for best results).
+
 ### 0.0.7
 
 * Add Wikipedia to the list of search engines for Web Search.
