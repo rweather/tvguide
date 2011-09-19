@@ -33,7 +33,11 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
     setWindowModality(Qt::WindowModal);
 
     m_model = new TvBookmarkModel(channelList, this);
-    bookmarkView->setModel(m_model);
+
+    m_proxy = new BookmarkListSortModel(m_model, this);
+    m_proxy->setDynamicSortFilter(true);
+
+    bookmarkView->setModel(m_proxy);
     bookmarkView->verticalHeader()->hide();
     bookmarkView->horizontalHeader()->setStretchLastSection(true);
     bookmarkView->setSelectionBehavior(QTableView::SelectRows);

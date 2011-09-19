@@ -47,6 +47,8 @@ public:
 
     TvBookmark *bookmarkAt(int index) const { return m_bookmarks.at(index); }
 
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+
 private:
     TvChannelList *m_channelList;
     QList<TvBookmark *> m_bookmarks;

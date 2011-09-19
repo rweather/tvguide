@@ -19,10 +19,31 @@
 #define _BOOKMARKLISTEDITOR_H
 
 #include <QtGui/qdialog.h>
+#include <QtGui/qsortfilterproxymodel.h>
 #include "ui_bookmarklisteditor.h"
 #include "tvbookmarkmodel.h"
 
 class TvChannelList;
+
+class BookmarkListSortModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+public:
+    BookmarkListSortModel(TvBookmarkModel *source, QObject *parent)
+        : QSortFilterProxyModel(parent), m_source(source)
+    {
+        setSourceModel(source);
+    }
+
+protected:
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const
+    {
+        return m_source->lessThan(left, right);
+    }
+
+private:
+    TvBookmarkModel *m_source;
+};
 
 class BookmarkListEditor : public QDialog, private Ui::BookmarkListEditor
 {
@@ -44,6 +65,7 @@ private Q_SLOTS:
 private:
     TvChannelList *m_channelList;
     TvBookmarkModel *m_model;
+    QSortFilterProxyModel *m_proxy;
 };
 
 #endif
