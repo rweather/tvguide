@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>648</width>
-    <height>419</height>
+    <height>482</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -258,6 +258,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="timezone">
+     <property name="text">
+      <string>Adjust programmes on selected channel for local timezone</string>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

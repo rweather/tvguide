@@ -28,6 +28,7 @@ TvChannel::TvChannel(TvChannelList *channelList)
     , m_lastInsert(0)
     , m_primaryChannelNumber(-1)
     , m_hidden(false)
+    , m_convertTimezone(false)
 {
 }
 
@@ -433,7 +434,7 @@ static int fetchField(const QString &str, int *posn, int size)
 
 // Format is "yyyyMMddhhmmss (+/-)zzzz" but isn't easily parseable
 // by QDateTime::fromString().  So do it the long way.
-QDateTime TvChannel::stringToDateTime(const QString &str)
+QDateTime TvChannel::stringToDateTime(const QString &str, TvChannel *channel)
 {
     int posn = 0;
     int year = fetchField(str, &posn, 4);
@@ -457,13 +458,16 @@ QDateTime TvChannel::stringToDateTime(const QString &str)
             break;
         }
     }
-    // FIXME: assume local time because it is too expensive
-    // to ask the system what the current timezone is.
-    return QDateTime(QDate(year, month, day), QTime(hour, min, sec));
-    //QDateTime dt(QDate(year, month, day), QTime(hour, min, sec));
-    //dt.setUtcOffset(tz * 60);
-    // Converting from a UTC offset to local must go via UTC.
-    //return dt.toTimeSpec(Qt::UTC).toTimeSpec(Qt::LocalTime);
+    if (channel && channel->convertTimezone()) {
+        QDateTime dt(QDate(year, month, day), QTime(hour, min, sec));
+        dt.setUtcOffset(tz * 60);
+        // Converting from a UTC offset to local must go via UTC.
+        return dt.toTimeSpec(Qt::UTC).toTimeSpec(Qt::LocalTime);
+    } else {
+        // Ignore the timezone on the incoming value and assume
+        // that it is local time.
+        return QDateTime(QDate(year, month, day), QTime(hour, min, sec));
+    }
 }
 
 static int fetchDashField(const QString &str, int *posn)

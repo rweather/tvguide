@@ -43,6 +43,9 @@ public:
     bool isHidden() const { return m_hidden; }
     void setHidden(bool value) { m_hidden = value; }
 
+    bool convertTimezone() const { return m_convertTimezone; }
+    void setConvertTimezone(bool value) { m_convertTimezone = value; }
+
     QString name() const { return m_name; }
     void setName(const QString &name) { m_name = name; }
 
@@ -90,7 +93,7 @@ public:
         (const QDate &first, const QDate &last,
          TvBookmark::MatchOptions options) const;
 
-    static QDateTime stringToDateTime(const QString &str);
+    static QDateTime stringToDateTime(const QString &str, TvChannel *channel = 0);
     static QDate stringToDate(const QString &str);
 
     int compare(const TvChannel *other) const;
@@ -110,6 +113,7 @@ private:
     QStringList m_channelNumbers;
     int m_primaryChannelNumber;
     bool m_hidden;
+    bool m_convertTimezone;
 
     void addDataFor(const QDate &date, const QDateTime &lastModified);
 };

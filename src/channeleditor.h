@@ -45,9 +45,11 @@ private Q_SLOTS:
     void updateMakeInactive();
     void updateMakeActive();
     void updateSetIcon();
+    void updateTimezone();
     void itemDoubleClicked(QListWidgetItem *item);
     void largeIconsChanged(bool value);
     void regionChanged(int index);
+    void timezoneChanged(bool value);
     void help();
 
 private:
@@ -63,6 +65,7 @@ private:
     TvChannelList *m_channelList;
     QMap<QString, Region *> m_regions;
     QMap<QString, Region *> m_channelToRegion;
+    bool m_timezoneBlock;
 
     void loadOzTivoRegions();
     void loadOzTivoRegionData(QXmlStreamReader *reader);

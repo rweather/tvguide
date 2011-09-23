@@ -84,8 +84,8 @@ void TvProgramme::load(QXmlStreamReader *reader)
     Q_ASSERT(reader->name() == QLatin1String("programme"));
     QString start = reader->attributes().value(QLatin1String("start")).toString();
     QString stop = reader->attributes().value(QLatin1String("stop")).toString();
-    m_start = TvChannel::stringToDateTime(start);
-    m_stop = TvChannel::stringToDateTime(stop);
+    m_start = TvChannel::stringToDateTime(start, m_channel);
+    m_stop = TvChannel::stringToDateTime(stop, m_channel);
     while (!reader->hasError()) {
         QXmlStreamReader::TokenType token = reader->readNext();
         if (token == QXmlStreamReader::StartElement) {

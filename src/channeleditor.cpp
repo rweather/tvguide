@@ -26,6 +26,7 @@
 ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     : QDialog(parent)
     , m_channelList(channelList)
+    , m_timezoneBlock(false)
 {
     setupUi(this);
 
@@ -55,6 +56,9 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
 
         item1->setData(Qt::UserRole + 2, channel->iconFile());
         item2->setData(Qt::UserRole + 2, channel->iconFile());
+
+        item1->setData(Qt::UserRole + 3, channel->convertTimezone());
+        item2->setData(Qt::UserRole + 3, channel->convertTimezone());
     }
 
     if (channelList->largeIcons()) {
@@ -77,6 +81,7 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     connect(setIconButton, SIGNAL(clicked()), this, SLOT(setIcon()));
     connect(removeIconButton, SIGNAL(clicked()), this, SLOT(removeIcon()));
     connect(largeIcons, SIGNAL(toggled(bool)), this, SLOT(largeIconsChanged(bool)));
+    connect(timezone, SIGNAL(toggled(bool)), this, SLOT(timezoneChanged(bool)));
 
     connect(activeChannels, SIGNAL(itemSelectionChanged()),
             this, SLOT(updateMakeInactive()));
@@ -84,6 +89,8 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
             this, SLOT(itemDoubleClicked(QListWidgetItem*)));
     connect(activeChannels, SIGNAL(itemSelectionChanged()),
             this, SLOT(updateSetIcon()));
+    connect(activeChannels, SIGNAL(itemSelectionChanged()),
+            this, SLOT(updateTimezone()));
 
     connect(inactiveChannels, SIGNAL(itemSelectionChanged()),
             this, SLOT(updateMakeActive()));
@@ -94,6 +101,7 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     makeInactive->setEnabled(false);
     setIconButton->setEnabled(false);
     removeIconButton->setEnabled(false);
+    timezone->setEnabled(false);
 
     if (channelList->startUrl().host().endsWith(QLatin1String(".oztivo.net")))
         loadOzTivoRegions();
@@ -122,6 +130,7 @@ ChannelEditor::~ChannelEditor()
 void ChannelEditor::accept()
 {
     int count = activeChannels->count();
+    bool timezonesChanged = false;
     for (int index = 0; index < count; ++index) {
         QListWidgetItem *item = activeChannels->item(index);
         TvChannel *channel = static_cast<TvChannel *>
@@ -129,8 +138,15 @@ void ChannelEditor::accept()
         channel->setHidden(item->isHidden());
         channel->setIcon(item->icon());
         channel->setIconFile(item->data(Qt::UserRole + 2).toString());
+        bool timezone = item->data(Qt::UserRole + 3).toBool();
+        if (timezone != channel->convertTimezone()) {
+            channel->setConvertTimezone(timezone);
+            timezonesChanged = true;
+        }
     }
     m_channelList->updateChannels(largeIcons->isChecked());
+    if (timezonesChanged)
+        m_channelList->timezoneSettingsChanged();
     QDialog::accept();
 }
 
@@ -243,6 +259,21 @@ void ChannelEditor::updateSetIcon()
     removeIconButton->setEnabled(items.size() == 1 && !items.at(0)->icon().isNull());
 }
 
+void ChannelEditor::updateTimezone()
+{
+    m_timezoneBlock = true;
+    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    if (items.size() == 1) {
+        timezone->setEnabled(true);
+        bool value = items.at(0)->data(Qt::UserRole + 3).toBool();
+        timezone->setChecked(value);
+    } else {
+        timezone->setEnabled(false);
+        timezone->setChecked(false);
+    }
+    m_timezoneBlock = false;
+}
+
 void ChannelEditor::itemDoubleClicked(QListWidgetItem *item)
 {
     QListWidgetItem *other = static_cast<QListWidgetItem *>
@@ -291,6 +322,15 @@ void ChannelEditor::regionChanged(int index)
             other->setHidden(false);
         }
     }
+}
+
+void ChannelEditor::timezoneChanged(bool value)
+{
+    if (m_timezoneBlock)
+        return;
+    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    if (!items.isEmpty())
+        items.at(0)->setData(Qt::UserRole + 3, value);
 }
 
 void ChannelEditor::loadOzTivoRegions()

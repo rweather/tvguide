@@ -113,6 +113,8 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
                     newChannels = true;
                     if (m_hiddenChannelIds.contains(channelId))
                         channel->setHidden(true);
+                    if (m_timezoneConvertChannelIds.contains(channelId))
+                        channel->setConvertTimezone(true);
                 }
                 if (channel->hasDataFor())
                     m_hasDataFor = true;
@@ -128,6 +130,8 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
                     newChannels = true;
                     if (m_hiddenChannelIds.contains(channelId))
                         channel->setHidden(true);
+                    if (m_timezoneConvertChannelIds.contains(channelId))
+                        channel->setConvertTimezone(true);
                 }
                 programme = new TvProgramme(channel);
                 programme->load(reader);
@@ -349,6 +353,7 @@ void TvChannelList::reloadService()
     m_channels.clear();
     m_activeChannels.clear();
     m_hiddenChannelIds.clear();
+    m_timezoneConvertChannelIds.clear();
     m_iconFiles.clear();
     m_hasDataFor = false;
     m_largeIcons = true;
@@ -385,6 +390,7 @@ void TvChannelList::reloadService()
 void TvChannelList::updateChannels(bool largeIcons)
 {
     QSet<QString> hidden;
+    QSet<QString> convert;
     QMap<QString, QString> iconFiles;
     for (int index = 0; index < m_activeChannels.size(); ++index) {
         TvChannel *channel = m_activeChannels.at(index);
@@ -393,17 +399,27 @@ void TvChannelList::updateChannels(bool largeIcons)
         QString file = channel->iconFile();
         if (!file.isEmpty())
             iconFiles.insert(channel->id(), file);
+        if (channel->convertTimezone())
+            convert.insert(channel->id());
     }
     if (m_hiddenChannelIds != hidden ||
+            m_timezoneConvertChannelIds != convert ||
             m_iconFiles != iconFiles ||
             m_largeIcons != largeIcons) {
         m_hiddenChannelIds = hidden;
+        m_timezoneConvertChannelIds = convert;
         m_iconFiles = iconFiles;
         m_largeIcons = largeIcons;
         saveChannelSettings();
         emit hiddenChannelsChanged();
         refreshIcons();
     }
+}
+
+void TvChannelList::timezoneSettingsChanged()
+{
+    m_loaded.clear();
+    refreshChannels(false);
 }
 
 void TvChannelList::clearCache()
@@ -717,6 +733,7 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
     settings->beginGroup(m_serviceId);
     m_largeIcons = settings->value(QLatin1String("largeIcons"), true).toBool();
     m_hiddenChannelIds.clear();
+    m_timezoneConvertChannelIds.clear();
     m_iconFiles.clear();
     int size = settings->beginReadArray(QLatin1String("channels"));
     for (int index = 0; index < size; ++index) {
@@ -730,6 +747,9 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
         QString file = settings->value(QLatin1String("icon")).toString();
         if (!file.isEmpty())
             m_iconFiles.insert(id, file);
+        bool timezone = settings->value(QLatin1String("convertTimezone"), false).toBool();
+        if (timezone)
+            m_timezoneConvertChannelIds.insert(id);
     }
     settings->endArray();
 
@@ -770,6 +790,7 @@ void TvChannelList::saveChannelSettings()
             settings.remove(QLatin1String("icon"));
         else
             settings.setValue(QLatin1String("icon"), file);
+        settings.setValue(QLatin1String("convertTimezone"), channel->convertTimezone());
     }
     settings.endArray();
     settings.endGroup();

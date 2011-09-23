@@ -69,6 +69,7 @@ public Q_SLOTS:
     void reload();
     void reloadService();
     void updateChannels(bool largeIcons);
+    void timezoneSettingsChanged();
     void clearCache();
 
 private Q_SLOTS:
@@ -112,6 +113,7 @@ private:
     QMap<QString, TvChannel *> m_channels;
     QList<TvChannel *> m_activeChannels;
     QSet<QString> m_hiddenChannelIds;
+    QSet<QString> m_timezoneConvertChannelIds;
     QMap<QString, QString> m_iconFiles;
     QNetworkAccessManager m_nam;
     QString m_serviceId;
