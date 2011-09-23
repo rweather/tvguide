@@ -1,5 +1,14 @@
 ## Change log
 
+### 0.0.9
+
+* Adjustments to the display of show titles to better distinguish
+  partial matches from full matches.
+* Fix column sorting in the bookmark list.
+* Add region description and logo details for WTV Perth.
+* Per-channel setting to adjust the timezone of programmes
+  to convert them into local time.
+
 ### 0.0.8
 
 * Match programmes with no season number against bookmarks with N+
