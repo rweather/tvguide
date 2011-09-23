@@ -224,6 +224,15 @@ static int cmpNatural(TvBookmark *b1, TvBookmark *b2)
     return b1->title().compare(b2->title(), Qt::CaseInsensitive);
 }
 
+static bool sortCheck(TvBookmark *b1, TvBookmark *b2)
+{
+    if (b1->isOnAir() && !b2->isOnAir())
+        return false;
+    if (!b1->isOnAir() && b2->isOnAir())
+        return true;
+    return cmpNatural(b1, b2) < 0;
+}
+
 static bool sortDay(TvBookmark *b1, TvBookmark *b2)
 {
     if (b1->dayOfWeek() < b2->dayOfWeek())
@@ -265,81 +274,6 @@ static bool sortTitle(TvBookmark *b1, TvBookmark *b2)
     return cmpNatural(b1, b2) < 0;
 }
 
-static bool sortDayD(TvBookmark *b1, TvBookmark *b2)
-{
-    if (b1->dayOfWeek() > b2->dayOfWeek())
-        return true;
-    if (b1->dayOfWeek() < b2->dayOfWeek())
-        return false;
-    return cmpNatural(b1, b2) < 0;
-}
-
-static bool sortStartD(TvBookmark *b1, TvBookmark *b2)
-{
-    int cmp = cmpStartTime(b1, b2);
-    if (cmp != 0)
-        return cmp > 0;
-    return cmpNatural(b1, b2) < 0;
-}
-
-static bool sortStopD(TvBookmark *b1, TvBookmark *b2)
-{
-    int cmp = cmpStopTime(b1, b2);
-    if (cmp != 0)
-        return cmp > 0;
-    return cmpNatural(b1, b2) < 0;
-}
-
-static bool sortChannelD(TvBookmark *b1, TvBookmark *b2)
-{
-    int cmp = b1->channelId().compare(b2->channelId(), Qt::CaseInsensitive);
-    if (cmp != 0)
-        return cmp > 0;
-    return cmpNatural(b1, b2) < 0;
-}
-
-static bool sortTitleD(TvBookmark *b1, TvBookmark *b2)
-{
-    int cmp = b1->title().compare(b2->title(), Qt::CaseInsensitive);
-    if (cmp != 0)
-        return cmp > 0;
-    return cmpNatural(b1, b2) < 0;
-}
-
-void TvBookmarkModel::sort(int column, Qt::SortOrder order)
-{
-    if (column == MODEL_CHECK)
-        return;
-    if (order == Qt::AscendingOrder) {
-        switch (column) {
-        case MODEL_DAY:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortDay);
-        case MODEL_START_TIME:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortStart);
-        case MODEL_STOP_TIME:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortStop);
-        case MODEL_CHANNEL:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortChannel);
-        case MODEL_TITLE:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortTitle);
-        }
-    } else {
-        switch (column) {
-        case MODEL_DAY:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortDayD);
-        case MODEL_START_TIME:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortStartD);
-        case MODEL_STOP_TIME:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortStopD);
-        case MODEL_CHANNEL:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortChannelD);
-        case MODEL_TITLE:
-            return qSort(m_bookmarks.begin(), m_bookmarks.end(), sortTitleD);
-        }
-    }
-    reset();
-}
-
 void TvBookmarkModel::addBookmark(TvBookmark *bookmark)
 {
     beginInsertRows(QModelIndex(), m_bookmarks.size(), m_bookmarks.size());
@@ -376,6 +310,8 @@ bool TvBookmarkModel::lessThan(const QModelIndex &left, const QModelIndex &right
     TvBookmark *b1 = m_bookmarks.at(left.row());
     TvBookmark *b2 = m_bookmarks.at(right.row());
     switch (left.column()) {
+    case MODEL_CHECK:
+        return sortCheck(b1, b2);
     case MODEL_DAY:
         return sortDay(b1, b2);
     case MODEL_START_TIME:
