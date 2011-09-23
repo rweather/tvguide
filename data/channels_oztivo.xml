@@ -2047,9 +2047,10 @@
     <number system="foxtel">430</number>
   </channel>
 
-  <channel id="WTV">
+  <channel id="WTV" region="perth">
     <display-name lang="en">WTV</display-name>
-    <todo/>
+    <icon src="http://upload.wikimedia.org/wikipedia/en/1/15/WTV_LOGO.png"/>
+    <number system="digital">44</number>
   </channel>
 
   <channel id="WZONE">
