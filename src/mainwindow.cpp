@@ -729,14 +729,14 @@ QList<TvProgramme *> MainWindow::combineShowings
             if (prog->isSuppressed())
                 continue;   // We've already combined this programme.
             TvBookmark *bookmark = prog->bookmark();
-            if (!bookmark || prog->match() == TvBookmark::ShouldMatch || prog->isTicked()) {
-                // Failed or ticked - there will be no other showings.
+            if (!bookmark || prog->match() == TvBookmark::ShouldMatch || prog->isTicked() || prog->subTitle().isEmpty()) {
+                // Failed, ticked, or no episode title - there will be no other showings.
                 newProgrammes.append(prog);
                 continue;
             }
             for (index2 = index + 1; index2 < programmes.size(); ++index2) {
                 TvProgramme *prog2 = programmes.at(index2);
-                if (prog2->isSuppressed() || prog2->bookmark() != bookmark || prog2->isTicked() || prog2->match() == TvBookmark::ShouldMatch)
+                if (prog2->isSuppressed() || prog2->bookmark() != bookmark || prog2->isTicked() || prog2->match() == TvBookmark::ShouldMatch || prog2->subTitle().isEmpty())
                     continue;
                 if (prog->subTitle() != prog2->subTitle() ||
                         prog->episodeNumber() != prog2->episodeNumber())
