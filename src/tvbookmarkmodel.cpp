@@ -284,7 +284,7 @@ void TvBookmarkModel::addBookmark(TvBookmark *bookmark)
 void TvBookmarkModel::updateBookmark(int index)
 {
     emit dataChanged(createIndex(index, 0),
-                     createIndex(index, MODEL_NUM_COLS - 0));
+                     createIndex(index, MODEL_NUM_COLS - 1));
 }
 
 void TvBookmarkModel::removeBookmark(int index)
