@@ -81,6 +81,7 @@ void BookmarkListEditor::accept()
 void BookmarkListEditor::editBookmark()
 {
     QModelIndex index = bookmarkView->selectionModel()->currentIndex();
+    index = m_proxy->mapToSource(index);
     if (!index.isValid())
         return;
     TvBookmark *bookmark = m_model->bookmarkAt(index.row());
@@ -100,6 +101,7 @@ void BookmarkListEditor::editBookmark()
 void BookmarkListEditor::deleteBookmark()
 {
     QModelIndex index = bookmarkView->selectionModel()->currentIndex();
+    index = m_proxy->mapToSource(index);
     if (!index.isValid())
         return;
     m_model->removeBookmark(index.row());
