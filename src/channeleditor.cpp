@@ -26,40 +26,54 @@
 ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     : QDialog(parent)
     , m_channelList(channelList)
+    , m_channels(channelList)
     , m_timezoneBlock(false)
+    , m_timezonesChanged(false)
 {
     setupUi(this);
 
     setWindowModality(Qt::WindowModal);
 
+    m_activeChannels = new TvChannelEditModel(&m_channels, false, this);
+    m_inactiveChannels = new TvChannelEditModel(&m_channels, true, this);
+    m_activeChannelsSort = new TvChannelEditSortProxy(m_activeChannels, this);
+    m_inactiveChannelsSort = new TvChannelEditSortProxy(m_inactiveChannels, this);
+
+    m_activeChannelsSort->setDynamicSortFilter(true);
+    m_inactiveChannelsSort->setDynamicSortFilter(true);
+
+    activeChannels->setModel(m_activeChannelsSort);
+    inactiveChannels->setModel(m_inactiveChannelsSort);
+
+    int sortColumn;
+    if (m_channelList->haveChannelNumbers())
+        sortColumn = TvChannelEditModel::ColumnNumber;
+    else
+        sortColumn = TvChannelEditModel::ColumnName;
+
+    activeChannels->verticalHeader()->hide();
+    activeChannels->horizontalHeader()->setStretchLastSection(true);
+    activeChannels->setSelectionBehavior(QTableView::SelectRows);
     activeChannels->setSortingEnabled(true);
+    activeChannels->horizontalHeader()->setSortIndicator(sortColumn, Qt::AscendingOrder);
+    activeChannels->setColumnHidden(TvChannelEditModel::ColumnNumber, !m_channelList->haveChannelNumbers());
+    activeChannels->setColumnWidth(TvChannelEditModel::ColumnNumber, 70);
+    activeChannels->resizeRowsToContents();
+    activeChannels->resizeColumnsToContents();
+    if (!m_channelList->haveChannelNumbers())
+        activeChannels->horizontalHeader()->hide();
+
+    inactiveChannels->verticalHeader()->hide();
+    inactiveChannels->horizontalHeader()->setStretchLastSection(true);
+    inactiveChannels->setSelectionBehavior(QTableView::SelectRows);
     inactiveChannels->setSortingEnabled(true);
-
-    QList<TvChannel *> channels = channelList->activeChannels();
-
-    for (int index = 0; index < channels.size(); ++index) {
-        TvChannel *channel = channels.at(index);
-        QListWidgetItem *item1 = new QListWidgetItem(channel->name());
-        item1->setData(Qt::UserRole, QVariant::fromValue<void *>(channel));
-        activeChannels->addItem(item1);
-        item1->setHidden(channel->isHidden());
-        item1->setIcon(channel->icon());
-
-        QListWidgetItem *item2 = new QListWidgetItem(channel->name());
-        item2->setData(Qt::UserRole, QVariant::fromValue<void *>(channel));
-        inactiveChannels->addItem(item2);
-        item2->setHidden(!channel->isHidden());
-        item2->setIcon(channel->icon());
-
-        item1->setData(Qt::UserRole + 1, QVariant::fromValue<void *>(item2));
-        item2->setData(Qt::UserRole + 1, QVariant::fromValue<void *>(item1));
-
-        item1->setData(Qt::UserRole + 2, channel->iconFile());
-        item2->setData(Qt::UserRole + 2, channel->iconFile());
-
-        item1->setData(Qt::UserRole + 3, channel->convertTimezone());
-        item2->setData(Qt::UserRole + 3, channel->convertTimezone());
-    }
+    inactiveChannels->horizontalHeader()->setSortIndicator(sortColumn, Qt::AscendingOrder);
+    inactiveChannels->setColumnHidden(TvChannelEditModel::ColumnNumber, !m_channelList->haveChannelNumbers());
+    inactiveChannels->setColumnWidth(TvChannelEditModel::ColumnNumber, 70);
+    inactiveChannels->resizeRowsToContents();
+    inactiveChannels->resizeColumnsToContents();
+    if (!m_channelList->haveChannelNumbers())
+        inactiveChannels->horizontalHeader()->hide();
 
     if (channelList->largeIcons()) {
         activeChannels->setIconSize(QSize(32, 32));
@@ -83,19 +97,23 @@ ChannelEditor::ChannelEditor(TvChannelList *channelList, QWidget *parent)
     connect(largeIcons, SIGNAL(toggled(bool)), this, SLOT(largeIconsChanged(bool)));
     connect(timezone, SIGNAL(toggled(bool)), this, SLOT(timezoneChanged(bool)));
 
-    connect(activeChannels, SIGNAL(itemSelectionChanged()),
+    connect(activeChannels->selectionModel(),
+            SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(updateMakeInactive()));
-    connect(activeChannels, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
-            this, SLOT(itemDoubleClicked(QListWidgetItem*)));
-    connect(activeChannels, SIGNAL(itemSelectionChanged()),
+    connect(activeChannels, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(activeDoubleClicked(QModelIndex)));
+    connect(activeChannels->selectionModel(),
+            SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(updateSetIcon()));
-    connect(activeChannels, SIGNAL(itemSelectionChanged()),
+    connect(activeChannels->selectionModel(),
+            SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(updateTimezone()));
 
-    connect(inactiveChannels, SIGNAL(itemSelectionChanged()),
+    connect(inactiveChannels->selectionModel(),
+            SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(updateMakeActive()));
-    connect(inactiveChannels, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
-            this, SLOT(itemDoubleClicked(QListWidgetItem*)));
+    connect(inactiveChannels, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(inactiveDoubleClicked(QModelIndex)));
 
     makeActive->setEnabled(false);
     makeInactive->setEnabled(false);
@@ -129,132 +147,94 @@ ChannelEditor::~ChannelEditor()
 
 void ChannelEditor::accept()
 {
-    int count = activeChannels->count();
-    bool timezonesChanged = false;
-    for (int index = 0; index < count; ++index) {
-        QListWidgetItem *item = activeChannels->item(index);
-        TvChannel *channel = static_cast<TvChannel *>
-            (item->data(Qt::UserRole).value<void *>());
-        channel->setHidden(item->isHidden());
-        channel->setIcon(item->icon());
-        channel->setIconFile(item->data(Qt::UserRole + 2).toString());
-        bool timezone = item->data(Qt::UserRole + 3).toBool();
-        if (timezone != channel->convertTimezone()) {
-            channel->setConvertTimezone(timezone);
-            timezonesChanged = true;
-        }
-    }
+    m_channels.updateChannels();
     m_channelList->updateChannels(largeIcons->isChecked());
-    if (timezonesChanged)
+    if (m_timezonesChanged)
         m_channelList->timezoneSettingsChanged();
     QDialog::accept();
 }
 
 void ChannelEditor::moveToInactive()
 {
-    QList<QListWidgetItem *> items = activeChannels->selectedItems();
-    for (int index = 0; index < items.size(); ++index) {
-        QListWidgetItem *item = items.at(index);
-        QListWidgetItem *other = static_cast<QListWidgetItem *>
-            (item->data(Qt::UserRole + 1).value<void *>());
-        item->setHidden(true);
-        other->setHidden(false);
-    }
+    QList<TvChannelEditable *> items = selectedActiveChannels();
+    for (int index = 0; index < items.size(); ++index)
+        items.at(index)->setHidden(true);
     activeChannels->clearSelection();
     regions->setCurrentIndex(0);
+    refreshChannels();
 }
 
 void ChannelEditor::moveToActive()
 {
-    QList<QListWidgetItem *> items = inactiveChannels->selectedItems();
-    for (int index = 0; index < items.size(); ++index) {
-        QListWidgetItem *item = items.at(index);
-        QListWidgetItem *other = static_cast<QListWidgetItem *>
-            (item->data(Qt::UserRole + 1).value<void *>());
-        item->setHidden(true);
-        other->setHidden(false);
-    }
+    QList<TvChannelEditable *> items = selectedInactiveChannels();
+    for (int index = 0; index < items.size(); ++index)
+        items.at(index)->setHidden(false);
     inactiveChannels->clearSelection();
     regions->setCurrentIndex(0);
+    refreshChannels();
 }
 
 void ChannelEditor::moveToInactiveAll()
 {
-    int count = activeChannels->count();
-    for (int index = 0; index < count; ++index) {
-        QListWidgetItem *item = activeChannels->item(index);
-        item->setHidden(true);
-        item = inactiveChannels->item(index);
-        item->setHidden(false);
-    }
+    QList<TvChannelEditable *> items = m_activeChannels->channels();
+    for (int index = 0; index < items.size(); ++index)
+        items.at(index)->setHidden(true);
     activeChannels->clearSelection();
-    inactiveChannels->clearSelection();
     regions->setCurrentIndex(0);
+    refreshChannels();
 }
 
 void ChannelEditor::moveToActiveAll()
 {
-    int count = activeChannels->count();
-    for (int index = 0; index < count; ++index) {
-        QListWidgetItem *item = activeChannels->item(index);
-        item->setHidden(false);
-        item = inactiveChannels->item(index);
-        item->setHidden(true);
-    }
+    QList<TvChannelEditable *> items = m_inactiveChannels->channels();
+    for (int index = 0; index < items.size(); ++index)
+        items.at(index)->setHidden(false);
     activeChannels->clearSelection();
-    inactiveChannels->clearSelection();
     regions->setCurrentIndex(0);
+    refreshChannels();
 }
 
 void ChannelEditor::setIcon()
 {
-    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    QList<TvChannelEditable *> items = selectedActiveChannels();
     if (items.size() != 1)
         return;
-    QListWidgetItem *item = items.at(0);
-    QListWidgetItem *other = static_cast<QListWidgetItem *>
-        (item->data(Qt::UserRole + 1).value<void *>());
-    QString iconFile = item->data(Qt::UserRole + 2).toString();
+    TvChannelEditable *item = items.at(0);
+    QString iconFile = item->iconFile();
     QString result = QFileDialog::getOpenFileName
         (this, tr("Select Icon"), iconFile,
          tr("Images (*.png *.jpg)"));
     if (!result.isEmpty() && result != iconFile) {
-        item->setData(Qt::UserRole + 2, result);
+        item->setIconFile(result);
         item->setIcon(QIcon(result));
-        other->setData(Qt::UserRole + 2, result);
-        other->setIcon(QIcon(result));
         updateSetIcon();
     }
 }
 
 void ChannelEditor::removeIcon()
 {
-    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    QList<TvChannelEditable *> items = selectedActiveChannels();
     if (items.size() != 1)
         return;
-    QListWidgetItem *item = items.at(0);
-    QListWidgetItem *other = static_cast<QListWidgetItem *>
-        (item->data(Qt::UserRole + 1).value<void *>());
-    item->setData(Qt::UserRole + 2, QString());
+    TvChannelEditable *item = items.at(0);
+    item->setIconFile(QString());
     item->setIcon(QIcon());
-    other->setData(Qt::UserRole + 2, QString());
-    other->setIcon(QIcon());
     updateSetIcon();
 }
 
 void ChannelEditor::updateMakeInactive()
 {
-    makeInactive->setEnabled(!activeChannels->selectedItems().isEmpty());
+    makeInactive->setEnabled(!selectedActiveChannels().isEmpty());
 }
 
 void ChannelEditor::updateMakeActive()
 {
-    makeActive->setEnabled(!inactiveChannels->selectedItems().isEmpty());
+    makeActive->setEnabled(!selectedInactiveChannels().isEmpty());
 }
 
 void ChannelEditor::updateSetIcon()
 {
-    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    QList<TvChannelEditable *> items = selectedActiveChannels();
     setIconButton->setEnabled(items.size() == 1);
     removeIconButton->setEnabled(items.size() == 1 && !items.at(0)->icon().isNull());
 }
@@ -262,11 +242,10 @@ void ChannelEditor::updateSetIcon()
 void ChannelEditor::updateTimezone()
 {
     m_timezoneBlock = true;
-    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    QList<TvChannelEditable *> items = selectedActiveChannels();
     if (items.size() == 1) {
         timezone->setEnabled(true);
-        bool value = items.at(0)->data(Qt::UserRole + 3).toBool();
-        timezone->setChecked(value);
+        timezone->setChecked(items.at(0)->convertTimezone());
     } else {
         timezone->setEnabled(false);
         timezone->setChecked(false);
@@ -274,15 +253,30 @@ void ChannelEditor::updateTimezone()
     m_timezoneBlock = false;
 }
 
-void ChannelEditor::itemDoubleClicked(QListWidgetItem *item)
+void ChannelEditor::activeDoubleClicked(const QModelIndex &index)
 {
-    QListWidgetItem *other = static_cast<QListWidgetItem *>
-        (item->data(Qt::UserRole + 1).value<void *>());
-    item->setHidden(true);
-    other->setHidden(false);
+    TvChannelEditable *channel =
+        m_activeChannels->channel
+            (m_activeChannelsSort->mapToSource(index));
+    if (!channel)
+        return;
+    channel->setHidden(true);
     activeChannels->clearSelection();
+    regions->setCurrentIndex(0);
+    refreshChannels();
+}
+
+void ChannelEditor::inactiveDoubleClicked(const QModelIndex &index)
+{
+    TvChannelEditable *channel =
+        m_inactiveChannels->channel
+            (m_inactiveChannelsSort->mapToSource(index));
+    if (!channel)
+        return;
+    channel->setHidden(false);
     inactiveChannels->clearSelection();
     regions->setCurrentIndex(0);
+    refreshChannels();
 }
 
 void ChannelEditor::largeIconsChanged(bool value)
@@ -304,33 +298,26 @@ void ChannelEditor::regionChanged(int index)
     Region *region = m_regions.value(id);
     Q_ASSERT(region);
 
-    int count = activeChannels->count();
-    for (int index = 0; index < count; ++index) {
-        QListWidgetItem *item = activeChannels->item(index);
-        QListWidgetItem *other = static_cast<QListWidgetItem *>
-            (item->data(Qt::UserRole + 1).value<void *>());
-        TvChannel *channel = static_cast<TvChannel *>
-            (item->data(Qt::UserRole).value<void *>());
-        Region *cregion = m_channelToRegion.value(channel->id(), 0);
+    QList<TvChannelEditable *> channels = m_channels.allChannels();
+    for (int index = 0; index < channels.size(); ++index) {
+        TvChannelEditable *channel = channels.at(index);
+        Region *cregion = m_channelToRegion.value(channel->channel()->id(), 0);
         if (!cregion)
             continue;   // Region-less channels are not changed.
-        if (channelInRegion(cregion, region)) {
-            item->setHidden(false);
-            other->setHidden(true);
-        } else {
-            item->setHidden(true);
-            other->setHidden(false);
-        }
+        channel->setHidden(!channelInRegion(cregion, region));
     }
+
+    refreshChannels();
 }
 
 void ChannelEditor::timezoneChanged(bool value)
 {
     if (m_timezoneBlock)
         return;
-    QList<QListWidgetItem *> items = activeChannels->selectedItems();
+    QList<TvChannelEditable *> items = selectedActiveChannels();
     if (!items.isEmpty())
-        items.at(0)->setData(Qt::UserRole + 3, value);
+        items.at(0)->setConvertTimezone(value);
+    m_timezonesChanged = true;
 }
 
 void ChannelEditor::loadOzTivoRegions()
@@ -406,4 +393,32 @@ bool ChannelEditor::channelInRegion(const Region *cregion, const Region *region)
 void ChannelEditor::help()
 {
     HelpBrowser::showContextHelp(QLatin1String("edit_channels.html"), this);
+}
+
+QList<TvChannelEditable *> ChannelEditor::selectedActiveChannels() const
+{
+    QModelIndexList selected = activeChannels->selectionModel()->selectedRows();
+    QList<TvChannelEditable *> channels;
+    for (int index = 0; index < selected.size(); ++index) {
+        channels.append(m_activeChannels->channel
+            (m_activeChannelsSort->mapToSource(selected.at(index))));
+    }
+    return channels;
+}
+
+QList<TvChannelEditable *> ChannelEditor::selectedInactiveChannels() const
+{
+    QModelIndexList selected = inactiveChannels->selectionModel()->selectedRows();
+    QList<TvChannelEditable *> channels;
+    for (int index = 0; index < selected.size(); ++index) {
+        channels.append(m_inactiveChannels->channel
+            (m_inactiveChannelsSort->mapToSource(selected.at(index))));
+    }
+    return channels;
+}
+
+void ChannelEditor::refreshChannels()
+{
+    m_activeChannels->refreshChannels();
+    m_inactiveChannels->refreshChannels();
 }

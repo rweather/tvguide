@@ -26,7 +26,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="activeChannels">
+        <widget class="QTableView" name="activeChannels">
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>
@@ -208,7 +208,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QListWidget" name="inactiveChannels">
+        <widget class="QTableView" name="inactiveChannels">
          <property name="selectionMode">
           <enum>QAbstractItemView::ExtendedSelection</enum>
          </property>

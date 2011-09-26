@@ -15,13 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CHANNELEDITOR_H
-#define _CHANNELEDITOR_H
+#ifndef _CHANNELEDITOR2_H
+#define _CHANNELEDITOR2_H
 
 #include <QtGui/qdialog.h>
 #include <QtCore/qmap.h>
 #include <QtCore/qxmlstream.h>
 #include "ui_channeleditor.h"
+#include "tvchanneleditmodel.h"
 
 class TvChannelList;
 
@@ -46,7 +47,8 @@ private Q_SLOTS:
     void updateMakeActive();
     void updateSetIcon();
     void updateTimezone();
-    void itemDoubleClicked(QListWidgetItem *item);
+    void activeDoubleClicked(const QModelIndex &index);
+    void inactiveDoubleClicked(const QModelIndex &index);
     void largeIconsChanged(bool value);
     void regionChanged(int index);
     void timezoneChanged(bool value);
@@ -63,13 +65,23 @@ private:
     };
 
     TvChannelList *m_channelList;
+    TvChannelListEditable m_channels;
+    TvChannelEditModel *m_activeChannels;
+    TvChannelEditModel *m_inactiveChannels;
+    TvChannelEditSortProxy *m_activeChannelsSort;
+    TvChannelEditSortProxy *m_inactiveChannelsSort;
     QMap<QString, Region *> m_regions;
     QMap<QString, Region *> m_channelToRegion;
     bool m_timezoneBlock;
+    bool m_timezonesChanged;
 
     void loadOzTivoRegions();
     void loadOzTivoRegionData(QXmlStreamReader *reader);
     static bool channelInRegion(const Region *cregion, const Region *region);
+
+    QList<TvChannelEditable *> selectedActiveChannels() const;
+    QList<TvChannelEditable *> selectedInactiveChannels() const;
+    void refreshChannels();
 };
 
 #endif

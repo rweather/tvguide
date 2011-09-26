@@ -8,6 +8,7 @@ SOURCES += \
     tvbookmarklist.cpp \
     tvbookmarkmodel.cpp \
     tvchannel.cpp \
+    tvchanneleditmodel.cpp \
     tvchannellist.cpp \
     tvchannelmodel.cpp \
     tvprogramme.cpp \
@@ -20,6 +21,7 @@ HEADERS += \
     tvbookmarklist.h \
     tvbookmarkmodel.h \
     tvchannel.h \
+    tvchanneleditmodel.h \
     tvchannellist.h \
     tvchannelmodel.h \
     tvprogramme.h \
