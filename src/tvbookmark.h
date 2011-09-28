@@ -88,6 +88,11 @@ public:
 
     static QList< QPair<int, int> > parseSeasons(const QString &seasons, bool *ok);
 
+    QString years() const;
+    void setYears(const QString &years);
+
+    QList< QPair<int, int> > yearList() const { return m_years; }
+
     enum Match
     {
         NoMatch,
@@ -124,6 +129,7 @@ private:
     QTime m_stopTime;
     QColor m_color;
     QList< QPair<int, int> > m_seasons;
+    QList< QPair<int, int> > m_years;
     QList<TvProgramme *> m_matchingProgrammes;
 
     friend class TvProgramme;

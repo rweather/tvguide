@@ -40,6 +40,16 @@ TvProgramme::~TvProgramme()
         m_bookmark->removeProgramme(this);
 }
 
+int TvProgramme::year() const
+{
+    bool ok = false;
+    int yr = m_date.toInt(&ok);
+    if (ok && yr >= 1900)
+        return yr;
+    else
+        return 0;
+}
+
 // Episode numbers in the "xmltv_ns" system are of the form
 // A.B.C, where each of the numbers is 0-based, not 1-based.
 // The numbers could also have the form X/Y for multiple parts.

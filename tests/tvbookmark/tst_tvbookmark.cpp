@@ -75,11 +75,18 @@ void tst_TvBookmark::properties()
     QVERIFY(b.isOnAir());
     QVERIFY(b.seasons().isEmpty());
     QVERIFY(b.seasonList().isEmpty());
+    QVERIFY(b.years().isEmpty());
+    QVERIFY(b.yearList().isEmpty());
 
     QList< QPair<int, int> > list;
     list.append(QPair<int, int>(1, 1));
     list.append(QPair<int, int>(3, 5));
     list.append(QPair<int, int>(7, 0x7fffffff));
+
+    QList< QPair<int, int> > list2;
+    list2.append(QPair<int, int>(1991, 1991));
+    list2.append(QPair<int, int>(1993, 1995));
+    list2.append(QPair<int, int>(1997, 0x7fffffff));
 
     b.setTitle(QLatin1String("foo"));
     b.setChannelId(QLatin1String("BAR"));
@@ -90,6 +97,7 @@ void tst_TvBookmark::properties()
     b.setColor(Qt::red);
     b.setOnAir(false);
     b.setSeasons(QLatin1String("1,3-5, 7+"));
+    b.setYears(QLatin1String("1991,1993-1995, 1997+"));
 
     QCOMPARE(b.title(), QLatin1String("foo"));
     QCOMPARE(b.channelId(), QLatin1String("BAR"));
@@ -104,6 +112,8 @@ void tst_TvBookmark::properties()
     QVERIFY(!b.isOnAir());
     QCOMPARE(b.seasons(), QLatin1String("1,3-5,7+"));
     QVERIFY(b.seasonList() == list);
+    QCOMPARE(b.years(), QLatin1String("1991,1993-1995,1997+"));
+    QVERIFY(b.yearList() == list2);
 
     TvBookmark b2(b);
     QCOMPARE(b2.title(), QLatin1String("foo"));
@@ -119,6 +129,8 @@ void tst_TvBookmark::properties()
     QVERIFY(!b2.isOnAir());
     QCOMPARE(b2.seasons(), QLatin1String("1,3-5,7+"));
     QVERIFY(b2.seasonList() == list);
+    QCOMPARE(b.years(), QLatin1String("1991,1993-1995,1997+"));
+    QVERIFY(b.yearList() == list2);
 }
 
 void tst_TvBookmark::match_data()

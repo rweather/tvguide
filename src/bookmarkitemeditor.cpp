@@ -59,6 +59,7 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     channelsCombo->setCurrentIndex(0);
 
     seasonEdit->setEnabled(false);
+    yearEdit->setEnabled(false);
 
     connect(colorSelect, SIGNAL(clicked()), this, SLOT(changeColor()));
     connect(otherDay, SIGNAL(clicked()), this, SLOT(selectOtherDay()));
@@ -69,6 +70,9 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     connect(seasonEdit, SIGNAL(textChanged(QString)), this, SLOT(updateOk()));
     connect(seasonEnable, SIGNAL(toggled(bool)), seasonEdit, SLOT(setEnabled(bool)));
     connect(seasonEnable, SIGNAL(stateChanged(int)), this, SLOT(updateOk()));
+    connect(yearEdit, SIGNAL(textChanged(QString)), this, SLOT(updateOk()));
+    connect(yearEnable, SIGNAL(toggled(bool)), yearEdit, SLOT(setEnabled(bool)));
+    connect(yearEnable, SIGNAL(stateChanged(int)), this, SLOT(updateOk()));
 
     connect(anyTimeCheck, SIGNAL(toggled(bool)), this, SLOT(anyTimeChanged(bool)));
 
@@ -164,6 +168,8 @@ void BookmarkItemEditor::copyFromBookmark(const TvBookmark *bookmark)
     setColor(bookmark->color());
     setSeasons(bookmark->seasons());
     setSeasonsEnabled(!bookmark->seasonList().isEmpty());
+    setYears(bookmark->years());
+    setYearsEnabled(!bookmark->yearList().isEmpty());
     setOnAir(bookmark->isOnAir());
 }
 
@@ -180,6 +186,10 @@ void BookmarkItemEditor::copyToBookmark(TvBookmark *bookmark)
         bookmark->setSeasons(seasons());
     else
         bookmark->setSeasons(QString());
+    if (yearsEnabled())
+        bookmark->setYears(years());
+    else
+        bookmark->setYears(QString());
     bookmark->setOnAir(isOnAir());
 }
 
@@ -199,6 +209,15 @@ void BookmarkItemEditor::updateOk()
         if (!seasons.isEmpty()) {
             bool sok = false;
             TvBookmark::parseSeasons(seasons, &sok);
+            if (!sok)
+                ok = false;
+        }
+    }
+    if (ok && yearEnable->isChecked()) {
+        QString years = yearEdit->text();
+        if (!years.isEmpty()) {
+            bool sok = false;
+            TvBookmark::parseSeasons(years, &sok);
             if (!sok)
                 ok = false;
         }

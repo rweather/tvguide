@@ -39,6 +39,7 @@ TvBookmark::TvBookmark(const TvBookmark &other)
     , m_stopTime(other.stopTime())
     , m_color(other.color())
     , m_seasons(other.seasonList())
+    , m_years(other.yearList())
 {
 }
 
@@ -154,12 +155,12 @@ QString TvBookmark::dayOfWeekLongName(int mask)
         return dayOfWeekMaskName(mask, true);
 }
 
-QString TvBookmark::seasons() const
+static QString seasonsToString(const QList< QPair<int, int> > &seasons)
 {
     QString result;
-    for (int index = 0; index < m_seasons.size(); ++index) {
-        int first = m_seasons.at(index).first;
-        int last = m_seasons.at(index).second;
+    for (int index = 0; index < seasons.size(); ++index) {
+        int first = seasons.at(index).first;
+        int last = seasons.at(index).second;
         if (index != 0)
             result += QLatin1Char(',');
         if (first == last) {
@@ -174,6 +175,11 @@ QString TvBookmark::seasons() const
         }
     }
     return result;
+}
+
+QString TvBookmark::seasons() const
+{
+    return seasonsToString(m_seasons);
 }
 
 void TvBookmark::setSeasons(const QString &seasons)
@@ -251,6 +257,16 @@ QList< QPair<int, int> > TvBookmark::parseSeasons(const QString &seasons, bool *
     if (ok)
         *ok = (token == ST_End);
     return list;
+}
+
+QString TvBookmark::years() const
+{
+    return seasonsToString(m_years);
+}
+
+void TvBookmark::setYears(const QString &years)
+{
+    m_years = parseSeasons(years, 0);
 }
 
 TvBookmark::Match TvBookmark::match
@@ -362,6 +378,31 @@ TvBookmark::Match TvBookmark::match
         }
     }
 
+    // Match the year number.
+    if (!m_years.isEmpty() && result != ShouldMatch &&
+            result != NoMatch) {
+        int year = programme->year();
+        int index;
+        if (year) {
+            for (index = 0; index < m_years.size(); ++index) {
+                if (year >= m_years.at(index).first &&
+                        year <= m_years.at(index).second)
+                    break;
+            }
+            if (index >= m_years.size())
+                result = NoMatch;
+        } else {
+            // If the programme does not have a year, then match
+            // it against a bookmark with N+ as one of the ranges.
+            for (index = 0; index < m_years.size(); ++index) {
+                if (m_years.at(index).second == 0x7fffffff)
+                    break;
+            }
+            if (index >= m_years.size())
+                result = NoMatch;
+        }
+    }
+
     return result;
 }
 
@@ -383,6 +424,7 @@ void TvBookmark::load(QSettings *settings)
     m_stopTime = QTime::fromString(settings->value(QLatin1String("stopTime")).toString(), Qt::TextDate);
     m_color = QColor(settings->value(QLatin1String("color")).toString());
     setSeasons(settings->value(QLatin1String("seasons")).toString());
+    setYears(settings->value(QLatin1String("years")).toString());
     m_onair = settings->value(QLatin1String("onair"), true).toBool();
 }
 
@@ -400,6 +442,7 @@ void TvBookmark::save(QSettings *settings)
     settings->setValue(QLatin1String("stopTime"), m_stopTime.toString(Qt::TextDate));
     settings->setValue(QLatin1String("color"), m_color.name());
     settings->setValue(QLatin1String("seasons"), seasons());
+    settings->setValue(QLatin1String("years"), years());
     settings->setValue(QLatin1String("onair"), m_onair);
 }
 

@@ -106,6 +106,9 @@ QVariant TvBookmarkModel::data(const QModelIndex &index, int role) const
                 title = QObject::tr("%1, Season %2")
                             .arg(title).arg(bookmark->seasons());
             }
+            if (!bookmark->yearList().isEmpty()) {
+                title += QLatin1String(", ") + bookmark->years();
+            }
             return title; }
         default: break;
         }

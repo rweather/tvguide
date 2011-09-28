@@ -50,6 +50,7 @@ public:
     QString subTitle() const { return m_subTitle; }
     QString description() const { return m_description; }
     QString date() const { return m_date; }
+    int year() const;
     QStringList directors() const { return m_directors; }
     QStringList actors() const { return m_actors; }
     QStringList presenters() const { return m_presenters; }

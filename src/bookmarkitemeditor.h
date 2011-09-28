@@ -59,6 +59,12 @@ public:
     bool seasonsEnabled() const { return seasonEnable->isChecked(); }
     void setSeasonsEnabled(bool value) { seasonEnable->setChecked(value); }
 
+    QString years() const { return yearEdit->text(); }
+    void setYears(const QString &year) { yearEdit->setText(year); }
+
+    bool yearsEnabled() const { return yearEnable->isChecked(); }
+    void setYearsEnabled(bool value) { yearEnable->setChecked(value); }
+
     bool isOnAir() const { return onAirButton->isChecked(); }
     void setOnAir(bool value)
     {

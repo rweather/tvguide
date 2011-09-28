@@ -396,6 +396,10 @@ void MainWindow::addBookmark()
         if (season > 0)
             bookmarkDlg.setSeasons(QString::number(season));
         bookmarkDlg.setSeasonsEnabled(false);
+        int year = programme->year();
+        if (year > 0)
+            bookmarkDlg.setYears(QString::number(year));
+        bookmarkDlg.setYearsEnabled(false);
         editBookmark = programme->bookmark();
         if (editBookmark) {
             if (QMessageBox::question
