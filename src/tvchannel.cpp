@@ -239,6 +239,8 @@ void TvChannel::addProgramme(TvProgramme *programme)
             // Original programme overlaps with new one, so this
             // is probably an update for the same timeslot.
             // Remove the original entry and replace it.
+            if (next)
+                next->m_prev = prev;
             if (prev)
                 prev->m_next = next;
             else
@@ -248,6 +250,9 @@ void TvChannel::addProgramme(TvProgramme *programme)
         }
     }
     programme->m_next = prog;
+    programme->m_prev = prev;
+    if (prog)
+        prog->m_prev = programme;
     if (prev)
         prev->m_next = programme;
     else
@@ -293,6 +298,7 @@ bool TvChannel::trimProgrammes()
             else
                 m_programmes = prog;
             prog->m_next = 0;
+            prog->m_prev = prev;
             prev = prog;
         } else {
             delete prog;

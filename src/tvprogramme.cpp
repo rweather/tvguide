@@ -30,6 +30,7 @@ TvProgramme::TvProgramme(TvChannel *channel)
     , m_ticked(false)
     , m_bookmark(0)
     , m_match(TvBookmark::NoMatch)
+    , m_prev(0)
     , m_next(0)
 {
 }
@@ -259,9 +260,27 @@ QString TvProgramme::shortDescription() const
     if (m_match == TvBookmark::NoMatch || m_match == TvBookmark::ShouldMatch) {
         desc += QLatin1String("<font color=\"#000000\">");
     } else if (m_match == TvBookmark::TitleMatch) {
-        desc += QLatin1String("<font color=\"") +
-                m_color.name() +
-                QLatin1String("\">");
+        if ((m_prev && m_prev->stop() == m_start &&
+                m_prev->match() == TvBookmark::FullMatch &&
+                m_prev->bookmark() == m_bookmark) ||
+            (m_next && m_next->start() == m_stop &&
+                m_next->match() == TvBookmark::FullMatch &&
+                m_next->bookmark() == m_bookmark)) {
+            // Partial match immediately before or after a full
+            // match is labelled as an underrun or overrun.
+            // Probably a double episode where one of the episodes
+            // falls outside the normal bookmark range.
+            QColor color = m_bookmark->color().lighter(150);
+            desc += QLatin1String("<font color=\"") +
+                    color.name() +
+                    QLatin1String("\">");
+            desc += QLatin1String("<b>");
+            bold = true;
+        } else {
+            desc += QLatin1String("<font color=\"") +
+                    m_color.name() +
+                    QLatin1String("\">");
+        }
     } else {
         desc += QLatin1String("<font color=\"") +
                 m_color.name() +
