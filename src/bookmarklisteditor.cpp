@@ -20,6 +20,7 @@
 #include "tvchannellist.h"
 #include "helpbrowser.h"
 #include <QtCore/qdebug.h>
+#include <QtCore/qsettings.h>
 #include <QtGui/qapplication.h>
 #include <QtGui/qstyle.h>
 #include <QtGui/qstyleoption.h>
@@ -55,8 +56,19 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
     editButton->setEnabled(false);
     deleteButton->setEnabled(false);
 
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("BookmarkSort"));
+    int column = settings.value(QLatin1String("column"), 1).toInt();
+    Qt::SortOrder order = Qt::SortOrder(settings.value(QLatin1String("order"), int(Qt::AscendingOrder)).toInt());
+    if (column < 0 || column >= 6)
+        column = 1;
+    if (order != Qt::AscendingOrder && order != Qt::DescendingOrder)
+        order = Qt::AscendingOrder;
+    settings.endGroup();
+
     bookmarkView->setSortingEnabled(true);
-    bookmarkView->horizontalHeader()->setSortIndicator(1, Qt::AscendingOrder);
+    bookmarkView->horizontalHeader()->setSortIndicator(column, order);
 
     QStyle *style = bookmarkView->style();
     if (!style)
@@ -70,6 +82,15 @@ BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *pare
 
 BookmarkListEditor::~BookmarkListEditor()
 {
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(QLatin1String("BookmarkSort"));
+    settings.setValue(QLatin1String("column"),
+                      bookmarkView->horizontalHeader()->sortIndicatorSection());
+    settings.setValue(QLatin1String("order"),
+                      int(bookmarkView->horizontalHeader()->sortIndicatorOrder()));
+    settings.endGroup();
+    settings.sync();
 }
 
 void BookmarkListEditor::accept()
