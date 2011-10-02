@@ -1,5 +1,14 @@
 ## Change log
 
+### 0.1.0
+
+* Empty episode titles should not count as "other showings".
+* Fix some bugs in column sorting in the bookmark list.
+* Year number matching in bookmarks.
+* Save the bookmark list sort order in the application settings.
+* Recognize underruns or overruns for double episodes where the
+  partial match on the second episode is outside the bookmark range.
+
 ### 0.0.9
 
 * Adjustments to the display of show titles to better distinguish
