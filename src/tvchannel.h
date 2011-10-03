@@ -87,11 +87,13 @@ public:
 
     QList<TvProgramme *> programmesForDay
         (const QDate &date, TimePeriods periods,
-         TvBookmark::MatchOptions options) const;
+         TvBookmark::MatchOptions options);
 
     QList<TvProgramme *> bookmarkedProgrammes
         (const QDate &first, const QDate &last,
-         TvBookmark::MatchOptions options) const;
+         TvBookmark::MatchOptions options);
+
+    void reloadBookmarks();
 
     static QDateTime stringToDateTime(const QString &str, TvChannel *channel = 0);
     static QDate stringToDate(const QString &str);
@@ -114,8 +116,12 @@ private:
     int m_primaryChannelNumber;
     bool m_hidden;
     bool m_convertTimezone;
+    bool m_needBookmarkRefresh;
 
     void addDataFor(const QDate &date, const QDateTime &lastModified);
+    void refreshBookmarks();
+
+    friend class TvProgramme;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(TvChannel::TimePeriods)

@@ -29,6 +29,7 @@ TvChannel::TvChannel(TvChannelList *channelList)
     , m_primaryChannelNumber(-1)
     , m_hidden(false)
     , m_convertTimezone(false)
+    , m_needBookmarkRefresh(false)
 {
 }
 
@@ -311,19 +312,18 @@ bool TvChannel::trimProgrammes()
 
 QList<TvProgramme *> TvChannel::programmesForDay
     (const QDate &date, TimePeriods periods,
-     TvBookmark::MatchOptions options) const
+     TvBookmark::MatchOptions options)
 {
+    Q_UNUSED(options);
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
-    TvProgramme *prev = 0;
-    TvBookmark::Match prevMatch = TvBookmark::NoMatch;
-    TvBookmark *prevBookmark = 0;
     QDateTime morningStart = QDateTime(date, QTime(6, 0, 0));
     QDateTime afternoonStart = QDateTime(date, QTime(12, 0, 0));
     QDateTime nightStart = QDateTime(date, QTime(18, 0, 0));
     QDateTime lateNightStart = QDateTime(date.addDays(1), QTime(0, 0, 0));
     QDateTime lateNightEnd = QDateTime(date.addDays(1), QTime(6, 0, 0));
     bool candidate;
+    refreshBookmarks();
     while (prog != 0) {
         candidate = false;
         if (periods & TvChannel::Morning) {
@@ -347,32 +347,7 @@ QList<TvProgramme *> TvChannel::programmesForDay
                 candidate = true;
         }
         if (candidate) {
-            TvBookmark *bookmark = 0;
-            TvBookmark::Match match;
-            match = channelList()->bookmarkList()->match(prog, &bookmark, options);
-            TvBookmark *addBookmark = bookmark;
-            TvBookmark::Match addMatch = match;
-            if (match != TvBookmark::NoMatch) {
-                if (prev && prevBookmark == bookmark) {
-                    // Trim redundant failed match indications.
-                    if (prevMatch == TvBookmark::ShouldMatch) {
-                        if (match == TvBookmark::ShouldMatch) {
-                            addBookmark = 0;
-                            addMatch = TvBookmark::NoMatch;
-                        } else {
-                            prev->setBookmark(0, TvBookmark::NoMatch);
-                        }
-                    } else if (match == TvBookmark::ShouldMatch) {
-                        addBookmark = 0;
-                        addMatch = TvBookmark::NoMatch;
-                    }
-                }
-            }
-            prog->setBookmark(addBookmark, addMatch);
             list.append(prog);
-            prev = prog;
-            prevMatch = match;
-            prevBookmark = bookmark;
         }
         prog = prog->m_next;
     }
@@ -382,7 +357,7 @@ QList<TvProgramme *> TvChannel::programmesForDay
 // Find all bookmarked programmes within a specific date range.
 QList<TvProgramme *> TvChannel::bookmarkedProgrammes
     (const QDate &first, const QDate &last,
-     TvBookmark::MatchOptions options) const
+     TvBookmark::MatchOptions options)
 {
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
@@ -391,14 +366,14 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
     TvBookmark *prevBookmark = 0;
     QDateTime startTime = QDateTime(first, QTime(6, 0, 0));
     QDateTime stopTime = QDateTime(last.addDays(1), QTime(6, 0, 0));
+    refreshBookmarks();
     while (prog != 0) {
         if ((prog->start() >= startTime &&
                     prog->start() < stopTime) ||
                 (prog->stop() > startTime &&
                     prog->stop() <= stopTime)) {
-            TvBookmark *bookmark = 0;
-            TvBookmark::Match match;
-            match = channelList()->bookmarkList()->match(prog, &bookmark, options);
+            TvBookmark *bookmark = prog->bookmark();
+            TvBookmark::Match match = prog->match();
             TvProgramme *addProg = prog;
             if (match != TvBookmark::NoMatch) {
                 if (prev && prevBookmark == bookmark) {
@@ -412,8 +387,12 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
                         addProg = 0;
                     }
                 }
+                if ((options & TvBookmark::PartialMatches) == 0 &&
+                        match == TvBookmark::TitleMatch) {
+                    // Suppress partial matches.
+                    addProg = 0;
+                }
                 if (addProg) {
-                    addProg->setBookmark(bookmark, match);
                     list.append(addProg);
                     prev = addProg;
                     prevMatch = match;
@@ -424,6 +403,28 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
         prog = prog->m_next;
     }
     return list;
+}
+
+void TvChannel::reloadBookmarks()
+{
+    m_needBookmarkRefresh = true;
+}
+
+void TvChannel::refreshBookmarks()
+{
+    if (!m_needBookmarkRefresh)
+        return;
+    m_needBookmarkRefresh = false;
+    TvProgramme *prog = m_programmes;
+    while (prog != 0) {
+        TvBookmark *bookmark = 0;
+        TvBookmark::Match match =
+            m_channelList->bookmarkList()->match
+                (prog, &bookmark,
+                 TvBookmark::PartialMatches | TvBookmark::NonMatching);
+        prog->setBookmark(bookmark, match);
+        prog = prog->m_next;
+    }
 }
 
 static int fetchField(const QString &str, int *posn, int size)

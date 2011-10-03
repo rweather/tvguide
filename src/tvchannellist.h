@@ -71,6 +71,7 @@ public Q_SLOTS:
     void updateChannels(bool largeIcons);
     void timezoneSettingsChanged();
     void clearCache();
+    void reloadBookmarks();
 
 private Q_SLOTS:
     void authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator);

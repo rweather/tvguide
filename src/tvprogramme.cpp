@@ -17,6 +17,7 @@
 
 #include "tvprogramme.h"
 #include "tvchannel.h"
+#include "tvchannellist.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qtextdocument.h>
 
@@ -192,6 +193,15 @@ void TvProgramme::load(QXmlStreamReader *reader)
     }
     m_shortDescription = QString();
     m_longDescription = QString();
+
+    // Find the bookmark that best matches the programme.
+    if (!m_channel->m_needBookmarkRefresh) {
+        TvBookmark *bookmark = 0;
+        TvBookmark::Match match =
+            m_channel->channelList()->bookmarkList()->match
+                (this, &bookmark, TvBookmark::PartialMatches | TvBookmark::NonMatching);
+        setBookmark(bookmark, match);
+    }
 }
 
 void TvProgramme::setColor(const QColor &color)

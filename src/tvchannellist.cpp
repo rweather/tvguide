@@ -57,6 +57,8 @@ TvChannelList::TvChannelList(QObject *parent)
             this, SLOT(throttleTimeout()));
 
     connect(&m_bookmarkList, SIGNAL(bookmarksChanged()),
+            this, SLOT(reloadBookmarks()));
+    connect(&m_bookmarkList, SIGNAL(bookmarksChanged()),
             this, SIGNAL(bookmarksChanged()));
     connect(&m_bookmarkList, SIGNAL(bookmarksChanged()),
             this, SLOT(saveBookmarks()));
@@ -426,6 +428,16 @@ void TvChannelList::clearCache()
 {
     m_nam.cache()->clear();
     reload();
+}
+
+void TvChannelList::reloadBookmarks()
+{
+    QMap<QString, TvChannel *>::ConstIterator it;
+    for (it = m_channels.constBegin();
+            it != m_channels.constEnd(); ++it) {
+        TvChannel *channel = it.value();
+        channel->reloadBookmarks();
+    }
 }
 
 void TvChannelList::authenticationRequired(QNetworkReply *reply, QAuthenticator *authenticator)
