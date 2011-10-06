@@ -234,14 +234,6 @@ void TvProgramme::setBookmark
         setColor(bookmark->color());
     else
         setColor(bookmark->color().lighter(150));
-
-    QString title;
-    if (match == TvBookmark::ShouldMatch)
-        title = bookmark->title();
-    if (m_nonMatchingTitle != title) {
-        m_nonMatchingTitle = title;
-        m_shortDescription = QString();
-    }
 }
 
 void TvProgramme::clearBookmarkMatch()
@@ -249,7 +241,6 @@ void TvProgramme::clearBookmarkMatch()
     m_bookmark = 0;
     m_match = TvBookmark::NoMatch;
     m_color = QColor();
-    m_nonMatchingTitle = QString();
     m_shortDescription = QString();
 }
 
@@ -267,9 +258,10 @@ QString TvProgramme::shortDescription() const
         return m_shortDescription;
     QString desc;
     bool bold = false;
-    if (m_match == TvBookmark::NoMatch || m_match == TvBookmark::ShouldMatch) {
+    TvBookmark::Match match = m_match;
+    if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch) {
         desc += QLatin1String("<font color=\"#000000\">");
-    } else if (m_match == TvBookmark::TitleMatch) {
+    } else if (match == TvBookmark::TitleMatch) {
         if ((m_prev && m_prev->stop() == m_start &&
                 m_prev->match() == TvBookmark::FullMatch &&
                 m_prev->bookmark() == m_bookmark) ||
@@ -368,9 +360,9 @@ QString TvProgramme::shortDescription() const
     }
     if (m_isPremiere)
         desc += QObject::tr(", <font color=\"red\"><b>Premiere</b></font>");
-    if (!m_nonMatchingTitle.isEmpty()) {
+    if (match == TvBookmark::ShouldMatch) {
         desc += QLatin1String("<br><s>") +
-                Qt::escape(m_nonMatchingTitle) +
+                Qt::escape(m_bookmark->title()) +
                 QLatin1String("</s>");
         QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
         bool needComma = false;
