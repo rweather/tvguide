@@ -384,15 +384,23 @@ QString TvProgramme::shortDescription() const
         if (needComma)
             desc += QLatin1String("</li></ul>");
     }
-    if (!m_otherShowings.isEmpty()) {
-        desc += QLatin1String("<br>") +
-                QObject::tr("Other showings:");
-        for (int index = 0; index < m_otherShowings.size(); ++index) {
-            TvProgramme *other = m_otherShowings.at(index);
-            if (index)
+    if (match != TvBookmark::NoMatch &&
+            match != TvBookmark::ShouldMatch &&
+            !m_subTitle.isEmpty()) {
+        QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
+        qSort(others.begin(), others.end(), sortMovedProgrammes);
+        bool needComma = false;
+        for (int index = 0; index < others.size(); ++index) {
+            TvProgramme *other = others.at(index);
+            if (other == this || other->subTitle() != m_subTitle)
+                continue;
+            if (needComma) {
                 desc += QLatin1String(", ");
-            else
-                desc += QLatin1Char(' ');
+            } else {
+                desc += QLatin1String("<br>") +
+                        QObject::tr("Other showings: ");
+                needComma = true;
+            }
             if (m_channel != other->channel()) {
                 desc += other->channel()->name();
                 desc += QLatin1Char(' ');
@@ -455,28 +463,4 @@ QString TvProgramme::longDescription() const
     desc += QLatin1String("</qt>");
     m_longDescription = desc;
     return desc;
-}
-
-void TvProgramme::clearOtherShowings()
-{
-    if (!m_otherShowings.isEmpty()) {
-        m_otherShowings.clear();
-        m_shortDescription = QString();
-    }
-}
-
-void TvProgramme::addOtherShowing(TvProgramme *programme)
-{
-    m_otherShowings.append(programme);
-    m_shortDescription = QString();
-}
-
-void TvProgramme::moveShowings(TvProgramme *from)
-{
-    m_shortDescription = QString();
-    m_otherShowings.clear();
-    m_otherShowings.append(from);
-    m_otherShowings.append(from->m_otherShowings);
-    from->m_otherShowings.clear();
-    from->m_shortDescription = QString();
 }

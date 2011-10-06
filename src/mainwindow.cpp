@@ -722,7 +722,6 @@ QList<TvProgramme *> MainWindow::combineShowings
     // Clear all "other showings" indications.
     for (index = 0; index < programmes.size(); ++index) {
         prog = programmes.at(index);
-        prog->clearOtherShowings();
         prog->setSuppressed(false);
     }
 
@@ -749,11 +748,9 @@ QList<TvProgramme *> MainWindow::combineShowings
                         prog->match() == TvBookmark::TitleMatch) {
                     // The new programme is a better candidate for the
                     // "primary match" amongst the showings.
-                    prog2->moveShowings(prog);
                     prog = 0;
                     break;
                 } else {
-                    prog->addOtherShowing(prog2);
                     prog2->setSuppressed(true);
                 }
             }

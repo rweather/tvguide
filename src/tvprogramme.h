@@ -79,10 +79,6 @@ public:
     QString shortDescription() const;
     QString longDescription() const;
 
-    void clearOtherShowings();
-    void addOtherShowing(TvProgramme *programme);
-    void moveShowings(TvProgramme *from);
-
     bool isSuppressed() const { return m_suppressed; }
     void setSuppressed(bool value) { m_suppressed = value; }
 
@@ -122,7 +118,6 @@ private:
     QColor m_color;
     TvProgramme *m_prev;
     TvProgramme *m_next;
-    QList<TvProgramme *> m_otherShowings;
 
     friend class TvChannel;
     friend class TvBookmark;
