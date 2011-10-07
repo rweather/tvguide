@@ -439,13 +439,11 @@ void MainWindow::tickShow()
     if (!index.isValid())
         return;
     TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
-    if (programme->isTicked()) {
-        programme->setTicked(false);
+    if (programme->match() == TvBookmark::TickMatch)
         m_channelList->bookmarkList()->removeTick(programme);
-    } else {
-        programme->setTicked(true);
+    else
         m_channelList->bookmarkList()->addTick(programme);
-    }
+    programme->refreshBookmark();
     m_programmeModel->updateTick(index.row());
 }
 
@@ -732,14 +730,14 @@ QList<TvProgramme *> MainWindow::combineShowings
             if (prog->isSuppressed())
                 continue;   // We've already combined this programme.
             TvBookmark *bookmark = prog->bookmark();
-            if (!bookmark || prog->match() == TvBookmark::ShouldMatch || prog->isTicked() || prog->subTitle().isEmpty()) {
+            if (!bookmark || prog->match() == TvBookmark::ShouldMatch || prog->match() == TvBookmark::TickMatch || prog->subTitle().isEmpty()) {
                 // Failed, ticked, or no episode title - there will be no other showings.
                 newProgrammes.append(prog);
                 continue;
             }
             for (index2 = index + 1; index2 < programmes.size(); ++index2) {
                 TvProgramme *prog2 = programmes.at(index2);
-                if (prog2->isSuppressed() || prog2->bookmark() != bookmark || prog2->isTicked() || prog2->match() == TvBookmark::ShouldMatch || prog2->subTitle().isEmpty())
+                if (prog2->isSuppressed() || prog2->bookmark() != bookmark || prog2->match() == TvBookmark::TickMatch || prog2->match() == TvBookmark::ShouldMatch || prog2->subTitle().isEmpty())
                     continue;
                 if (prog->subTitle() != prog2->subTitle() ||
                         prog->episodeNumber() != prog2->episodeNumber())

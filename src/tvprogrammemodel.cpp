@@ -115,7 +115,7 @@ QVariant TvProgrammeModel::data(const QModelIndex &index, int role) const
             return prog->longDescription();
     } else if (role == Qt::DecorationRole) {
         if (index.column() == ColumnTime) {
-            if (prog->isTicked())
+            if (prog->match() == TvBookmark::TickMatch)
                 return m_tickIcon;
             if (prog->bookmark() && !prog->bookmark()->isOnAir() &&
                     prog->match() != TvBookmark::ShouldMatch)

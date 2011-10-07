@@ -196,7 +196,6 @@ TvBookmark::Match TvBookmarkList::match
     while (tickit != m_ticks.constEnd()) {
         const TvTick *tick = tickit.value();
         if (tick->match(programme)) {
-            const_cast<TvProgramme *>(programme)->setTicked(true);
             *bookmark = 0;
             result = TvBookmark::TickMatch;
             break;

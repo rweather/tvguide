@@ -28,7 +28,6 @@ TvProgramme::TvProgramme(TvChannel *channel)
     , m_isRepeat(false)
     , m_isMovie(false)
     , m_suppressed(false)
-    , m_ticked(false)
     , m_bookmark(0)
     , m_match(TvBookmark::NoMatch)
     , m_prev(0)
@@ -370,6 +369,7 @@ QString TvProgramme::shortDescription() const
     }
     if (match != TvBookmark::NoMatch &&
             match != TvBookmark::ShouldMatch &&
+            match != TvBookmark::TickMatch &&
             !m_subTitle.isEmpty()) {
         QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
         qSort(others.begin(), others.end(), sortMovedProgrammes);
@@ -464,11 +464,13 @@ TvBookmark::Match TvProgramme::displayMatch() const
         // Suppress failed matches either side of a successful match,
         // and remove redundant failed matches.
         if (m_prev && m_prev->bookmark() == m_bookmark) {
-            if (m_prev->match() != TvBookmark::NoMatch)
+            if (m_prev->match() != TvBookmark::NoMatch &&
+                    m_prev->match() != TvBookmark::TickMatch)
                 result = TvBookmark::NoMatch;
         } else if (m_next && m_next->bookmark() == m_bookmark) {
             if (m_next->match() != TvBookmark::ShouldMatch &&
-                    m_next->match() != TvBookmark::NoMatch)
+                    m_next->match() != TvBookmark::NoMatch &&
+                    m_next->match() != TvBookmark::TickMatch)
                 result = TvBookmark::NoMatch;
         }
     } else if (m_match == TvBookmark::TitleMatch) {
@@ -488,4 +490,13 @@ TvBookmark::Match TvProgramme::displayMatch() const
     }
 
     return result;
+}
+
+void TvProgramme::refreshBookmark()
+{
+    TvBookmark *bookmark = 0;
+    TvBookmark::Match match =
+        m_channel->channelList()->bookmarkList()->match
+            (this, &bookmark, TvBookmark::PartialMatches | TvBookmark::NonMatching);
+    setBookmark(bookmark, match);
 }
