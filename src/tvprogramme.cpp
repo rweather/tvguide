@@ -414,8 +414,10 @@ QString TvProgramme::longDescription() const
         return m_longDescription;
     QString desc = QLatin1String("<qt><p><i>");
     desc += Qt::escape(m_description) + QLatin1String("</i></p>");
-    desc += QObject::tr("<p><b>Duration:</b> %1 minutes</p>")
-                .arg(QString::number(m_start.secsTo(m_stop) / 60));
+    desc += QObject::tr("<p><b>Duration:</b> %1 minutes, %2 to %3</p>")
+                .arg(QString::number(m_start.secsTo(m_stop) / 60))
+                .arg(m_start.time().toString(Qt::LocaleDate))
+                .arg(m_stop.time().toString(Qt::LocaleDate));
     if (m_categories.size() > 1) {
         desc += QObject::tr("<p><b>Categories:</b> %1</p>")
             .arg(Qt::escape(m_categories.join(QLatin1String(", "))));
