@@ -374,6 +374,7 @@ QString TvProgramme::shortDescription() const
         QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
         qSort(others.begin(), others.end(), sortMovedProgrammes);
         bool needComma = false;
+        bool explicitToday = false;
         for (int index = 0; index < others.size(); ++index) {
             TvProgramme *other = others.at(index);
             if (other == this || other->subTitle() != m_subTitle)
@@ -389,9 +390,15 @@ QString TvProgramme::shortDescription() const
                 desc += other->channel()->name();
                 desc += QLatin1Char(' ');
             }
-            if (m_start.date() != other->start().date()) {
-                desc += QDate::longDayName(other->start().date().dayOfWeek());
-                desc += QLatin1Char(' ');
+            if (m_start.date() != other->start().date() || explicitToday) {
+                int diff = m_start.date().daysTo(other->start().date());
+                if (diff >= 0 && diff <= 6) {
+                    desc += QDate::longDayName(other->start().date().dayOfWeek());
+                    desc += QLatin1Char(' ');
+                } else {
+                    desc += other->start().date().toString(QLatin1String("dddd, MMMM d, "));
+                }
+                explicitToday = true;
             }
             desc += other->start().time().toString(Qt::LocaleDate);
         }
