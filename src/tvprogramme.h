@@ -69,9 +69,6 @@ public:
 
     void load(QXmlStreamReader *reader);
 
-    QColor color() const { return m_color; }
-    void setColor(const QColor &color);
-
     TvBookmark *bookmark() const { return m_bookmark; }
     TvBookmark::Match match() const { return m_match; }
     void setBookmark(TvBookmark *bookmark, TvBookmark::Match match);
@@ -115,7 +112,6 @@ private:
     mutable QString m_longDescription;
     TvBookmark *m_bookmark;
     TvBookmark::Match m_match;
-    QColor m_color;
     TvProgramme *m_prev;
     TvProgramme *m_next;
 
@@ -124,6 +120,8 @@ private:
 
     void clearBookmarkMatch();
     void markDirty() { m_shortDescription = QString(); }
+
+    TvBookmark::Match displayMatch() const;
 };
 
 #endif

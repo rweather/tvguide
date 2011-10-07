@@ -204,14 +204,6 @@ void TvProgramme::load(QXmlStreamReader *reader)
     }
 }
 
-void TvProgramme::setColor(const QColor &color)
-{
-    if (m_color != color) {
-        m_color = color;
-        m_shortDescription = QString();
-    }
-}
-
 void TvProgramme::setBookmark
     (TvBookmark *bookmark, TvBookmark::Match match)
 {
@@ -227,20 +219,16 @@ void TvProgramme::setBookmark
         if (bookmark)
             bookmark->addProgramme(this);
     }
-    m_match = match;
-    if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch || match == TvBookmark::TickMatch)
-        setColor(QColor());
-    else if (match == TvBookmark::FullMatch || match == TvBookmark::TitleMatch)
-        setColor(bookmark->color());
-    else
-        setColor(bookmark->color().lighter(150));
+    if (m_match != match) {
+        m_match = match;
+        m_shortDescription = QString();
+    }
 }
 
 void TvProgramme::clearBookmarkMatch()
 {
     m_bookmark = 0;
     m_match = TvBookmark::NoMatch;
-    m_color = QColor();
     m_shortDescription = QString();
 }
 
@@ -258,37 +246,33 @@ QString TvProgramme::shortDescription() const
         return m_shortDescription;
     QString desc;
     bool bold = false;
-    TvBookmark::Match match = m_match;
-    if (match == TvBookmark::NoMatch || match == TvBookmark::ShouldMatch) {
+    TvBookmark::Match match = displayMatch();
+    switch (match) {
+    case TvBookmark::NoMatch:
+    case TvBookmark::ShouldMatch:
+    case TvBookmark::TickMatch:
         desc += QLatin1String("<font color=\"#000000\">");
-    } else if (match == TvBookmark::TitleMatch) {
-        if ((m_prev && m_prev->stop() == m_start &&
-                m_prev->match() == TvBookmark::FullMatch &&
-                m_prev->bookmark() == m_bookmark) ||
-            (m_next && m_next->start() == m_stop &&
-                m_next->match() == TvBookmark::FullMatch &&
-                m_next->bookmark() == m_bookmark)) {
-            // Partial match immediately before or after a full
-            // match is labelled as an underrun or overrun.
-            // Probably a double episode where one of the episodes
-            // falls outside the normal bookmark range.
-            QColor color = m_bookmark->color().lighter(150);
-            desc += QLatin1String("<font color=\"") +
-                    color.name() +
-                    QLatin1String("\">");
-            desc += QLatin1String("<b>");
-            bold = true;
-        } else {
-            desc += QLatin1String("<font color=\"") +
-                    m_color.name() +
-                    QLatin1String("\">");
-        }
-    } else {
+        break;
+    case TvBookmark::FullMatch:
         desc += QLatin1String("<font color=\"") +
-                m_color.name() +
+                m_bookmark->color().name() +
                 QLatin1String("\">");
         desc += QLatin1String("<b>");
         bold = true;
+        break;
+    case TvBookmark::Overrun:
+    case TvBookmark::Underrun:
+        desc += QLatin1String("<font color=\"") +
+                m_bookmark->color().lighter(150).name() +
+                QLatin1String("\">");
+        desc += QLatin1String("<b>");
+        bold = true;
+        break;
+    case TvBookmark::TitleMatch:
+        desc += QLatin1String("<font color=\"") +
+                m_bookmark->color().name() +
+                QLatin1String("\">");
+        break;
     }
     if (m_isMovie)
         desc += QObject::tr("MOVIE: %1").arg(Qt::escape(m_title));
@@ -463,4 +447,38 @@ QString TvProgramme::longDescription() const
     desc += QLatin1String("</qt>");
     m_longDescription = desc;
     return desc;
+}
+
+TvBookmark::Match TvProgramme::displayMatch() const
+{
+    TvBookmark::Match result = m_match;
+
+    if (m_match == TvBookmark::ShouldMatch) {
+        // Suppress failed matches either side of a successful match,
+        // and remove redundant failed matches.
+        if (m_prev && m_prev->bookmark() == m_bookmark) {
+            if (m_prev->match() != TvBookmark::NoMatch)
+                result = TvBookmark::NoMatch;
+        } else if (m_next && m_next->bookmark() == m_bookmark) {
+            if (m_next->match() != TvBookmark::ShouldMatch &&
+                    m_next->match() != TvBookmark::NoMatch)
+                result = TvBookmark::NoMatch;
+        }
+    } else if (m_match == TvBookmark::TitleMatch) {
+        // Partial match immediately before or after a full
+        // match is labelled as an underrun or overrun.
+        // Probably a double episode where one of the episodes
+        // falls outside the normal bookmark range.
+        if (m_prev && m_prev->stop() == m_start &&
+                m_prev->match() == TvBookmark::FullMatch &&
+                m_prev->bookmark() == m_bookmark) {
+            result = TvBookmark::Overrun;
+        } else if (m_next && m_next->start() == m_stop &&
+                   m_next->match() == TvBookmark::FullMatch &&
+                   m_next->bookmark() == m_bookmark) {
+            result = TvBookmark::Underrun;
+        }
+    }
+
+    return result;
 }
