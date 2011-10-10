@@ -22,6 +22,7 @@
 #include <QtCore/qstringlist.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qxmlstream.h>
+#include <QtCore/qmap.h>
 #include <QtGui/qcolor.h>
 #include "tvbookmark.h"
 
@@ -93,6 +94,7 @@ private:
     QStringList m_directors;
     QStringList m_actors;
     QStringList m_presenters;
+    QMap<QString, QStringList> m_otherCredits;
     QStringList m_categories;
     QString m_rating;
     QString m_starRating;
@@ -120,6 +122,8 @@ private:
     void markDirty() { m_shortDescription = QString(); }
 
     TvBookmark::Match displayMatch() const;
+
+    void addOtherCredit(const QString &type, const QString &name);
 };
 
 #endif

@@ -122,6 +122,41 @@ void TvProgramme::load(QXmlStreamReader *reader)
             } else if (reader->name() == QLatin1String("presenter")) {
                 m_presenters += reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
+            } else if (reader->name() == QLatin1String("guest")) {
+                addOtherCredit
+                    (QObject::tr("Guest"),
+                     reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("commentator")) {
+                addOtherCredit
+                    (QObject::tr("Commentator"),
+                     reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("writer")) {
+                addOtherCredit
+                    (QObject::tr("Writer"),
+                     reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("adapter")) {
+                addOtherCredit
+                    (QObject::tr("Adapted By"),
+                     reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("producer")) {
+                addOtherCredit
+                    (QObject::tr("Producer"),
+                     reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("composer")) {
+                addOtherCredit
+                    (QObject::tr("Composer"),
+                     reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("editor")) {
+                addOtherCredit
+                    (QObject::tr("Editor"),
+                     reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements));
             } else if (reader->name() == QLatin1String("category")) {
                 QString category = reader->readElementText
                     (QXmlStreamReader::IncludeChildElements);
@@ -172,13 +207,6 @@ void TvProgramme::load(QXmlStreamReader *reader)
                        reader->name() == QLatin1String("subtitles") ||
                        reader->name() == QLatin1String("review") ||
                        reader->name() == QLatin1String("url") ||
-                       reader->name() == QLatin1String("writer") ||
-                       reader->name() == QLatin1String("adapter") ||
-                       reader->name() == QLatin1String("producer") ||
-                       reader->name() == QLatin1String("composer") ||
-                       reader->name() == QLatin1String("editor") ||
-                       reader->name() == QLatin1String("commentator") ||
-                       reader->name() == QLatin1String("guest") ||
                        reader->name() == QLatin1String("length") ||
                        reader->name() == QLatin1String("icon")) {
                 qWarning() << "Warning: unhandled standard programme element:" << reader->name();
@@ -430,6 +458,15 @@ QString TvProgramme::longDescription() const
         desc += QObject::tr("<p><b>Presenter:</b> %1</p>")
             .arg(Qt::escape(m_presenters.join(QLatin1String(", "))));
     }
+    if (!m_otherCredits.isEmpty()) {
+        QMap<QString, QStringList>::ConstIterator it;
+        for (it = m_otherCredits.constBegin();
+                it != m_otherCredits.constEnd(); ++it) {
+            desc += QString(QLatin1String("<p><b>%1:</b> %2</p>"))
+                .arg(Qt::escape(it.key()))
+                .arg(Qt::escape(it.value().join(QLatin1String(", "))));
+        }
+    }
     if (!m_directors.isEmpty()) {
         desc += QObject::tr("<p><b>Director:</b> %1</p>")
             .arg(Qt::escape(m_directors.join(QLatin1String(", "))));
@@ -501,4 +538,14 @@ void TvProgramme::refreshBookmark()
         m_channel->channelList()->bookmarkList()->match
             (this, &bookmark, TvBookmark::PartialMatches | TvBookmark::NonMatching);
     setBookmark(bookmark, match);
+}
+
+void TvProgramme::addOtherCredit(const QString &type, const QString &name)
+{
+    QMap<QString, QStringList>::Iterator it;
+    it = m_otherCredits.find(type);
+    if (it != m_otherCredits.end())
+        it.value().append(name);
+    else
+        m_otherCredits.insert(type, QStringList(name));
 }
