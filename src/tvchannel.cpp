@@ -364,7 +364,7 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
     TvProgramme *prev = 0;
     TvBookmark::Match prevMatch = TvBookmark::NoMatch;
     TvBookmark *prevBookmark = 0;
-    QDateTime startTime = QDateTime(first, QTime(6, 0, 0));
+    QDateTime startTime = QDateTime(first, QTime(0, 0, 0));
     QDateTime stopTime = QDateTime(last.addDays(1), QTime(6, 0, 0));
     refreshBookmarks();
     while (prog != 0) {
