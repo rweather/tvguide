@@ -322,8 +322,15 @@ QString TvProgramme::shortDescription() const
         desc += QObject::tr(" (R)");
     }
     if (!m_categories.isEmpty()) {
-        desc += QLatin1String(", ") +
-                Qt::escape(m_categories.at(0));
+        QString category = m_categories.at(0);
+        for (int index = 1; index < m_categories.size(); ++index) {
+            if (category.compare(QLatin1String("series")) != 0 &&
+                    category.compare(QLatin1String("movies")) != 0 &&
+                    category.compare(QLatin1String("movie")) != 0)
+                break;
+            category = m_categories.at(index);
+        }
+        desc += QLatin1String(", ") + Qt::escape(category);
     }
     if (!m_actors.isEmpty()) {
         desc += QLatin1String(", ") +
