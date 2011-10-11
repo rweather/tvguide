@@ -20,6 +20,7 @@
 
 #include <QtGui/qmainwindow.h>
 #include <QtGui/qprogressbar.h>
+#include <QtGui/qlineedit.h>
 #include "ui_mainwindow.h"
 #include "tvchannellist.h"
 #include "tvchannelmodel.h"
@@ -79,6 +80,9 @@ private Q_SLOTS:
     void zoomReset();
     void zoomUpdate();
 
+    void searchFilterChanged(const QString &text);
+    void searchFilterOptionsChanged();
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 
@@ -93,6 +97,7 @@ private:
     qreal m_baseFontSize;
     qreal m_fontMultiplier;
     HelpBrowser *m_helpBrowser;
+    QLineEdit *m_searchFilter;
 
     TvChannel::TimePeriods timePeriods() const;
     TvBookmark::MatchOptions matchOptions() const;

@@ -27,6 +27,7 @@ TvProgrammeModel::TvProgrammeModel(QObject *parent)
     , m_bookmarkIcon(QLatin1String(":/images/bookmark.png"))
     , m_tickIcon(QLatin1String(":/images/tick.png"))
     , m_returnedIcon(QLatin1String(":/images/ledred.png"))
+    , m_filterOptions(TvProgramme::SearchTitle)
 {
     m_bookmarkIcon = m_bookmarkIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     m_tickIcon = m_tickIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -39,7 +40,8 @@ TvProgrammeModel::~TvProgrammeModel()
 
 void TvProgrammeModel::clear()
 {
-    if (!m_programmes.isEmpty()) {
+    if (!m_unfilteredProgrammes.isEmpty()) {
+        m_unfilteredProgrammes.clear();
         m_programmes.clear();
         m_channel = 0;
         m_date = QDate();
@@ -49,10 +51,11 @@ void TvProgrammeModel::clear()
 
 void TvProgrammeModel::setProgrammes(const QList<TvProgramme *> &programmes, TvChannel *channel, const QDate &date)
 {
+    m_unfilteredProgrammes = programmes;
     m_programmes = programmes;
     m_channel = channel;
     m_date = date;
-    reset();
+    updateFilter();
 }
 
 QModelIndex TvProgrammeModel::index(int row, int column, const QModelIndex &) const
@@ -179,5 +182,38 @@ void TvProgrammeModel::updateTick(int row)
 
 void TvProgrammeModel::updateIcons()
 {
+    reset();
+}
+
+void TvProgrammeModel::setFilter(const QString &str)
+{
+    if (m_filter != str) {
+        m_filter = str;
+        updateFilter();
+    }
+}
+
+void TvProgrammeModel::setFilterOptions(int options)
+{
+    if (m_filterOptions != options) {
+        m_filterOptions = options;
+        if (!m_filter.isEmpty())
+            updateFilter();
+    }
+}
+
+void TvProgrammeModel::updateFilter()
+{
+    if (m_filter.isEmpty()) {
+        m_programmes = m_unfilteredProgrammes;
+    } else {
+        m_programmes.clear();
+        uint hashval = TvProgramme::hashSearchString(m_filter);
+        for (int index = 0; index < m_unfilteredProgrammes.size(); ++index) {
+            TvProgramme *prog = m_unfilteredProgrammes.at(index);
+            if (prog->containsSearchString(hashval, m_filter, m_filterOptions))
+                m_programmes.append(prog);
+        }
+    }
     reset();
 }

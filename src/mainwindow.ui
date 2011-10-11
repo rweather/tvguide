@@ -443,6 +443,46 @@
     <string>&amp;Clear Cache</string>
    </property>
   </action>
+  <action name="actionSearchFilterTitle">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Title</string>
+   </property>
+  </action>
+  <action name="actionSearchFilterEpisodeName">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Episode Name</string>
+   </property>
+  </action>
+  <action name="actionSearchFilterDescription">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Description</string>
+   </property>
+  </action>
+  <action name="actionSearchFilterCredits">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Credits</string>
+   </property>
+  </action>
+  <action name="actionSearchFilterCategories">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Categories</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="tvguide.qrc"/>

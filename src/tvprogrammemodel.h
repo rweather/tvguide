@@ -48,13 +48,24 @@ public:
     void updateTick(int row);
     void updateIcons();
 
+    QString filter() const { return m_filter; }
+    void setFilter(const QString &str);
+
+    int filterOptions() const { return m_filterOptions; }
+    void setFilterOptions(int options);
+
 private:
+    QList<TvProgramme *> m_unfilteredProgrammes;
     QList<TvProgramme *> m_programmes;
     TvChannel *m_channel;
     QDate m_date;
     QPixmap m_bookmarkIcon;
     QPixmap m_tickIcon;
     QPixmap m_returnedIcon;
+    QString m_filter;
+    int m_filterOptions;
+
+    void updateFilter();
 };
 
 #endif

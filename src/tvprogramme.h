@@ -82,6 +82,18 @@ public:
 
     void refreshBookmark();
 
+    static uint hashSearchString(const QString &str);
+
+    enum {
+        SearchTitle         = (1 << 0),
+        SearchSubTitle      = (1 << 1),
+        SearchDescription   = (1 << 2),
+        SearchCredits       = (1 << 3),
+        SearchCategories    = (1 << 4)
+    };
+
+    bool containsSearchString(uint hashval, const QString &str, int options) const;
+
 private:
     TvChannel *m_channel;
     QDateTime m_start;
@@ -124,6 +136,25 @@ private:
     TvBookmark::Match displayMatch() const;
 
     void addOtherCredit(const QString &type, const QString &name);
+
+#if 0
+    static const int HashBitsPerWord = sizeof(uint) * 8;
+    static const int HashSize = 511;
+    static const int HashWordSize = 512 / HashBitsPerWord;
+    uint hash[HashWordSize];
+#endif
+
+    void createSubstringHash();
+    void updateHash(const QString &str);
+    void updateHash(const QStringList &list);
+    bool containsSearchString(const QString &str, int options) const;
+
+    inline bool containsSearch(const QString &str, const QString &within) const
+    {
+        return within.indexOf(str, 0, Qt::CaseInsensitive) >= 0;
+    }
+
+    bool containsSearch(const QString &str, const QStringList &within) const;
 };
 
 #endif
