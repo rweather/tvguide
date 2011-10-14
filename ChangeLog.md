@@ -1,5 +1,23 @@
 ## Change log
 
+### 0.1.1
+
+* Perform bookmark matching when the programme is loaded to avoid
+  re-matching it every time the date or channel changes.
+* Display "other showings" in the regular (non-7days) view.
+* Show start and end time for a programme next to its duration.
+* Improved Edit Channels dialog that sorts channels the same
+  way as the main window's Channels pane.
+* 7 day outlook now searches for bookmarked programmes from
+  12:00am onwards rather than 6:00am onwards.
+* Parse other credits (writer, producer, composer, etc) from the
+  incoming XMLTV data.
+* If the first category is something generic like "series" or
+  "movie", then try to find something more meaningful further
+  down the category list for the short description.
+* Search box for filtering the programme view with a string.
+* Selecting categories and credits for searching.
+
 ### 0.1.0
 
 * Empty episode titles should not count as "other showings".
