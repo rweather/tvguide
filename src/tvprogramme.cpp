@@ -724,3 +724,26 @@ bool TvProgramme::containsSearch(const QString &str, const QStringList &within) 
     }
     return false;
 }
+
+void TvProgramme::updateCategorySet(QSet<QString> &set) const
+{
+    updateSet(set, m_categories);
+}
+
+void TvProgramme::updateCreditSet(QSet<QString> &set) const
+{
+    updateSet(set, m_directors);
+    updateSet(set, m_actors);
+    updateSet(set, m_presenters);
+    QMap<QString, QStringList>::ConstIterator it;
+    for (it = m_otherCredits.constBegin();
+            it != m_otherCredits.constEnd(); ++it) {
+        updateSet(set, it.value());
+    }
+}
+
+void TvProgramme::updateSet(QSet<QString> &set, const QStringList &list)
+{
+    for (int index = 0; index < list.size(); ++index)
+        set.insert(list.at(index));
+}

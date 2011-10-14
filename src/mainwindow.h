@@ -82,6 +82,8 @@ private Q_SLOTS:
 
     void searchFilterChanged(const QString &text);
     void searchFilterOptionsChanged();
+    void selectSearchCategory();
+    void selectSearchCredit();
 
 protected:
     void keyPressEvent(QKeyEvent *event);
@@ -94,6 +96,7 @@ private:
     QTimer *m_hideProgressTimer;
     bool m_firstTimeChannelList;
     bool m_fetching;
+    bool m_updatingFilter;
     qreal m_baseFontSize;
     qreal m_fontMultiplier;
     HelpBrowser *m_helpBrowser;

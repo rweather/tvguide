@@ -483,6 +483,16 @@
     <string>Categories</string>
    </property>
   </action>
+  <action name="actionSearchFilterSelectCategory">
+   <property name="text">
+    <string>Select Category ...</string>
+   </property>
+  </action>
+  <action name="actionSearchFilterSelectCredit">
+   <property name="text">
+    <string>Select Credit ...</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="tvguide.qrc"/>

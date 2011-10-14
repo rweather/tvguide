@@ -202,6 +202,15 @@ void TvProgrammeModel::setFilterOptions(int options)
     }
 }
 
+void TvProgrammeModel::setFilterOptions(int options, const QString &str)
+{
+    if (m_filter != str || m_filterOptions != options) {
+        m_filter = str;
+        m_filterOptions = options;
+        updateFilter();
+    }
+}
+
 void TvProgrammeModel::updateFilter()
 {
     if (m_filter.isEmpty()) {

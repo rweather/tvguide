@@ -23,6 +23,7 @@
 #include <QtCore/qdatetime.h>
 #include <QtCore/qxmlstream.h>
 #include <QtCore/qmap.h>
+#include <QtCore/qset.h>
 #include <QtGui/qcolor.h>
 #include "tvbookmark.h"
 
@@ -94,6 +95,9 @@ public:
 
     bool containsSearchString(uint hashval, const QString &str, int options) const;
 
+    void updateCategorySet(QSet<QString> &set) const;
+    void updateCreditSet(QSet<QString> &set) const;
+
 private:
     TvChannel *m_channel;
     QDateTime m_start;
@@ -155,6 +159,8 @@ private:
     }
 
     bool containsSearch(const QString &str, const QStringList &within) const;
+
+    static void updateSet(QSet<QString> &set, const QStringList &list);
 };
 
 #endif

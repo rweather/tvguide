@@ -139,6 +139,10 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
                 programme->load(reader);
                 channel->addProgramme(programme);
                 newProgrammes.insert(channel);
+
+                // Update the category and credit sets with new values.
+                programme->updateCategorySet(m_categories);
+                programme->updateCreditSet(m_credits);
             }
         } else if (token == QXmlStreamReader::EndElement) {
             if (reader->name() == QLatin1String("tv"))

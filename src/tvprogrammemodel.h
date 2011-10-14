@@ -54,6 +54,8 @@ public:
     int filterOptions() const { return m_filterOptions; }
     void setFilterOptions(int options);
 
+    void setFilterOptions(int options, const QString &str);
+
 private:
     QList<TvProgramme *> m_unfilteredProgrammes;
     QList<TvProgramme *> m_programmes;

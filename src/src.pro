@@ -5,6 +5,7 @@ SOURCES += \
     mainwindow.cpp \
     bookmarkitemeditor.cpp \
     bookmarklisteditor.cpp \
+    categoryselector.cpp \
     channeleditor.cpp \
     dayselectiondialog.cpp \
     helpbrowser.cpp \
@@ -16,6 +17,7 @@ HEADERS += \
     mainwindow.h \
     bookmarkitemeditor.h \
     bookmarklisteditor.h \
+    categoryselector.h \
     channeleditor.h \
     dayselectiondialog.h \
     helpbrowser.h \
@@ -35,6 +37,7 @@ FORMS += \
     mainwindow.ui \
     bookmarkitemeditor.ui \
     bookmarklisteditor.ui \
+    categoryselector.ui \
     channeleditor.ui \
     dayselectiondialog.ui \
     helpbrowser.ui \

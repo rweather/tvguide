@@ -17,6 +17,7 @@
 
 #include "mainwindow.h"
 #include "tvprogrammedelegate.h"
+#include "categoryselector.h"
 #include "channeleditor.h"
 #include "bookmarkitemeditor.h"
 #include "bookmarklisteditor.h"
@@ -36,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_firstTimeChannelList(false)
     , m_fetching(false)
+    , m_updatingFilter(false)
     , m_baseFontSize(12.0f)
     , m_fontMultiplier(1.0f)
     , m_helpBrowser(0)
@@ -208,12 +210,15 @@ MainWindow::MainWindow(QWidget *parent)
     toolBar->addWidget(searchOptions);
 
     QMenu *menu = new QMenu(this);
-    menu->setTearOffEnabled(true);
+    //menu->setTearOffEnabled(true);
     menu->addAction(actionSearchFilterTitle);
     menu->addAction(actionSearchFilterEpisodeName);
     menu->addAction(actionSearchFilterDescription);
     menu->addAction(actionSearchFilterCredits);
     menu->addAction(actionSearchFilterCategories);
+    menu->addSeparator();
+    menu->addAction(actionSearchFilterSelectCredit);
+    menu->addAction(actionSearchFilterSelectCategory);
     searchOptions->setMenu(menu);
 
     int options = m_programmeModel->filterOptions();
@@ -238,6 +243,10 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(searchFilterOptionsChanged()));
     connect(actionSearchFilterCategories, SIGNAL(toggled(bool)),
             this, SLOT(searchFilterOptionsChanged()));
+    connect(actionSearchFilterSelectCategory, SIGNAL(triggered()),
+            this, SLOT(selectSearchCategory()));
+    connect(actionSearchFilterSelectCredit, SIGNAL(triggered()),
+            this, SLOT(selectSearchCredit()));
 
     m_searchFilter = new QLineEdit(this);
     toolBar->addWidget(m_searchFilter);
@@ -643,12 +652,17 @@ void MainWindow::zoomUpdate()
 
 void MainWindow::searchFilterChanged(const QString &text)
 {
+    if (m_updatingFilter)
+        return;
     m_programmeModel->setFilter(text);
     programmes->resizeRowsToContents();
 }
 
 void MainWindow::searchFilterOptionsChanged()
 {
+    if (m_updatingFilter)
+        return;
+
     int options = m_programmeModel->filterOptions();
 
     if (actionSearchFilterTitle->isChecked())
@@ -678,6 +692,45 @@ void MainWindow::searchFilterOptionsChanged()
 
     m_programmeModel->setFilterOptions(options);
     programmes->resizeRowsToContents();
+}
+
+void MainWindow::selectSearchCategory()
+{
+    CategorySelector selector(this);
+    selector.setCategories(m_channelList->categories());
+    if (selector.exec() == QDialog::Accepted) {
+        m_updatingFilter = true;
+        m_searchFilter->setText(selector.selectedCategory());
+        actionSearchFilterTitle->setChecked(false);
+        actionSearchFilterEpisodeName->setChecked(false);
+        actionSearchFilterDescription->setChecked(false);
+        actionSearchFilterCredits->setChecked(false);
+        actionSearchFilterCategories->setChecked(true);
+        m_updatingFilter = false;
+        m_programmeModel->setFilterOptions
+            (TvProgramme::SearchCategories, selector.selectedCategory());
+        programmes->resizeRowsToContents();
+    }
+}
+
+void MainWindow::selectSearchCredit()
+{
+    CategorySelector selector(this);
+    selector.setWindowTitle(tr("Select Credit"));
+    selector.setCategories(m_channelList->credits());
+    if (selector.exec() == QDialog::Accepted) {
+        m_updatingFilter = true;
+        m_searchFilter->setText(selector.selectedCategory());
+        actionSearchFilterTitle->setChecked(false);
+        actionSearchFilterEpisodeName->setChecked(false);
+        actionSearchFilterDescription->setChecked(false);
+        actionSearchFilterCredits->setChecked(true);
+        actionSearchFilterCategories->setChecked(false);
+        m_updatingFilter = false;
+        m_programmeModel->setFilterOptions
+            (TvProgramme::SearchCredits, selector.selectedCategory());
+        programmes->resizeRowsToContents();
+    }
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)

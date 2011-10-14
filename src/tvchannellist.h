@@ -62,6 +62,9 @@ public:
 
     TvBookmarkList *bookmarkList() { return &m_bookmarkList; }
 
+    QSet<QString> categories() const { return m_categories; }
+    QSet<QString> credits() const { return m_credits; }
+
 public Q_SLOTS:
     void refreshChannels(bool forceReload = false);
     void requestChannelDay(TvChannel *channel, const QDate &date, int days = 1, bool trimPrevious = true);
@@ -137,6 +140,8 @@ private:
     QByteArray m_contents;
     QMap<QUrl, QDateTime> m_lastFetch;
     TvBookmarkList m_bookmarkList;
+    QSet<QString> m_categories;
+    QSet<QString> m_credits;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
     void loadOzTivoChannelData();
