@@ -41,7 +41,7 @@ private Q_SLOTS:
     void busyChanged(bool value);
     void progressChanged(qreal progress);
     void dateChanged();
-    void channelChanged(const QModelIndex &index);
+    void channelChanged();
     void programmeChanged(const QModelIndex &index);
     void programmesReset();
     void programmesChanged(TvChannel *channel);
@@ -104,9 +104,9 @@ private:
 
     TvChannel::TimePeriods timePeriods() const;
     TvBookmark::MatchOptions matchOptions() const;
-    void setDay(const QModelIndex &index, const QDate &date);
+    void setDay(const QModelIndexList &selected, const QDate &date, TvChannel *changedChannel = 0, bool request = true);
     void updateProgrammes(TvChannel *channel, const QDate &date, bool request);
-    void updateMultiChannelProgrammes(const QDate &date, bool request);
+    void updateMultiChannelProgrammes(const QDate &date, const QList<TvChannel *> channels, bool request);
     QList<TvProgramme *> combineShowings(const QList<TvProgramme *> &programmes);
 };
 

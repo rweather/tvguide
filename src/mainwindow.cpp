@@ -173,8 +173,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(calendar, SIGNAL(selectionChanged()),
             this, SLOT(dateChanged()));
     connect(channels->selectionModel(),
-            SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-            this, SLOT(channelChanged(QModelIndex)));
+            SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+            this, SLOT(channelChanged()));
 
     connect(programmes->selectionModel(),
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
@@ -331,14 +331,17 @@ void MainWindow::dateChanged()
 {
     QDate date = calendar->selectedDate();
     actionToday->setEnabled(date != QDate::currentDate());
-    setDay(channels->selectionModel()->currentIndex(), date);
+    setDay(channels->selectionModel()->selectedRows(), date);
 }
 
-void MainWindow::channelChanged(const QModelIndex &index)
+void MainWindow::channelChanged()
 {
     TvChannel *channel;
-    if (index.isValid()) {
-        channel = static_cast<TvChannel *>(index.internalPointer());
+    QList<QModelIndex> indexes;
+    if (!actionMultiChannel->isChecked())
+        indexes = channels->selectionModel()->selectedRows();
+    if (indexes.size() == 1) {
+        channel = static_cast<TvChannel *>(indexes.at(0).internalPointer());
         QDate first, last;
         channel->dataForRange(&first, &last);
         calendar->setMinimumDate(first);
@@ -347,7 +350,9 @@ void MainWindow::channelChanged(const QModelIndex &index)
         calendar->setMinimumDate(QDate::fromJulianDay(1));
         calendar->setMaximumDate(QDate(7999, 12, 31));
     }
-    setDay(index, calendar->selectedDate());
+    programmes->setColumnHidden
+        (TvProgrammeModel::ColumnChannel, indexes.size() == 1);
+    setDay(indexes, calendar->selectedDate());
 }
 
 void MainWindow::programmeChanged(const QModelIndex &index)
@@ -364,17 +369,8 @@ void MainWindow::programmesChanged(TvChannel *channel)
 {
     if (m_fetching)
         return;
-    QDate date = calendar->selectedDate();
-    if (actionMultiChannel->isChecked()) {
-        updateMultiChannelProgrammes(date, false);
-    } else {
-        QModelIndex index = channels->selectionModel()->currentIndex();
-        if (index.isValid()) {
-            TvChannel *indexChannel = static_cast<TvChannel *>(index.internalPointer());
-            if (channel == indexChannel)
-                updateProgrammes(channel, date, false);
-        }
-    }
+    setDay(channels->selectionModel()->selectedRows(),
+           calendar->selectedDate(), channel, false);
 }
 
 void MainWindow::showToday()
@@ -404,7 +400,7 @@ void MainWindow::showPreviousWeek()
 
 void MainWindow::updateTimePeriods()
 {
-    setDay(channels->selectionModel()->currentIndex(), calendar->selectedDate());
+    setDay(channels->selectionModel()->selectedRows(), calendar->selectedDate());
 }
 
 void MainWindow::sevenDayOutlookChanged()
@@ -416,14 +412,8 @@ void MainWindow::sevenDayOutlookChanged()
 
 void MainWindow::multiChannelChanged()
 {
-    bool multi = actionMultiChannel->isChecked();
-    programmes->setColumnHidden
-        (TvProgrammeModel::ColumnChannel, !multi);
-    channels->setEnabled(!multi);
-    if (multi)
-        channelChanged(QModelIndex());
-    else
-        channelChanged(channels->selectionModel()->currentIndex());
+    channels->setEnabled(!actionMultiChannel->isChecked());
+    channelChanged();
 }
 
 void MainWindow::editChannels()
@@ -769,19 +759,25 @@ TvBookmark::MatchOptions MainWindow::matchOptions() const
     return options;
 }
 
-void MainWindow::setDay(const QModelIndex &index, const QDate &date)
+void MainWindow::setDay(const QModelIndexList &selected, const QDate &date, TvChannel *changedChannel, bool request)
 {
     TvChannel *channel;
     if (actionMultiChannel->isChecked()) {
-        updateMultiChannelProgrammes(date, true);
+        updateMultiChannelProgrammes(date, m_channelList->activeChannels(), request);
+    } else if (selected.size() == 1) {
+        QModelIndex index = selected.at(0);
+        channel = static_cast<TvChannel *>(index.internalPointer());
+        if (!changedChannel || channel == changedChannel)
+            updateProgrammes(channel, date, request);
+    } else if (selected.size() > 1) {
+        QList<TvChannel *> channels;
+        for (int index = 0; index < selected.size(); ++index)
+            channels.append(static_cast<TvChannel *>(selected.at(index).internalPointer()));
+        if (!changedChannel || channels.contains(changedChannel))
+            updateMultiChannelProgrammes(date, channels, request);
     } else {
-        if (index.isValid()) {
-            channel = static_cast<TvChannel *>(index.internalPointer());
-            updateProgrammes(channel, date, true);
-        } else {
-            channel = 0;
-            m_programmeModel->clear();
-        }
+        channel = 0;
+        m_programmeModel->clear();
     }
 }
 
@@ -817,11 +813,10 @@ static bool sortByStartTimeAndChannel(TvProgramme *p1, TvProgramme *p2)
 }
 
 void MainWindow::updateMultiChannelProgrammes
-    (const QDate &date, bool request)
+    (const QDate &date, const QList<TvChannel *> channels, bool request)
 {
     // Collect up the programmes for all channels on this date.
     QList<TvProgramme *> programmes;
-    QList<TvChannel *> channels = m_channelList->activeChannels();
     m_fetching = true;
     for (int index = 0; index < channels.size(); ++index) {
         TvChannel *channel = channels.at(index);
