@@ -272,6 +272,27 @@ static bool sortMovedProgrammes(TvProgramme *p1, TvProgramme *p2)
     return p1->start() < p2->start();
 }
 
+static QList<TvProgramme *> reduceMovedToList(const QList<TvProgramme *> &list)
+{
+    QList<TvProgramme *> result;
+    for (int index = 0; index < list.size(); ++index)
+        list.at(index)->setSuppressed(false);
+    for (int index = 0; index < list.size(); ++index) {
+        TvProgramme *prog = list.at(index);
+        if (prog->isSuppressed() || prog->subTitle().isEmpty())
+            continue;
+        for (int index2 = index + 1; index2 < list.size(); ++index2) {
+            TvProgramme *prog2 = list.at(index2);
+            if (prog2->isSuppressed())
+                continue;
+            if (prog->subTitle() == prog2->subTitle())
+                prog2->setSuppressed(true);
+        }
+        result.append(prog);
+    }
+    return result;
+}
+
 QString TvProgramme::shortDescription() const
 {
     if (!m_shortDescription.isEmpty())
@@ -396,6 +417,7 @@ QString TvProgramme::shortDescription() const
         QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
         bool needComma = false;
         qSort(others.begin(), others.end(), sortMovedProgrammes);
+        others = reduceMovedToList(others);
         for (int index = 0; index < others.size(); ++index) {
             TvProgramme *other = others.at(index);
             if (other->match() != TvBookmark::TitleMatch)
