@@ -51,10 +51,10 @@ public:
     QString filter() const { return m_filter; }
     void setFilter(const QString &str);
 
-    int filterOptions() const { return m_filterOptions; }
-    void setFilterOptions(int options);
+    TvProgramme::SearchType filterType() const { return m_filterType; }
+    void setFilterType(TvProgramme::SearchType type);
 
-    void setFilterOptions(int options, const QString &str);
+    void setFilterType(TvProgramme::SearchType type, const QString &str);
 
 private:
     QList<TvProgramme *> m_unfilteredProgrammes;
@@ -65,7 +65,7 @@ private:
     QPixmap m_tickIcon;
     QPixmap m_returnedIcon;
     QString m_filter;
-    int m_filterOptions;
+    TvProgramme::SearchType m_filterType;
 
     void updateFilter();
 };

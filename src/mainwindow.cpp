@@ -199,7 +199,11 @@ MainWindow::MainWindow(QWidget *parent)
     actionShowFailedMatches->setChecked(true);
     action7DayOutlook->setChecked(settings.value(QLatin1String("outlook7days"), false).toBool());
     actionMultiChannel->setChecked(settings.value(QLatin1String("allchannels"), false).toBool());
-    m_programmeModel->setFilterOptions(settings.value(QLatin1String("filteroptions"), TvProgramme::SearchTitle).toInt());
+    int filterType = settings.value(QLatin1String("filtertype"), TvProgramme::SearchTitle).toInt();
+    if (filterType < TvProgramme::SearchFirst ||
+            filterType > TvProgramme::SearchLast)
+        filterType = TvProgramme::SearchTitle;
+    m_programmeModel->setFilterType(TvProgramme::SearchType(filterType));
     settings.endGroup();
 
     toolBar->addSeparator();
@@ -221,28 +225,33 @@ MainWindow::MainWindow(QWidget *parent)
     menu->addAction(actionSearchFilterSelectCategory);
     searchOptions->setMenu(menu);
 
-    int options = m_programmeModel->filterOptions();
-    actionSearchFilterTitle->setChecked
-        ((options & TvProgramme::SearchTitle) != 0);
-    actionSearchFilterEpisodeName->setChecked
-        ((options & TvProgramme::SearchSubTitle) != 0);
-    actionSearchFilterDescription->setChecked
-        ((options & TvProgramme::SearchDescription) != 0);
-    actionSearchFilterCredits->setChecked
-        ((options & TvProgramme::SearchCredits) != 0);
-    actionSearchFilterCategories->setChecked
-        ((options & TvProgramme::SearchCategories) != 0);
+    m_searchActionGroup = new QActionGroup(this);
+    m_searchActionGroup->addAction(actionSearchFilterTitle);
+    m_searchActionGroup->addAction(actionSearchFilterEpisodeName);
+    m_searchActionGroup->addAction(actionSearchFilterDescription);
+    m_searchActionGroup->addAction(actionSearchFilterCredits);
+    m_searchActionGroup->addAction(actionSearchFilterCategories);
+    connect(m_searchActionGroup, SIGNAL(triggered(QAction *)),
+            this, SLOT(searchFilterOptionsChanged()));
 
-    connect(actionSearchFilterTitle, SIGNAL(toggled(bool)),
-            this, SLOT(searchFilterOptionsChanged()));
-    connect(actionSearchFilterEpisodeName, SIGNAL(toggled(bool)),
-            this, SLOT(searchFilterOptionsChanged()));
-    connect(actionSearchFilterDescription, SIGNAL(toggled(bool)),
-            this, SLOT(searchFilterOptionsChanged()));
-    connect(actionSearchFilterCredits, SIGNAL(toggled(bool)),
-            this, SLOT(searchFilterOptionsChanged()));
-    connect(actionSearchFilterCategories, SIGNAL(toggled(bool)),
-            this, SLOT(searchFilterOptionsChanged()));
+    switch (m_programmeModel->filterType()) {
+    case TvProgramme::SearchTitle:
+        actionSearchFilterTitle->setChecked(true);
+        break;
+    case TvProgramme::SearchEpisodeName:
+        actionSearchFilterEpisodeName->setChecked(true);
+        break;
+    case TvProgramme::SearchDescription:
+        actionSearchFilterDescription->setChecked(true);
+        break;
+    case TvProgramme::SearchCredits:
+        actionSearchFilterCredits->setChecked(true);
+        break;
+    case TvProgramme::SearchCategories:
+        actionSearchFilterCategories->setChecked(true);
+        break;
+    }
+
     connect(actionSearchFilterSelectCategory, SIGNAL(triggered()),
             this, SLOT(selectSearchCategory()));
     connect(actionSearchFilterSelectCredit, SIGNAL(triggered()),
@@ -284,8 +293,9 @@ MainWindow::~MainWindow()
                       action7DayOutlook->isChecked());
     settings.setValue(QLatin1String("allchannels"),
                       actionMultiChannel->isChecked());
-    settings.setValue(QLatin1String("filteroptions"),
-                      m_programmeModel->filterOptions());
+    settings.setValue(QLatin1String("filtertype"),
+                      m_programmeModel->filterType());
+    settings.remove(QLatin1String("filteroptions"));
     settings.endGroup();
 
     settings.sync();
@@ -653,34 +663,22 @@ void MainWindow::searchFilterOptionsChanged()
     if (m_updatingFilter)
         return;
 
-    int options = m_programmeModel->filterOptions();
+    TvProgramme::SearchType type;
 
     if (actionSearchFilterTitle->isChecked())
-        options |= TvProgramme::SearchTitle;
+        type = TvProgramme::SearchTitle;
+    else if (actionSearchFilterEpisodeName->isChecked())
+        type = TvProgramme::SearchEpisodeName;
+    else if (actionSearchFilterDescription->isChecked())
+        type = TvProgramme::SearchDescription;
+    else if (actionSearchFilterCredits->isChecked())
+        type = TvProgramme::SearchCredits;
+    else if (actionSearchFilterCategories->isChecked())
+        type = TvProgramme::SearchCategories;
     else
-        options &= ~TvProgramme::SearchTitle;
+        type = TvProgramme::SearchTitle;
 
-    if (actionSearchFilterEpisodeName->isChecked())
-        options |= TvProgramme::SearchSubTitle;
-    else
-        options &= ~TvProgramme::SearchSubTitle;
-
-    if (actionSearchFilterDescription->isChecked())
-        options |= TvProgramme::SearchDescription;
-    else
-        options &= ~TvProgramme::SearchDescription;
-
-    if (actionSearchFilterCredits->isChecked())
-        options |= TvProgramme::SearchCredits;
-    else
-        options &= ~TvProgramme::SearchCredits;
-
-    if (actionSearchFilterCategories->isChecked())
-        options |= TvProgramme::SearchCategories;
-    else
-        options &= ~TvProgramme::SearchCategories;
-
-    m_programmeModel->setFilterOptions(options);
+    m_programmeModel->setFilterType(type);
     programmes->resizeRowsToContents();
 }
 
@@ -691,13 +689,9 @@ void MainWindow::selectSearchCategory()
     if (selector.exec() == QDialog::Accepted) {
         m_updatingFilter = true;
         m_searchFilter->setText(selector.selectedCategory());
-        actionSearchFilterTitle->setChecked(false);
-        actionSearchFilterEpisodeName->setChecked(false);
-        actionSearchFilterDescription->setChecked(false);
-        actionSearchFilterCredits->setChecked(false);
         actionSearchFilterCategories->setChecked(true);
         m_updatingFilter = false;
-        m_programmeModel->setFilterOptions
+        m_programmeModel->setFilterType
             (TvProgramme::SearchCategories, selector.selectedCategory());
         programmes->resizeRowsToContents();
     }
@@ -711,13 +705,9 @@ void MainWindow::selectSearchCredit()
     if (selector.exec() == QDialog::Accepted) {
         m_updatingFilter = true;
         m_searchFilter->setText(selector.selectedCategory());
-        actionSearchFilterTitle->setChecked(false);
-        actionSearchFilterEpisodeName->setChecked(false);
-        actionSearchFilterDescription->setChecked(false);
         actionSearchFilterCredits->setChecked(true);
-        actionSearchFilterCategories->setChecked(false);
         m_updatingFilter = false;
-        m_programmeModel->setFilterOptions
+        m_programmeModel->setFilterType
             (TvProgramme::SearchCredits, selector.selectedCategory());
         programmes->resizeRowsToContents();
     }

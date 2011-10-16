@@ -27,7 +27,7 @@ TvProgrammeModel::TvProgrammeModel(QObject *parent)
     , m_bookmarkIcon(QLatin1String(":/images/bookmark.png"))
     , m_tickIcon(QLatin1String(":/images/tick.png"))
     , m_returnedIcon(QLatin1String(":/images/ledred.png"))
-    , m_filterOptions(TvProgramme::SearchTitle)
+    , m_filterType(TvProgramme::SearchTitle)
 {
     m_bookmarkIcon = m_bookmarkIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     m_tickIcon = m_tickIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -193,20 +193,20 @@ void TvProgrammeModel::setFilter(const QString &str)
     }
 }
 
-void TvProgrammeModel::setFilterOptions(int options)
+void TvProgrammeModel::setFilterType(TvProgramme::SearchType type)
 {
-    if (m_filterOptions != options) {
-        m_filterOptions = options;
+    if (m_filterType != type) {
+        m_filterType = type;
         if (!m_filter.isEmpty())
             updateFilter();
     }
 }
 
-void TvProgrammeModel::setFilterOptions(int options, const QString &str)
+void TvProgrammeModel::setFilterType(TvProgramme::SearchType type, const QString &str)
 {
-    if (m_filter != str || m_filterOptions != options) {
+    if (m_filter != str || m_filterType != type) {
         m_filter = str;
-        m_filterOptions = options;
+        m_filterType = type;
         updateFilter();
     }
 }
@@ -220,7 +220,7 @@ void TvProgrammeModel::updateFilter()
         uint hashval = TvProgramme::hashSearchString(m_filter);
         for (int index = 0; index < m_unfilteredProgrammes.size(); ++index) {
             TvProgramme *prog = m_unfilteredProgrammes.at(index);
-            if (prog->containsSearchString(hashval, m_filter, m_filterOptions))
+            if (prog->containsSearchString(hashval, m_filter, m_filterType))
                 m_programmes.append(prog);
         }
     }

@@ -698,7 +698,7 @@ uint TvProgramme::hashSearchString(const QString &str)
     return 0;
 }
 
-bool TvProgramme::containsSearchString(uint hashval, const QString &str, int options) const
+bool TvProgramme::containsSearchString(uint hashval, const QString &str, SearchType type) const
 {
     Q_UNUSED(hashval);
 #if 0
@@ -706,24 +706,19 @@ bool TvProgramme::containsSearchString(uint hashval, const QString &str, int opt
             (1U << (hashval % HashBitsPerWord))) == 0)
         return false;
 #endif
-    return containsSearchString(str, options);
+    return containsSearchString(str, type);
 }
 
-bool TvProgramme::containsSearchString(const QString &str, int options) const
+bool TvProgramme::containsSearchString(const QString &str, SearchType type) const
 {
-    if (options & SearchTitle) {
-        if (containsSearch(str, m_title))
-            return true;
-    }
-    if (options & SearchSubTitle) {
-        if (containsSearch(str, m_subTitle))
-            return true;
-    }
-    if (options & SearchDescription) {
-        if (containsSearch(str, m_description))
-            return true;
-    }
-    if (options & SearchCredits) {
+    switch (type) {
+    case SearchTitle:
+        return containsSearch(str, m_title);
+    case SearchEpisodeName:
+        return containsSearch(str, m_subTitle);
+    case SearchDescription:
+        return containsSearch(str, m_description);
+    case SearchCredits: {
         if (containsSearch(str, m_directors))
             return true;
         if (containsSearch(str, m_actors))
@@ -736,10 +731,9 @@ bool TvProgramme::containsSearchString(const QString &str, int options) const
             if (containsSearch(str, it.value()))
                 return true;
         }
-    }
-    if (options & SearchCategories) {
-        if (containsSearch(str, m_categories))
-            return true;
+        return false; }
+    case SearchCategories:
+        return containsSearch(str, m_categories);
     }
     return false;
 }

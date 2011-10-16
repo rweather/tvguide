@@ -85,15 +85,18 @@ public:
 
     static uint hashSearchString(const QString &str);
 
-    enum {
-        SearchTitle         = (1 << 0),
-        SearchSubTitle      = (1 << 1),
-        SearchDescription   = (1 << 2),
-        SearchCredits       = (1 << 3),
-        SearchCategories    = (1 << 4)
+    enum SearchType
+    {
+        SearchTitle,
+        SearchEpisodeName,
+        SearchDescription,
+        SearchCredits,
+        SearchCategories,
+        SearchFirst = SearchTitle,
+        SearchLast = SearchCategories
     };
 
-    bool containsSearchString(uint hashval, const QString &str, int options) const;
+    bool containsSearchString(uint hashval, const QString &str, SearchType type) const;
 
     void updateCategorySet(QSet<QString> &set) const;
     void updateCreditSet(QSet<QString> &set) const;
@@ -151,7 +154,7 @@ private:
     void createSubstringHash();
     void updateHash(const QString &str);
     void updateHash(const QStringList &list);
-    bool containsSearchString(const QString &str, int options) const;
+    bool containsSearchString(const QString &str, SearchType type) const;
 
     inline bool containsSearch(const QString &str, const QString &within) const
     {

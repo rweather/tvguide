@@ -21,6 +21,7 @@
 #include <QtGui/qmainwindow.h>
 #include <QtGui/qprogressbar.h>
 #include <QtGui/qlineedit.h>
+#include <QtGui/qactiongroup.h>
 #include "ui_mainwindow.h"
 #include "tvchannellist.h"
 #include "tvchannelmodel.h"
@@ -101,6 +102,7 @@ private:
     qreal m_fontMultiplier;
     HelpBrowser *m_helpBrowser;
     QLineEdit *m_searchFilter;
+    QActionGroup *m_searchActionGroup;
 
     TvChannel::TimePeriods timePeriods() const;
     TvBookmark::MatchOptions matchOptions() const;
