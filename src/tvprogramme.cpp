@@ -384,9 +384,15 @@ QString TvProgramme::shortDescription() const
     if (m_isPremiere)
         desc += QObject::tr(", <font color=\"red\"><b>Premiere</b></font>");
     if (match == TvBookmark::ShouldMatch) {
-        desc += QLatin1String("<br><s>") +
-                Qt::escape(m_bookmark->title()) +
-                QLatin1String("</s>");
+        QString title = m_bookmark->title();
+        if (!m_bookmark->seasonList().isEmpty()) {
+            title = QObject::tr("%1, Season %2")
+                        .arg(title).arg(m_bookmark->seasons());
+        }
+        if (!m_bookmark->yearList().isEmpty()) {
+            title += QLatin1String(", ") + m_bookmark->years();
+        }
+        desc += QLatin1String("<br><s>") + title + QLatin1String("</s>");
         QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
         bool needComma = false;
         qSort(others.begin(), others.end(), sortMovedProgrammes);
