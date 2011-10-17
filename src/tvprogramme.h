@@ -83,8 +83,6 @@ public:
 
     void refreshBookmark();
 
-    static uint hashSearchString(const QString &str);
-
     enum SearchType
     {
         SearchTitle,
@@ -92,11 +90,10 @@ public:
         SearchDescription,
         SearchCredits,
         SearchCategories,
-        SearchFirst = SearchTitle,
-        SearchLast = SearchCategories
+        SearchAll
     };
 
-    bool containsSearchString(uint hashval, const QString &str, SearchType type) const;
+    bool containsSearchString(const QString &str, SearchType type) const;
 
     void updateCategorySet(QSet<QString> &set) const;
     void updateCreditSet(QSet<QString> &set) const;
@@ -143,18 +140,6 @@ private:
     TvBookmark::Match displayMatch() const;
 
     void addOtherCredit(const QString &type, const QString &name);
-
-#if 0
-    static const int HashBitsPerWord = sizeof(uint) * 8;
-    static const int HashSize = 511;
-    static const int HashWordSize = 512 / HashBitsPerWord;
-    uint hash[HashWordSize];
-#endif
-
-    void createSubstringHash();
-    void updateHash(const QString &str);
-    void updateHash(const QStringList &list);
-    bool containsSearchString(const QString &str, SearchType type) const;
 
     inline bool containsSearch(const QString &str, const QString &within) const
     {

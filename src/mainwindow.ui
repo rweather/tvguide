@@ -77,8 +77,10 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="actionEditChannels"/>
-    <addaction name="actionWebSearch"/>
     <addaction name="actionClearCache"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdvancedSearch"/>
+    <addaction name="actionWebSearch"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -106,6 +108,152 @@
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="advancedSearchDock">
+   <property name="features">
+    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::AllDockWidgetAreas</set>
+   </property>
+   <property name="windowTitle">
+    <string>Advanced Search</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>4</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Title:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="titleEdit"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Episode Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="episodeNameEdit"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Description:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="descriptionEdit"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Credit:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QLineEdit" name="creditEdit"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="creditChoose">
+             <property name="text">
+              <string>Choose ...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Category:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QLineEdit" name="categoryEdit"/>
+           </item>
+           <item>
+            <widget class="QPushButton" name="categoryChoose">
+             <property name="text">
+              <string>Choose ...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QRadioButton" name="andButton">
+              <property name="text">
+               <string>AND</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="orButton">
+              <property name="text">
+               <string>OR</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+    <zorder>groupBox</zorder>
+   </widget>
+  </widget>
   <widget class="QDockWidget" name="channelDock">
    <property name="features">
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
@@ -123,11 +271,11 @@
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QTableView" name="channels">
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
        <property name="alternatingRowColors">
         <bool>true</bool>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
       </widget>
      </item>
@@ -446,54 +594,22 @@
     <string>&amp;Clear Cache</string>
    </property>
   </action>
-  <action name="actionSearchFilterTitle">
+  <action name="actionAdvancedSearch">
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="text">
-    <string>Title</string>
-   </property>
-  </action>
-  <action name="actionSearchFilterEpisodeName">
-   <property name="checkable">
-    <bool>true</bool>
+   <property name="icon">
+    <iconset resource="tvguide.qrc">
+     <normaloff>:/images/edit-find.png</normaloff>:/images/edit-find.png</iconset>
    </property>
    <property name="text">
-    <string>Episode Name</string>
+    <string>&amp;Search ...</string>
    </property>
-  </action>
-  <action name="actionSearchFilterDescription">
-   <property name="checkable">
-    <bool>true</bool>
+   <property name="toolTip">
+    <string>Advanced Search</string>
    </property>
-   <property name="text">
-    <string>Description</string>
-   </property>
-  </action>
-  <action name="actionSearchFilterCredits">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Credits</string>
-   </property>
-  </action>
-  <action name="actionSearchFilterCategories">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Categories</string>
-   </property>
-  </action>
-  <action name="actionSearchFilterSelectCategory">
-   <property name="text">
-    <string>Select Category ...</string>
-   </property>
-  </action>
-  <action name="actionSearchFilterSelectCredit">
-   <property name="text">
-    <string>Select Credit ...</string>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

@@ -27,7 +27,7 @@ TvProgrammeModel::TvProgrammeModel(QObject *parent)
     , m_bookmarkIcon(QLatin1String(":/images/bookmark.png"))
     , m_tickIcon(QLatin1String(":/images/tick.png"))
     , m_returnedIcon(QLatin1String(":/images/ledred.png"))
-    , m_filterType(TvProgramme::SearchTitle)
+    , m_advancedFilter(0)
 {
     m_bookmarkIcon = m_bookmarkIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     m_tickIcon = m_tickIcon.scaled(16, 16, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
@@ -36,6 +36,7 @@ TvProgrammeModel::TvProgrammeModel(QObject *parent)
 
 TvProgrammeModel::~TvProgrammeModel()
 {
+    delete m_advancedFilter;
 }
 
 void TvProgrammeModel::clear()
@@ -189,40 +190,83 @@ void TvProgrammeModel::setFilter(const QString &str)
 {
     if (m_filter != str) {
         m_filter = str;
-        updateFilter();
-    }
-}
-
-void TvProgrammeModel::setFilterType(TvProgramme::SearchType type)
-{
-    if (m_filterType != type) {
-        m_filterType = type;
-        if (!m_filter.isEmpty())
+        if (!m_advancedFilter)
             updateFilter();
     }
 }
 
-void TvProgrammeModel::setFilterType(TvProgramme::SearchType type, const QString &str)
+void TvProgrammeModel::setAdvancedFilter(TvProgrammeFilter *filter)
 {
-    if (m_filter != str || m_filterType != type) {
-        m_filter = str;
-        m_filterType = type;
+    if (m_advancedFilter != filter) {
+        delete m_advancedFilter;
+        m_advancedFilter = filter;
         updateFilter();
     }
 }
 
 void TvProgrammeModel::updateFilter()
 {
-    if (m_filter.isEmpty()) {
+    if (m_filter.isEmpty() && !m_advancedFilter) {
         m_programmes = m_unfilteredProgrammes;
-    } else {
+    } else if (m_advancedFilter) {
         m_programmes.clear();
-        uint hashval = TvProgramme::hashSearchString(m_filter);
         for (int index = 0; index < m_unfilteredProgrammes.size(); ++index) {
             TvProgramme *prog = m_unfilteredProgrammes.at(index);
-            if (prog->containsSearchString(hashval, m_filter, m_filterType))
+            if (m_advancedFilter->match(prog))
+                m_programmes.append(prog);
+        }
+    } else {
+        m_programmes.clear();
+        for (int index = 0; index < m_unfilteredProgrammes.size(); ++index) {
+            TvProgramme *prog = m_unfilteredProgrammes.at(index);
+            if (prog->containsSearchString(m_filter, TvProgramme::SearchAll))
                 m_programmes.append(prog);
         }
     }
     reset();
+}
+
+bool TvProgrammeFilter::match(const TvProgramme *prog) const
+{
+    bool matchTitle = (m_combineMode == CombineAnd);
+    bool matchEpisodeName = (m_combineMode == CombineAnd);
+    bool matchDescription = (m_combineMode == CombineAnd);
+    bool matchCredit = (m_combineMode == CombineAnd);
+    bool matchCategory = (m_combineMode == CombineAnd);
+    bool haveCriteria = false;
+    if (!m_title.isEmpty()) {
+        matchTitle = prog->containsSearchString(m_title, TvProgramme::SearchTitle);
+        haveCriteria = true;
+    }
+    if (!m_episodeName.isEmpty()) {
+        matchEpisodeName = prog->containsSearchString(m_episodeName, TvProgramme::SearchEpisodeName);
+        haveCriteria = true;
+    }
+    if (!m_description.isEmpty()) {
+        matchDescription = prog->containsSearchString(m_description, TvProgramme::SearchDescription);
+        haveCriteria = true;
+    }
+    if (!m_credit.isEmpty()) {
+        matchCredit = prog->containsSearchString(m_credit, TvProgramme::SearchCredits);
+        haveCriteria = true;
+    }
+    if (!m_category.isEmpty()) {
+        matchCategory = prog->containsSearchString(m_category, TvProgramme::SearchCategories);
+        haveCriteria = true;
+    }
+    if (!haveCriteria)
+        return true;        // No criteria always means "match all".
+    if (m_combineMode == CombineAnd) {
+        return matchTitle &&
+               matchEpisodeName &&
+               matchDescription &&
+               matchCredit &&
+               matchCategory;
+    } else {
+        return matchTitle ||
+               matchEpisodeName ||
+               matchDescription ||
+               matchCredit ||
+               matchCategory;
+    }
 }

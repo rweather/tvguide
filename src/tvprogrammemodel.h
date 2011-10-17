@@ -22,6 +22,8 @@
 #include <QtCore/qabstractitemmodel.h>
 #include <QtGui/qicon.h>
 
+class TvProgrammeFilter;
+
 class TvProgrammeModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -51,10 +53,8 @@ public:
     QString filter() const { return m_filter; }
     void setFilter(const QString &str);
 
-    TvProgramme::SearchType filterType() const { return m_filterType; }
-    void setFilterType(TvProgramme::SearchType type);
-
-    void setFilterType(TvProgramme::SearchType type, const QString &str);
+    TvProgrammeFilter *advancedFilter() const { return m_advancedFilter; }
+    void setAdvancedFilter(TvProgrammeFilter *filter);
 
 private:
     QList<TvProgramme *> m_unfilteredProgrammes;
@@ -65,9 +65,50 @@ private:
     QPixmap m_tickIcon;
     QPixmap m_returnedIcon;
     QString m_filter;
-    TvProgramme::SearchType m_filterType;
+    TvProgrammeFilter *m_advancedFilter;
 
     void updateFilter();
+};
+
+class TvProgrammeFilter
+{
+public:
+    enum CombineMode
+    {
+        CombineAnd,
+        CombineOr
+    };
+
+    TvProgrammeFilter() : m_combineMode(CombineAnd) {}
+    ~TvProgrammeFilter() {}
+
+    QString title() const { return m_title; }
+    void setTitle(const QString &title) { m_title = title; }
+
+    QString episodeName() const { return m_episodeName; }
+    void setEpisodeName(const QString &episodeName) { m_episodeName = episodeName; }
+
+    QString description() const { return m_description; }
+    void setDescription(const QString &description) { m_description = description; }
+
+    QString credit() const { return m_credit; }
+    void setCredit(const QString &credit) { m_credit = credit; }
+
+    QString category() const { return m_category; }
+    void setCategory(const QString &category) { m_category = category; }
+
+    CombineMode combineMode() const { return m_combineMode; }
+    void setCombineMode(CombineMode combineMode) { m_combineMode = combineMode; }
+
+    bool match(const TvProgramme *prog) const;
+
+private:
+    QString m_title;
+    QString m_episodeName;
+    QString m_description;
+    QString m_credit;
+    QString m_category;
+    CombineMode m_combineMode;
 };
 
 #endif

@@ -33,9 +33,6 @@ TvProgramme::TvProgramme(TvChannel *channel)
     , m_prev(0)
     , m_next(0)
 {
-#if 0
-    memset(hash, 0, sizeof(hash));
-#endif
 }
 
 TvProgramme::~TvProgramme()
@@ -232,8 +229,6 @@ void TvProgramme::load(QXmlStreamReader *reader)
                 (this, &bookmark, TvBookmark::PartialMatches | TvBookmark::NonMatching);
         setBookmark(bookmark, match);
     }
-
-    createSubstringHash();
 }
 
 void TvProgramme::setBookmark
@@ -590,125 +585,6 @@ void TvProgramme::addOtherCredit(const QString &type, const QString &name)
         m_otherCredits.insert(type, QStringList(name));
 }
 
-// This function implements a variation on Rabin-Karp string searching.
-// http://en.wikipedia.org/wiki/Rabin%E2%80%93Karp_string_search_algorithm
-// Rabin-Karp hashes substrings and uses the hash value to quickly
-// check if a substring is likely to match.
-void TvProgramme::createSubstringHash()
-{
-#if 0
-    memset(hash, 0, sizeof(hash));
-    updateHash(m_title);
-    updateHash(m_subTitle);
-    updateHash(m_description);
-    updateHash(m_directors);
-    updateHash(m_actors);
-    updateHash(m_presenters);
-    updateHash(m_categories);
-    QMap<QString, QStringList>::ConstIterator it;
-    for (it = m_otherCredits.constBegin();
-            it != m_otherCredits.constEnd(); ++it) {
-        updateHash(it.value());
-    }
-
-    // Test the hash to see how well it matches.
-    QString str;
-    uint hashval;
-    int mismatches = 0;
-    for (uint ch1 = 'a'; ch1 <= 'z'; ++ch1) {
-        for (uint ch2 = 'a'; ch2 <= 'z'; ++ch2) {
-            for (uint ch3 = 'a'; ch3 <= 'z'; ++ch3) {
-                str = QString(QChar(ch1)) + QString(QChar(ch2)) + QString(QChar(ch3));
-                hashval = hashSearchString(str);
-                bool hashContains =
-                    ((hash[hashval / HashBitsPerWord] &
-                        (1U << (hashval % HashBitsPerWord))) != 0);
-                bool strContains = containsSearchString(str);
-                if (hashContains != strContains)
-                    ++mismatches;
-            }
-        }
-    }
-    int occupancy = 0;
-    for (hashval = 0; hashval < uint(HashSize); ++hashval) {
-        bool hashContains =
-            ((hash[hashval / HashBitsPerWord] &
-                (1U << (hashval % HashBitsPerWord))) != 0);
-        if (hashContains)
-            ++occupancy;
-    }
-    qDebug("mismatches = %f, occupancy = %f", ((double)mismatches) / (26 * 26 * 26), ((double)occupancy) / HashSize);
-#endif
-}
-
-void TvProgramme::updateHash(const QString &str)
-{
-    Q_UNUSED(str);
-#if 0
-    uint ch1 = 0;
-    uint ch2 = 0;
-    uint ch3 = 0;
-    uint hashval;
-    QString s = str.toLower();
-    for (int index = 0; index < s.length(); ++index) {
-        ch1 = ch2;
-        ch2 = ch3;
-        ch3 = s.at(index).unicode();
-        hashval = ch3 % HashSize;
-        hash[hashval / HashBitsPerWord] |= (1U << (hashval % HashBitsPerWord));
-        if (index >= 1) {
-            hashval = ((ch2 * 5) + ch3) % HashSize;
-            hash[hashval / HashBitsPerWord] |= (1U << (hashval % HashBitsPerWord));
-        }
-        if (index >= 2) {
-            hashval = ((((ch1 * 5) + ch2) * 5) + ch3) % HashSize;
-            hash[hashval / HashBitsPerWord] |= (1U << (hashval % HashBitsPerWord));
-        }
-    }
-#endif
-}
-
-void TvProgramme::updateHash(const QStringList &list)
-{
-    for (int index = 0; index < list.size(); ++index)
-        updateHash(list.at(index));
-}
-
-uint TvProgramme::hashSearchString(const QString &str)
-{
-#if 0
-    QString s = str.toLower();
-    uint ch1, ch2, ch3;
-    if (s.length() >= 3) {
-        ch1 = s.at(0).unicode();
-        ch2 = s.at(1).unicode();
-        ch3 = s.at(2).unicode();
-        return ((((ch1 * 5) + ch2) * 5) + ch3) % HashSize;
-    } else if (s.length() >= 2) {
-        ch1 = s.at(0).unicode();
-        ch2 = s.at(1).unicode();
-        return ((ch1 * 5) + ch2) % HashSize;
-    } else if (s.length() >= 1) {
-        return s.at(0).unicode() % HashSize;
-    } else {
-        return 0;
-    }
-#endif
-    Q_UNUSED(str);
-    return 0;
-}
-
-bool TvProgramme::containsSearchString(uint hashval, const QString &str, SearchType type) const
-{
-    Q_UNUSED(hashval);
-#if 0
-    if ((hash[hashval / HashBitsPerWord] &
-            (1U << (hashval % HashBitsPerWord))) == 0)
-        return false;
-#endif
-    return containsSearchString(str, type);
-}
-
 bool TvProgramme::containsSearchString(const QString &str, SearchType type) const
 {
     switch (type) {
@@ -718,6 +594,16 @@ bool TvProgramme::containsSearchString(const QString &str, SearchType type) cons
         return containsSearch(str, m_subTitle);
     case SearchDescription:
         return containsSearch(str, m_description);
+    case SearchAll:
+        if (containsSearch(str, m_title))
+            return true;
+        if (containsSearch(str, m_subTitle))
+            return true;
+        if (containsSearch(str, m_description))
+            return true;
+        if (containsSearch(str, m_categories))
+            return true;
+        // Fall through to the next case.
     case SearchCredits: {
         if (containsSearch(str, m_directors))
             return true;
