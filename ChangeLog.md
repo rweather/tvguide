@@ -1,5 +1,15 @@
 ## Change log
 
+### 0.1.2
+
+* Multi-selection of channels in the main window.
+* Show the season number for failed match strikethroughs.
+* Remove redundant showings from the "may have moved to" list.
+* Implement advanced searching on multiple fields.
+* Simplify the previous toolbar-based search field.
+* Add ABC, DEF, etc tabs to the category and credit selectors to
+  make it easier to find a specific name.
+
 ### 0.1.1
 
 * Perform bookmark matching when the programme is loaded to avoid
