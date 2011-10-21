@@ -6,16 +6,120 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>391</width>
+    <width>510</width>
     <height>461</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Select Category</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QListWidget" name="categories"/>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="allTab">
+      <attribute name="title">
+       <string>All</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QListWidget" name="categories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="abcTab">
+      <attribute name="title">
+       <string>ABC</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QListWidget" name="abcCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="defTab">
+      <attribute name="title">
+       <string>DEF</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QListWidget" name="defCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="ghiTab">
+      <attribute name="title">
+       <string>GHI</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QListWidget" name="ghiCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="jklTab">
+      <attribute name="title">
+       <string>JKL</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QListWidget" name="jklCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="mnoTab">
+      <attribute name="title">
+       <string>MNO</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QListWidget" name="mnoCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pqrTab">
+      <attribute name="title">
+       <string>PQR</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <widget class="QListWidget" name="pqrCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="stuTab">
+      <attribute name="title">
+       <string>STU</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_9">
+       <item>
+        <widget class="QListWidget" name="stuCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="vwTab">
+      <attribute name="title">
+       <string>VW</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <widget class="QListWidget" name="vwCategories"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="xyzTab">
+      <attribute name="title">
+       <string>XYZ</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_11">
+       <item>
+        <widget class="QListWidget" name="xyzCategories"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
