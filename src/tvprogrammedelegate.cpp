@@ -30,13 +30,11 @@ void TvProgrammeDelegate::paint
             (data.value<void *>());
         QStyleOptionViewItemV4 opt = option;
         initStyleOption(&opt, index);
-        QString desc = programme->shortDescription();
-        QTextDocument document;
-        document.setDefaultFont(opt.font);
-        document.setHtml(desc);
+        QTextDocument *document = programme->shortDescriptionDocument();
         painter->save();
         painter->translate(opt.rect.x(), opt.rect.y());
-        document.drawContents(painter);
+        QRect clip(0, 0, opt.rect.width(), opt.rect.height());
+        document->drawContents(painter, clip);
         painter->restore();
         return;
     }
@@ -52,11 +50,10 @@ QSize TvProgrammeDelegate::sizeHint
             (data.value<void *>());
         QStyleOptionViewItemV4 opt = option;
         initStyleOption(&opt, index);
-        QString desc = programme->shortDescription();
-        QTextDocument document;
-        document.setDefaultFont(opt.font);
-        document.setHtml(desc);
-        return document.size().toSize();
+        QTextDocument *document = programme->shortDescriptionDocument();
+        document->setDefaultFont(opt.font);
+        document->setTextWidth(opt.rect.width());
+        return document->size().toSize();
     }
     return QStyledItemDelegate::sizeHint(option, index);
 }

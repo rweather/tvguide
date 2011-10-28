@@ -25,6 +25,8 @@
 #include <QtCore/qmap.h>
 #include <QtCore/qset.h>
 #include <QtGui/qcolor.h>
+#include <QtGui/qtextcursor.h>
+#include <QtGui/qtextdocument.h>
 #include "tvbookmark.h"
 
 class TvChannel;
@@ -75,8 +77,27 @@ public:
     TvBookmark::Match match() const { return m_match; }
     void setBookmark(TvBookmark *bookmark, TvBookmark::Match match);
 
-    QString shortDescription() const;
+    QTextDocument *shortDescriptionDocument() const;
+
     QString longDescription() const;
+
+    enum {
+        Write_Actor         = 0x00000001,
+        Write_Category      = 0x00000002,
+        Write_EpisodeName   = 0x00000004,
+        Write_MovedTo       = 0x00000008,
+        Write_OtherShowings = 0x00000010,
+        Write_Date          = 0x00000020,
+        Write_StarRating    = 0x00000040,
+        Write_Description   = 0x00010000,
+        Write_Weekday       = 0x00020000,
+        Write_Short         = 0x0000FFFF,
+        Write_All           = 0x7FFFFFFF
+    };
+
+    // Writes the short form of the programme description
+    // to a QTextDocument object via a QTextCursor.
+    void writeShortDescription(QTextCursor *cursor, int options) const;
 
     bool isSuppressed() const { return m_suppressed; }
     void setSuppressed(bool value) { m_suppressed = value; }
@@ -124,7 +145,7 @@ private:
     bool m_isRepeat;
     bool m_isMovie;
     bool m_suppressed;
-    mutable QString m_shortDescription;
+    mutable QTextDocument *m_shortDescriptionDocument;
     mutable QString m_longDescription;
     TvBookmark *m_bookmark;
     TvBookmark::Match m_match;
@@ -135,7 +156,7 @@ private:
     friend class TvBookmark;
 
     void clearBookmarkMatch();
-    void markDirty() { m_shortDescription = QString(); }
+    void markDirty();
 
     TvBookmark::Match displayMatch() const;
 

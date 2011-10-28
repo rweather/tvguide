@@ -20,6 +20,8 @@
 #include "tvchannellist.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qtextdocument.h>
+#include <QtGui/qtextlist.h>
+#include <QtGui/qtexttable.h>
 
 TvProgramme::TvProgramme(TvChannel *channel)
     : m_channel(channel)
@@ -28,6 +30,7 @@ TvProgramme::TvProgramme(TvChannel *channel)
     , m_isRepeat(false)
     , m_isMovie(false)
     , m_suppressed(false)
+    , m_shortDescriptionDocument(0)
     , m_bookmark(0)
     , m_match(TvBookmark::NoMatch)
     , m_prev(0)
@@ -39,6 +42,7 @@ TvProgramme::~TvProgramme()
 {
     if (m_bookmark)
         m_bookmark->removeProgramme(this);
+    delete m_shortDescriptionDocument;
 }
 
 int TvProgramme::year() const
@@ -218,7 +222,8 @@ void TvProgramme::load(QXmlStreamReader *reader)
                 break;
         }
     }
-    m_shortDescription = QString();
+    delete m_shortDescriptionDocument;
+    m_shortDescriptionDocument = 0;
     m_longDescription = QString();
 
     // Find the bookmark that best matches the programme.
@@ -248,7 +253,8 @@ void TvProgramme::setBookmark
     }
     if (m_match != match) {
         m_match = match;
-        m_shortDescription = QString();
+        delete m_shortDescriptionDocument;
+        m_shortDescriptionDocument = 0;
     }
 }
 
@@ -256,7 +262,14 @@ void TvProgramme::clearBookmarkMatch()
 {
     m_bookmark = 0;
     m_match = TvBookmark::NoMatch;
-    m_shortDescription = QString();
+    delete m_shortDescriptionDocument;
+    m_shortDescriptionDocument = 0;
+}
+
+void TvProgramme::markDirty()
+{
+    delete m_shortDescriptionDocument;
+    m_shortDescriptionDocument = 0;
 }
 
 static bool sortMovedProgrammes(TvProgramme *p1, TvProgramme *p2)
@@ -288,187 +301,14 @@ static QList<TvProgramme *> reduceMovedToList(const QList<TvProgramme *> &list)
     return result;
 }
 
-QString TvProgramme::shortDescription() const
+QTextDocument *TvProgramme::shortDescriptionDocument() const
 {
-    if (!m_shortDescription.isEmpty())
-        return m_shortDescription;
-    QString desc;
-    bool bold = false;
-    TvBookmark::Match match = displayMatch();
-    switch (match) {
-    case TvBookmark::NoMatch:
-    case TvBookmark::ShouldMatch:
-    case TvBookmark::TickMatch:
-        desc += QLatin1String("<font color=\"#000000\">");
-        break;
-    case TvBookmark::FullMatch:
-        desc += QLatin1String("<font color=\"") +
-                m_bookmark->color().name() +
-                QLatin1String("\">");
-        desc += QLatin1String("<b>");
-        bold = true;
-        break;
-    case TvBookmark::Overrun:
-    case TvBookmark::Underrun:
-        desc += QLatin1String("<font color=\"") +
-                m_bookmark->color().lighter(150).name() +
-                QLatin1String("\">");
-        desc += QLatin1String("<b>");
-        bold = true;
-        break;
-    case TvBookmark::TitleMatch:
-        desc += QLatin1String("<font color=\"") +
-                m_bookmark->color().name() +
-                QLatin1String("\">");
-        break;
-    }
-    if (m_isMovie)
-        desc += QObject::tr("MOVIE: %1").arg(Qt::escape(m_title));
-    else
-        desc += Qt::escape(m_title);
-    if (bold)
-        desc += QLatin1String("</b>");
-    desc += QLatin1String("</font>");
-    desc += QLatin1String("<font color=\"#606060\">");
-    if (!m_date.isEmpty() && m_date != QLatin1String("0")) {
-        desc += QLatin1String(" (") +
-                Qt::escape(m_date) + QLatin1String(")");
-    }
-    if (!m_rating.isEmpty()) {
-        desc += QLatin1String(" (") +
-                Qt::escape(m_rating) + QLatin1String(")");
-        if (m_isRepeat)
-            desc += QObject::tr("(R)");
-    } else if (m_isRepeat) {
-        desc += QObject::tr(" (R)");
-    }
-    if (!m_categories.isEmpty()) {
-        QString category = m_categories.at(0);
-        for (int index = 1; index < m_categories.size(); ++index) {
-            if (category.compare(QLatin1String("series")) != 0 &&
-                    category.compare(QLatin1String("movies")) != 0 &&
-                    category.compare(QLatin1String("movie")) != 0)
-                break;
-            category = m_categories.at(index);
-        }
-        desc += QLatin1String(", ") + Qt::escape(category);
-    }
-    if (!m_actors.isEmpty()) {
-        desc += QLatin1String(", ") +
-                Qt::escape(m_actors.at(0));
-    } else if (!m_presenters.isEmpty()) {
-        desc += QLatin1String(", ") +
-                Qt::escape(m_presenters.at(0));
-    } else if (!m_directors.isEmpty()) {
-        desc += QLatin1String(", ") +
-                Qt::escape(QObject::tr("Director: %1").arg(m_directors.at(0)));
-    }
-    if (!m_starRating.isEmpty()) {
-        QStringList list = m_starRating.split(QLatin1String("/"));
-        if (list.size() >= 2) {
-            int numer = list.at(0).toInt();
-            int denom = list.at(1).toInt();
-            if (numer > 0 && denom > 0) {
-                qreal stars = numer * 5.0f / denom;
-                if (stars < 0.0f)
-                    stars = 0.0f;
-                else if (stars > 5.0f)
-                    stars = 5.0f;
-                desc += QLatin1Char(' ');
-                int istars = int(stars);
-                qreal leftOver = stars - istars;
-                for (int black = 0; black < istars; ++black)
-                    desc += QChar(0x2605);  // Black star.
-                if (leftOver >= 0.5f) {
-                    desc += QChar(0x272D);  // Black outlined star.
-                    ++istars;
-                }
-                for (int white = istars; white < 5; ++white)
-                    desc += QChar(0x2606);  // White star.
-            }
-        }
-    }
-    if (!m_subTitle.isEmpty()) {
-        desc += QLatin1String("<br><i>") +
-                Qt::escape(m_subTitle) +
-                QLatin1String("</i>");
-    }
-    if (!m_episodeNumber.isEmpty()) {
-        desc += QObject::tr(" <i>(Episode %1)</i>").arg
-            (Qt::escape(m_episodeNumber));
-    }
-    if (m_isPremiere)
-        desc += QObject::tr(", <font color=\"red\"><b>Premiere</b></font>");
-    if (match == TvBookmark::ShouldMatch) {
-        QString title = m_bookmark->title();
-        if (!m_bookmark->seasonList().isEmpty()) {
-            title = QObject::tr("%1, Season %2")
-                        .arg(title).arg(m_bookmark->seasons());
-        }
-        if (!m_bookmark->yearList().isEmpty()) {
-            title += QLatin1String(", ") + m_bookmark->years();
-        }
-        desc += QLatin1String("<br><s>") + title + QLatin1String("</s>");
-        QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
-        bool needComma = false;
-        qSort(others.begin(), others.end(), sortMovedProgrammes);
-        others = reduceMovedToList(others);
-        for (int index = 0; index < others.size(); ++index) {
-            TvProgramme *other = others.at(index);
-            if (other->match() != TvBookmark::TitleMatch)
-                continue;
-            if (needComma) {
-                desc += QLatin1String("</li><li>");
-            } else {
-                desc += QObject::tr(" may have moved to:<ul><li>");
-                needComma = true;
-            }
-            desc += other->channel()->name();
-            desc += other->start().date().toString(QLatin1String(" dddd, MMMM d, "));
-            desc += other->start().time().toString(Qt::LocaleDate);
-        }
-        if (needComma)
-            desc += QLatin1String("</li></ul>");
-    }
-    if (match != TvBookmark::NoMatch &&
-            match != TvBookmark::ShouldMatch &&
-            match != TvBookmark::TickMatch &&
-            !m_subTitle.isEmpty()) {
-        QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
-        qSort(others.begin(), others.end(), sortMovedProgrammes);
-        bool needComma = false;
-        bool explicitToday = false;
-        for (int index = 0; index < others.size(); ++index) {
-            TvProgramme *other = others.at(index);
-            if (other == this || other->subTitle() != m_subTitle)
-                continue;
-            if (needComma) {
-                desc += QLatin1String(", ");
-            } else {
-                desc += QLatin1String("<br>") +
-                        QObject::tr("Other showings: ");
-                needComma = true;
-            }
-            if (m_channel != other->channel()) {
-                desc += other->channel()->name();
-                desc += QLatin1Char(' ');
-            }
-            if (m_start.date() != other->start().date() || explicitToday) {
-                int diff = m_start.date().daysTo(other->start().date());
-                if (diff >= 0 && diff <= 6) {
-                    desc += QDate::longDayName(other->start().date().dayOfWeek());
-                    desc += QLatin1Char(' ');
-                } else {
-                    desc += other->start().date().toString(QLatin1String("dddd, MMMM d, "));
-                }
-                explicitToday = true;
-            }
-            desc += other->start().time().toString(Qt::LocaleDate);
-        }
-    }
-    desc += QLatin1String("</font>");
-    m_shortDescription = desc;
-    return desc;
+    if (m_shortDescriptionDocument)
+        return m_shortDescriptionDocument;
+    m_shortDescriptionDocument = new QTextDocument();
+    QTextCursor cursor(m_shortDescriptionDocument);
+    writeShortDescription(&cursor, Write_Short);
+    return m_shortDescriptionDocument;
 }
 
 QString TvProgramme::longDescription() const
@@ -528,6 +368,215 @@ QString TvProgramme::longDescription() const
     desc += QLatin1String("</qt>");
     m_longDescription = desc;
     return desc;
+}
+
+void TvProgramme::writeShortDescription(QTextCursor *cursor, int options) const
+{
+    QTextCharFormat prevFormat = cursor->charFormat();
+
+    TvBookmark::Match match = displayMatch();
+    QTextCharFormat titleFormat = prevFormat;
+    switch (match) {
+    case TvBookmark::NoMatch:
+    case TvBookmark::ShouldMatch:
+    case TvBookmark::TickMatch:
+        break;
+    case TvBookmark::FullMatch:
+        titleFormat.setForeground(m_bookmark->color());
+        titleFormat.setFontWeight(QFont::Bold);
+        break;
+    case TvBookmark::Overrun:
+    case TvBookmark::Underrun:
+        titleFormat.setForeground(m_bookmark->color().lighter(150));
+        titleFormat.setFontWeight(QFont::Bold);
+        break;
+    case TvBookmark::TitleMatch:
+        titleFormat.setForeground(m_bookmark->color());
+        break;
+    }
+    if (m_isMovie)
+        cursor->insertText(QObject::tr("MOVIE: "), titleFormat);
+    cursor->insertText(m_title, titleFormat);
+
+    QTextCharFormat detailsFormat = prevFormat;
+    QTextCharFormat italicDetailsFormat;
+    detailsFormat.setForeground(QColor::fromRgb(0x60, 0x60, 0x60));
+    italicDetailsFormat = detailsFormat;
+    italicDetailsFormat.setFontItalic(true);
+    cursor->setCharFormat(detailsFormat);
+
+    QTextBlockFormat mainBlockFormat = cursor->blockFormat();
+
+    if (!m_date.isEmpty() && m_date != QLatin1String("0") &&
+                (options & Write_Date) != 0) {
+        cursor->insertText(QLatin1String(" (") +
+                           m_date + QLatin1String(")"));
+    }
+    if (!m_rating.isEmpty()) {
+        cursor->insertText(QLatin1String(" (") +
+                           m_rating + QLatin1String(")"));
+        if (m_isRepeat)
+            cursor->insertText(QObject::tr("(R)"));
+    } else if (m_isRepeat) {
+        cursor->insertText(QObject::tr(" (R)"));
+    }
+    if (options & Write_Category) {
+        if (!m_categories.isEmpty()) {
+            QString category = m_categories.at(0);
+            for (int index = 1; index < m_categories.size(); ++index) {
+                if (category.compare(QLatin1String("series")) != 0 &&
+                        category.compare(QLatin1String("movies")) != 0 &&
+                        category.compare(QLatin1String("movie")) != 0)
+                    break;
+                category = m_categories.at(index);
+            }
+            cursor->insertText(QLatin1String(", ") + category);
+        }
+    }
+    if (options & Write_Actor) {
+        if (!m_actors.isEmpty()) {
+            cursor->insertText(QLatin1String(", ") + m_actors.at(0));
+        } else if (!m_presenters.isEmpty()) {
+            cursor->insertText(QLatin1String(", ") + m_presenters.at(0));
+        } else if (!m_directors.isEmpty()) {
+            cursor->insertText
+                (QLatin1String(", ") +
+                QObject::tr("Director: %1").arg(m_directors.at(0)));
+        }
+    }
+    if (!m_starRating.isEmpty() && (options & Write_StarRating) != 0) {
+        QStringList list = m_starRating.split(QLatin1String("/"));
+        if (list.size() >= 2) {
+            int numer = list.at(0).toInt();
+            int denom = list.at(1).toInt();
+            if (numer > 0 && denom > 0) {
+                qreal stars = numer * 5.0f / denom;
+                if (stars < 0.0f)
+                    stars = 0.0f;
+                else if (stars > 5.0f)
+                    stars = 5.0f;
+                QString rating(QLatin1String(" "));
+                int istars = int(stars);
+                qreal leftOver = stars - istars;
+                for (int black = 0; black < istars; ++black)
+                    rating += QChar(0x2605);  // Black star.
+                if (leftOver >= 0.5f) {
+                    rating += QChar(0x272D);  // Black outlined star.
+                    ++istars;
+                }
+                for (int white = istars; white < 5; ++white)
+                    rating += QChar(0x2606);  // White star.
+                cursor->insertText(rating);
+            }
+        }
+    }
+    if (options & Write_EpisodeName) {
+        if (!m_subTitle.isEmpty()) {
+            cursor->insertBlock(mainBlockFormat);
+            cursor->insertText(m_subTitle, italicDetailsFormat);
+            cursor->setCharFormat(detailsFormat);
+        }
+        if (!m_episodeNumber.isEmpty()) {
+            cursor->insertText(QObject::tr(" (Episode %1)")
+                                    .arg(m_episodeNumber));
+        }
+        if (m_isPremiere) {
+            cursor->insertText(QLatin1String(", "));
+            QTextCharFormat redFormat = detailsFormat;
+            redFormat.setForeground(Qt::red);
+            redFormat.setFontWeight(QFont::Bold);
+            cursor->insertText(QObject::tr("Premiere"), redFormat);
+            cursor->setCharFormat(detailsFormat);
+        }
+    }
+    if (match == TvBookmark::ShouldMatch) {
+        QString title = m_bookmark->title();
+        if (!m_bookmark->seasonList().isEmpty()) {
+            title = QObject::tr("%1, Season %2")
+                        .arg(title).arg(m_bookmark->seasons());
+        }
+        if (!m_bookmark->yearList().isEmpty()) {
+            title += QLatin1String(", ") + m_bookmark->years();
+        }
+        QTextCharFormat strikeOutFormat = detailsFormat;
+        strikeOutFormat.setFontStrikeOut(true);
+        cursor->insertBlock(mainBlockFormat);
+        cursor->setCharFormat(strikeOutFormat);
+        cursor->insertText(title);
+        cursor->setCharFormat(detailsFormat);
+        if (options & Write_MovedTo) {
+            QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
+            QTextList *list = 0;
+            qSort(others.begin(), others.end(), sortMovedProgrammes);
+            others = reduceMovedToList(others);
+            for (int index = 0; index < others.size(); ++index) {
+                TvProgramme *other = others.at(index);
+                if (other->match() != TvBookmark::TitleMatch)
+                    continue;
+                if (list) {
+                    cursor->insertBlock();
+                    list->add(cursor->block());
+                } else {
+                    cursor->insertText(QObject::tr(" may have moved to:"));
+                    list = cursor->insertList(QTextListFormat::ListDisc);
+                }
+                cursor->insertText(other->channel()->name());
+                cursor->insertText(other->start().date().toString(QLatin1String(" dddd, MMMM d, ")));
+                cursor->insertText(other->start().time().toString(Qt::LocaleDate));
+            }
+        }
+    }
+    if (match != TvBookmark::NoMatch &&
+            match != TvBookmark::ShouldMatch &&
+            match != TvBookmark::TickMatch &&
+            !m_subTitle.isEmpty() &&
+            (options & Write_OtherShowings) != 0) {
+        QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
+        qSort(others.begin(), others.end(), sortMovedProgrammes);
+        bool needComma = false;
+        bool explicitToday = false;
+        for (int index = 0; index < others.size(); ++index) {
+            TvProgramme *other = others.at(index);
+            if (other == this || other->subTitle() != m_subTitle)
+                continue;
+            if (needComma) {
+                cursor->insertText(QLatin1String(", "));
+            } else {
+                cursor->insertBlock(mainBlockFormat);
+                cursor->insertText(QObject::tr("Other showings: "));
+                needComma = true;
+            }
+            if (m_channel != other->channel()) {
+                cursor->insertText(other->channel()->name());
+                cursor->insertText(QLatin1String(" "));
+            }
+            if (m_start.date() != other->start().date() || explicitToday) {
+                int diff = m_start.date().daysTo(other->start().date());
+                if (diff >= 0 && diff <= 6) {
+                    cursor->insertText(QDate::longDayName(other->start().date().dayOfWeek()));
+                    cursor->insertText(QLatin1String(" "));
+                } else {
+                    cursor->insertText(other->start().date().toString(QLatin1String("dddd, MMMM d, ")));
+                }
+                explicitToday = true;
+            }
+            cursor->insertText(other->start().time().toString(Qt::LocaleDate));
+        }
+    }
+    if (options & Write_Description) {
+        // Add the first sentence of the description.
+        QString desc = m_description;
+        int index = desc.indexOf(QLatin1Char('.'));
+        if (index >= 0)
+            desc = desc.left(index + 1);
+        if (!desc.isEmpty()) {
+            cursor->insertBlock(mainBlockFormat);
+            cursor->insertText(desc);
+        }
+    }
+
+    cursor->setCharFormat(prevFormat);
+    cursor->setBlockFormat(mainBlockFormat);
 }
 
 TvBookmark::Match TvProgramme::displayMatch() const
