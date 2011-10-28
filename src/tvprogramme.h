@@ -91,6 +91,7 @@ public:
         Write_StarRating    = 0x00000040,
         Write_Description   = 0x00010000,
         Write_Weekday       = 0x00020000,
+        Write_Continued     = 0x00040000,
         Write_Short         = 0x0000FFFF,
         Write_All           = 0x7FFFFFFF
     };

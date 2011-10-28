@@ -397,6 +397,8 @@ void TvProgramme::writeShortDescription(QTextCursor *cursor, int options) const
     if (m_isMovie)
         cursor->insertText(QObject::tr("MOVIE: "), titleFormat);
     cursor->insertText(m_title, titleFormat);
+    if (options & Write_Continued)
+        cursor->insertText(QObject::tr(" (cont)"));
 
     QTextCharFormat detailsFormat = prevFormat;
     QTextCharFormat italicDetailsFormat;

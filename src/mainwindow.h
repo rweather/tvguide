@@ -29,6 +29,7 @@
 #include "tvprogrammemodel.h"
 
 class HelpBrowser;
+class ProgrammeView;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -44,7 +45,7 @@ private Q_SLOTS:
     void progressChanged(qreal progress);
     void dateChanged();
     void channelChanged();
-    void programmeChanged(const QModelIndex &index);
+    void programmeChanged();
     void programmesReset();
     void programmesChanged(TvChannel *channel);
     void networkRequest(TvChannel *channel, const QDate &date, bool isIconFetch);
@@ -107,6 +108,8 @@ private:
     HelpBrowser *m_helpBrowser;
     QLabel *m_searchLabel;
     QLineEdit *m_searchFilter;
+    QTableView *programmes;
+    ProgrammeView *programmeView;
 
     TvChannel::TimePeriods timePeriods() const;
     TvBookmark::MatchOptions matchOptions() const;
@@ -114,6 +117,10 @@ private:
     void updateProgrammes(TvChannel *channel, const QDate &date, bool request);
     void updateMultiChannelProgrammes(const QDate &date, const QList<TvChannel *> channels, bool request);
     QList<TvProgramme *> combineShowings(const QList<TvProgramme *> &programmes);
+
+    void selectView();
+    void clearView();
+    TvProgramme *selectedProgramme(int *row = 0) const;
 };
 
 #endif

@@ -16,11 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QTableView" name="programmes">
-      <property name="alternatingRowColors">
-       <bool>true</bool>
-      </property>
-     </widget>
+     <widget class="QStackedWidget" name="viewStack"/>
     </item>
    </layout>
   </widget>

@@ -9,6 +9,7 @@ SOURCES += \
     channeleditor.cpp \
     dayselectiondialog.cpp \
     helpbrowser.cpp \
+    programmeview.cpp \
     serviceeditor.cpp \
     serviceselector.cpp \
     websearchdialog.cpp \
@@ -21,6 +22,7 @@ HEADERS += \
     channeleditor.h \
     dayselectiondialog.h \
     helpbrowser.h \
+    programmeview.h \
     serviceeditor.h \
     serviceselector.h \
     websearchdialog.h \

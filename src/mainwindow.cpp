@@ -21,6 +21,7 @@
 #include "channeleditor.h"
 #include "bookmarkitemeditor.h"
 #include "bookmarklisteditor.h"
+#include "programmeview.h"
 #include "serviceselector.h"
 #include "helpbrowser.h"
 #include "ui_aboutdialog.h"
@@ -32,6 +33,7 @@
 #include <QtGui/qdesktopservices.h>
 #include <QtGui/qevent.h>
 #include <QtGui/qtoolbutton.h>
+#include <QtGui/qtexttable.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -43,6 +45,13 @@ MainWindow::MainWindow(QWidget *parent)
     , m_helpBrowser(0)
 {
     setupUi(this);
+
+    programmes = new QTableView(viewStack);
+    programmes->setAlternatingRowColors(true);
+    viewStack->addWidget(programmes);
+
+    programmeView = new ProgrammeView();
+    viewStack->addWidget(programmeView);
 
     action_Quit->setShortcuts(QKeySequence::Quit);
     actionReload->setShortcuts(QKeySequence::Refresh);
@@ -178,9 +187,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(programmes->selectionModel(),
             SIGNAL(currentChanged(QModelIndex,QModelIndex)),
-            this, SLOT(programmeChanged(QModelIndex)));
+            this, SLOT(programmeChanged()));
     connect(m_programmeModel, SIGNAL(modelReset()),
             this, SLOT(programmesReset()));
+    connect(programmeView, SIGNAL(selectionChanged()),
+            this, SLOT(programmeChanged()));
     actionTickShow->setEnabled(false);
 
     QSettings settings(QLatin1String("Southern Storm"),
@@ -236,6 +247,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(selectSearchCredit()));
 
     zoomUpdate();
+
+    selectView();
 }
 
 MainWindow::~MainWindow()
@@ -336,9 +349,9 @@ void MainWindow::channelChanged()
     setDay(indexes, calendar->selectedDate());
 }
 
-void MainWindow::programmeChanged(const QModelIndex &index)
+void MainWindow::programmeChanged()
 {
-    actionTickShow->setEnabled(index.isValid());
+    actionTickShow->setEnabled(selectedProgramme() != 0);
 }
 
 void MainWindow::programmesReset()
@@ -386,6 +399,7 @@ void MainWindow::updateTimePeriods()
 
 void MainWindow::sevenDayOutlookChanged()
 {
+    selectView();
     programmes->setColumnHidden
         (TvProgrammeModel::ColumnDay, !action7DayOutlook->isChecked());
     updateTimePeriods();
@@ -411,10 +425,9 @@ void MainWindow::addBookmark()
         TvChannel *channel = static_cast<TvChannel *>(index.internalPointer());
         bookmarkDlg.setChannelId(channel->id());
     }
-    index = programmes->selectionModel()->currentIndex();
+    TvProgramme *programme = selectedProgramme();
     TvBookmark *editBookmark = 0;
-    if (index.isValid()) {
-        TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
+    if (programme) {
         bookmarkDlg.setChannelId(programme->channel()->id());
         bookmarkDlg.setTitle(programme->title());
         bookmarkDlg.setStartTime(programme->start().time());
@@ -463,16 +476,19 @@ void MainWindow::organizeBookmarks()
 
 void MainWindow::tickShow()
 {
-    QModelIndex index = programmes->selectionModel()->currentIndex();
-    if (!index.isValid())
+    int row = -1;
+    TvProgramme *programme = selectedProgramme(&row);
+    if (!programme)
         return;
-    TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
     if (programme->match() == TvBookmark::TickMatch)
         m_channelList->bookmarkList()->removeTick(programme);
     else
         m_channelList->bookmarkList()->addTick(programme);
     programme->refreshBookmark();
-    m_programmeModel->updateTick(index.row());
+    if (row >= 0)
+        m_programmeModel->updateTick(row);
+    else
+        updateTimePeriods();
 }
 
 void MainWindow::selectService()
@@ -482,6 +498,7 @@ void MainWindow::selectService()
     if (dialog.exec() == QDialog::Accepted) {
         m_firstTimeChannelList = firstTime;
         m_programmeModel->clear();
+        clearView();
         m_channelList->reloadService();
     }
 }
@@ -489,9 +506,8 @@ void MainWindow::selectService()
 void MainWindow::webSearch()
 {
     WebSearchDialog searchDlg(this);
-    QModelIndex index = programmes->selectionModel()->currentIndex();
-    if (index.isValid()) {
-        TvProgramme *programme = static_cast<TvProgramme *>(index.internalPointer());
+    TvProgramme *programme = selectedProgramme();
+    if (programme) {
         searchDlg.setSearchText(programme->title());
         searchDlg.addSearchItem(programme->title());
         if (!programme->subTitle().isEmpty()) {
@@ -627,6 +643,7 @@ void MainWindow::searchFilterChanged(const QString &text)
         return;
     m_programmeModel->setFilter(text);
     programmes->resizeRowsToContents();
+    selectView();
 }
 
 void MainWindow::selectSearchCategory()
@@ -673,6 +690,7 @@ void MainWindow::toggleAdvancedSearch(bool value)
     } else {
         m_programmeModel->setAdvancedFilter(0);
         programmes->resizeRowsToContents();
+        selectView();
     }
 }
 
@@ -690,6 +708,7 @@ void MainWindow::advancedSearchChanged()
         filter->setCombineMode(TvProgrammeFilter::CombineOr);
     m_programmeModel->setAdvancedFilter(filter);
     programmes->resizeRowsToContents();
+    selectView();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -707,13 +726,13 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 TvChannel::TimePeriods MainWindow::timePeriods() const
 {
     TvChannel::TimePeriods periods(0);
-    if (actionMorning->isChecked())
+    //if (actionMorning->isChecked())
         periods |= TvChannel::Morning;
-    if (actionAfternoon->isChecked())
+    //if (actionAfternoon->isChecked())
         periods |= TvChannel::Afternoon;
-    if (actionNight->isChecked())
+    //if (actionNight->isChecked())
         periods |= TvChannel::Night;
-    if (actionLateNight->isChecked())
+    //if (actionLateNight->isChecked())
         periods |= TvChannel::LateNight;
     return periods;
 }
@@ -747,6 +766,7 @@ void MainWindow::setDay(const QModelIndexList &selected, const QDate &date, TvCh
     } else {
         channel = 0;
         m_programmeModel->clear();
+        clearView();
     }
 }
 
@@ -770,6 +790,7 @@ void MainWindow::updateProgrammes
     m_programmeModel->setProgrammes(programmes, channel, date);
     this->programmes->resizeRowsToContents();
     m_fetching = false;
+    programmeView->setProgrammes(programmes);
 }
 
 static bool sortByStartTimeAndChannel(TvProgramme *p1, TvProgramme *p2)
@@ -812,6 +833,7 @@ void MainWindow::updateMultiChannelProgrammes
     m_programmeModel->setProgrammes(programmes, 0, date);
     this->programmes->resizeRowsToContents();
     m_fetching = false;
+    programmeView->setMultiChannelProgrammes(programmes);
 }
 
 QList<TvProgramme *> MainWindow::combineShowings
@@ -862,5 +884,41 @@ QList<TvProgramme *> MainWindow::combineShowings
         return newProgrammes;
     } else {
         return programmes;
+    }
+}
+
+void MainWindow::selectView()
+{
+    bool newView = true;
+    if (action7DayOutlook->isChecked())
+        newView = false;
+    else if (m_programmeModel->advancedFilter())
+        newView = false;
+    else if (!m_programmeModel->filter().isEmpty())
+        newView = false;
+    if (newView)
+        viewStack->setCurrentIndex(1);
+    else
+        viewStack->setCurrentIndex(0);
+}
+
+void MainWindow::clearView()
+{
+    programmeView->setProgrammes(QList<TvProgramme *>());
+}
+
+TvProgramme *MainWindow::selectedProgramme(int *row) const
+{
+    if (row)
+        *row = -1;
+    if (viewStack->currentIndex() == 1)
+        return programmeView->selectedProgramme();
+    QModelIndex index = programmes->selectionModel()->currentIndex();
+    if (index.isValid()) {
+        if (row)
+            *row = index.row();
+        return static_cast<TvProgramme *>(index.internalPointer());
+    } else {
+        return 0;
     }
 }
