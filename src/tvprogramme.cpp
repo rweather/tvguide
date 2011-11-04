@@ -255,6 +255,7 @@ void TvProgramme::setBookmark
         m_match = match;
         delete m_shortDescriptionDocument;
         m_shortDescriptionDocument = 0;
+        m_longDescription = QString();
     }
 }
 
@@ -264,12 +265,14 @@ void TvProgramme::clearBookmarkMatch()
     m_match = TvBookmark::NoMatch;
     delete m_shortDescriptionDocument;
     m_shortDescriptionDocument = 0;
+    m_longDescription = QString();
 }
 
 void TvProgramme::markDirty()
 {
     delete m_shortDescriptionDocument;
     m_shortDescriptionDocument = 0;
+    m_longDescription = QString();
 }
 
 static bool sortMovedProgrammes(TvProgramme *p1, TvProgramme *p2)
@@ -315,12 +318,17 @@ QString TvProgramme::longDescription() const
 {
     if (!m_longDescription.isEmpty())
         return m_longDescription;
+    TvBookmark::Match match = displayMatch();
     QString desc = QLatin1String("<qt><p><i>");
     desc += Qt::escape(m_description) + QLatin1String("</i></p>");
     desc += QObject::tr("<p><b>Duration:</b> %1 minutes, %2 to %3</p>")
                 .arg(QString::number(m_start.secsTo(m_stop) / 60))
                 .arg(m_start.time().toString(Qt::LocaleDate))
                 .arg(m_stop.time().toString(Qt::LocaleDate));
+    if (!m_date.isEmpty() && m_date != QLatin1String("0")) {
+        desc += QObject::tr("<p><b>Year:</b> %1</p>")
+            .arg(Qt::escape(m_date));
+    }
     if (m_categories.size() > 1) {
         desc += QObject::tr("<p><b>Categories:</b> %1</p>")
             .arg(Qt::escape(m_categories.join(QLatin1String(", "))));
@@ -364,6 +372,48 @@ QString TvProgramme::longDescription() const
     if (!m_aspectRatio.isEmpty()) {
         desc += QObject::tr("<p><b>Aspect ratio:</b> %1</p>")
             .arg(Qt::escape(m_aspectRatio));
+    }
+    if (match == TvBookmark::ShouldMatch) {
+        QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
+        qSort(others.begin(), others.end(), sortMovedProgrammes);
+        others = reduceMovedToList(others);
+        if (!others.isEmpty()) {
+            QString title = m_bookmark->title();
+            if (!m_bookmark->seasonList().isEmpty()) {
+                title = QObject::tr("%1, Season %2")
+                            .arg(title).arg(m_bookmark->seasons());
+            }
+            if (!m_bookmark->yearList().isEmpty()) {
+                title += QLatin1String(", ") + m_bookmark->years();
+            }
+            bool needComma = false;
+            for (int index = 0; index < others.size(); ++index) {
+                TvProgramme *other = others.at(index);
+                if (other->match() != TvBookmark::TitleMatch)
+                    continue;
+                if (needComma) {
+                    desc += QLatin1String("</li><li>");
+                } else {
+                    desc += QObject::tr("<p><b><s>%1</s> may have moved to:</b><ul><li>").arg(title);
+                    needComma = true;
+                }
+                desc += Qt::escape(other->channel()->name());
+                desc += other->start().date().toString(QLatin1String(" dddd, MMMM d, "));
+                desc += other->start().time().toString(Qt::LocaleDate);
+            }
+            if (needComma)
+                desc += QLatin1String("</li></ul>");
+        }
+    }
+    if (match != TvBookmark::NoMatch &&
+            match != TvBookmark::ShouldMatch &&
+            match != TvBookmark::TickMatch &&
+            !m_subTitle.isEmpty()) {
+        QString otherShowings = formatOtherShowings();
+        if (!otherShowings.isEmpty()) {
+            desc += QObject::tr("<p><b>Other showings:</b> %1</p>")
+                .arg(Qt::escape(otherShowings));
+        }
     }
     desc += QLatin1String("</qt>");
     m_longDescription = desc;
@@ -506,63 +556,17 @@ void TvProgramme::writeShortDescription(QTextCursor *cursor, int options) const
         cursor->setCharFormat(strikeOutFormat);
         cursor->insertText(title);
         cursor->setCharFormat(detailsFormat);
-        if (options & Write_MovedTo) {
-            QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
-            QTextList *list = 0;
-            qSort(others.begin(), others.end(), sortMovedProgrammes);
-            others = reduceMovedToList(others);
-            for (int index = 0; index < others.size(); ++index) {
-                TvProgramme *other = others.at(index);
-                if (other->match() != TvBookmark::TitleMatch)
-                    continue;
-                if (list) {
-                    cursor->insertBlock();
-                    list->add(cursor->block());
-                } else {
-                    cursor->insertText(QObject::tr(" may have moved to:"));
-                    list = cursor->insertList(QTextListFormat::ListDisc);
-                }
-                cursor->insertText(other->channel()->name());
-                cursor->insertText(other->start().date().toString(QLatin1String(" dddd, MMMM d, ")));
-                cursor->insertText(other->start().time().toString(Qt::LocaleDate));
-            }
-        }
     }
     if (match != TvBookmark::NoMatch &&
             match != TvBookmark::ShouldMatch &&
             match != TvBookmark::TickMatch &&
             !m_subTitle.isEmpty() &&
             (options & Write_OtherShowings) != 0) {
-        QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
-        qSort(others.begin(), others.end(), sortMovedProgrammes);
-        bool needComma = false;
-        bool explicitToday = false;
-        for (int index = 0; index < others.size(); ++index) {
-            TvProgramme *other = others.at(index);
-            if (other == this || other->subTitle() != m_subTitle)
-                continue;
-            if (needComma) {
-                cursor->insertText(QLatin1String(", "));
-            } else {
-                cursor->insertBlock(mainBlockFormat);
-                cursor->insertText(QObject::tr("Other showings: "));
-                needComma = true;
-            }
-            if (m_channel != other->channel()) {
-                cursor->insertText(other->channel()->name());
-                cursor->insertText(QLatin1String(" "));
-            }
-            if (m_start.date() != other->start().date() || explicitToday) {
-                int diff = m_start.date().daysTo(other->start().date());
-                if (diff >= 0 && diff <= 6) {
-                    cursor->insertText(QDate::longDayName(other->start().date().dayOfWeek()));
-                    cursor->insertText(QLatin1String(" "));
-                } else {
-                    cursor->insertText(other->start().date().toString(QLatin1String("dddd, MMMM d, ")));
-                }
-                explicitToday = true;
-            }
-            cursor->insertText(other->start().time().toString(Qt::LocaleDate));
+        QString otherShowings = formatOtherShowings();
+        if (!otherShowings.isEmpty()) {
+            cursor->insertBlock(mainBlockFormat);
+            cursor->insertText(QObject::tr("Other showings: "));
+            cursor->insertText(otherShowings);
         }
     }
     if (options & Write_Description) {
@@ -614,6 +618,37 @@ TvBookmark::Match TvProgramme::displayMatch() const
         }
     }
 
+    return result;
+}
+
+QString TvProgramme::formatOtherShowings() const
+{
+    QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
+    qSort(others.begin(), others.end(), sortMovedProgrammes);
+    bool explicitToday = false;
+    QString result;
+    for (int index = 0; index < others.size(); ++index) {
+        TvProgramme *other = others.at(index);
+        if (other == this || other->subTitle() != m_subTitle)
+            continue;
+        if (!result.isEmpty())
+            result += QLatin1String(", ");
+        if (m_channel != other->channel()) {
+            result += other->channel()->name();
+            result += QLatin1Char(' ');
+        }
+        if (m_start.date() != other->start().date() || explicitToday) {
+            int diff = m_start.date().daysTo(other->start().date());
+            if (diff >= 0 && diff <= 6) {
+                result += QDate::longDayName(other->start().date().dayOfWeek());
+                result += QLatin1Char(' ');
+            } else {
+                result += other->start().date().toString(QLatin1String("dddd, MMMM d, "));
+            }
+            explicitToday = true;
+        }
+        result += other->start().time().toString(Qt::LocaleDate);
+    }
     return result;
 }
 

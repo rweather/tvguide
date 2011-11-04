@@ -85,13 +85,11 @@ public:
         Write_Actor         = 0x00000001,
         Write_Category      = 0x00000002,
         Write_EpisodeName   = 0x00000004,
-        Write_MovedTo       = 0x00000008,
-        Write_OtherShowings = 0x00000010,
-        Write_Date          = 0x00000020,
-        Write_StarRating    = 0x00000040,
+        Write_OtherShowings = 0x00000008,
+        Write_Date          = 0x00000010,
+        Write_StarRating    = 0x00000020,
         Write_Description   = 0x00010000,
-        Write_Weekday       = 0x00020000,
-        Write_Continued     = 0x00040000,
+        Write_Continued     = 0x00020000,
         Write_Short         = 0x0000FFFF,
         Write_All           = 0x7FFFFFFF
     };
@@ -160,6 +158,8 @@ private:
     void markDirty();
 
     TvBookmark::Match displayMatch() const;
+
+    QString formatOtherShowings() const;
 
     void addOtherCredit(const QString &type, const QString &name);
 
