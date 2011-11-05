@@ -39,7 +39,6 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_firstTimeChannelList(false)
     , m_fetching(false)
-    , m_updatingFilter(false)
     , m_baseFontSize(12.0f)
     , m_fontMultiplier(1.0f)
     , m_helpBrowser(0)
@@ -558,6 +557,7 @@ void MainWindow::channelIconsChanged()
     if (actionMultiChannel->isChecked()) {
         m_programmeModel->updateIcons();
         programmes->resizeRowsToContents();
+        programmeView->updateIcons();
     }
 }
 
@@ -640,10 +640,7 @@ void MainWindow::zoomUpdate()
 
 void MainWindow::searchFilterChanged(const QString &text)
 {
-    if (m_updatingFilter)
-        return;
-    m_programmeModel->setFilter(text);
-    programmes->resizeRowsToContents();
+    programmeView->setFilter(text);
     selectView();
 }
 
@@ -651,16 +648,8 @@ void MainWindow::selectSearchCategory()
 {
     CategorySelector selector(this);
     selector.setCategories(m_channelList->categories());
-    if (selector.exec() == QDialog::Accepted) {
-        //m_updatingFilter = true;
-        //m_searchFilter->setText(selector.selectedCategory());
-        //actionSearchFilterCategories->setChecked(true);
-        //m_updatingFilter = false;
-        //m_programmeModel->setFilterType
-            //(TvProgramme::SearchCategories, selector.selectedCategory());
-        //programmes->resizeRowsToContents();
+    if (selector.exec() == QDialog::Accepted)
         categoryEdit->setText(selector.selectedCategory());
-    }
 }
 
 void MainWindow::selectSearchCredit()
@@ -668,16 +657,8 @@ void MainWindow::selectSearchCredit()
     CategorySelector selector(this);
     selector.setWindowTitle(tr("Select Credit"));
     selector.setCategories(m_channelList->credits());
-    if (selector.exec() == QDialog::Accepted) {
-        //m_updatingFilter = true;
-        //m_searchFilter->setText(selector.selectedCategory());
-        //actionSearchFilterCredits->setChecked(true);
-        //m_updatingFilter = false;
-        //m_programmeModel->setFilterType
-            //(TvProgramme::SearchCredits, selector.selectedCategory());
-        //programmes->resizeRowsToContents();
+    if (selector.exec() == QDialog::Accepted)
         creditEdit->setText(selector.selectedCategory());
-    }
 }
 
 void MainWindow::toggleAdvancedSearch(bool value)
@@ -689,8 +670,7 @@ void MainWindow::toggleAdvancedSearch(bool value)
         titleEdit->setFocus();
         advancedSearchChanged();
     } else {
-        m_programmeModel->setAdvancedFilter(0);
-        programmes->resizeRowsToContents();
+        programmeView->setAdvancedFilter(0);
         selectView();
     }
 }
@@ -707,8 +687,7 @@ void MainWindow::advancedSearchChanged()
         filter->setCombineMode(TvProgrammeFilter::CombineAnd);
     else
         filter->setCombineMode(TvProgrammeFilter::CombineOr);
-    m_programmeModel->setAdvancedFilter(filter);
-    programmes->resizeRowsToContents();
+    programmeView->setAdvancedFilter(filter);
     selectView();
 }
 
@@ -777,7 +756,10 @@ void MainWindow::updateProgrammes
     m_programmeModel->setProgrammes(programmes, channel, date);
     this->programmes->resizeRowsToContents();
     m_fetching = false;
-    programmeView->setProgrammes(programmes);
+    if (action7DayOutlook->isChecked())
+        programmeView->setProgrammes(programmes, ProgrammeView::BookmarksSingleChannel);
+    else
+        programmeView->setProgrammes(programmes, ProgrammeView::SingleDaySingleChannel);
 }
 
 static bool sortByStartTimeAndChannel(TvProgramme *p1, TvProgramme *p2)
@@ -820,7 +802,10 @@ void MainWindow::updateMultiChannelProgrammes
     m_programmeModel->setProgrammes(programmes, 0, date);
     this->programmes->resizeRowsToContents();
     m_fetching = false;
-    programmeView->setMultiChannelProgrammes(programmes);
+    if (action7DayOutlook->isChecked())
+        programmeView->setMultiChannelProgrammes(programmes, ProgrammeView::BookmarksMultiChannel);
+    else
+        programmeView->setMultiChannelProgrammes(programmes, ProgrammeView::SingleDayMultiChannel);
 }
 
 QList<TvProgramme *> MainWindow::combineShowings
@@ -879,10 +864,6 @@ void MainWindow::selectView()
     bool newView = true;
     if (action7DayOutlook->isChecked())
         newView = false;
-    else if (m_programmeModel->advancedFilter())
-        newView = false;
-    else if (!m_programmeModel->filter().isEmpty())
-        newView = false;
     if (newView)
         viewStack->setCurrentIndex(1);
     else
@@ -891,7 +872,7 @@ void MainWindow::selectView()
 
 void MainWindow::clearView()
 {
-    programmeView->setProgrammes(QList<TvProgramme *>());
+    programmeView->setProgrammes(QList<TvProgramme *>(), ProgrammeView::SingleDaySingleChannel);
 }
 
 TvProgramme *MainWindow::selectedProgramme(int *row) const

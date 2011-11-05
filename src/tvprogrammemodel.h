@@ -70,45 +70,4 @@ private:
     void updateFilter();
 };
 
-class TvProgrammeFilter
-{
-public:
-    enum CombineMode
-    {
-        CombineAnd,
-        CombineOr
-    };
-
-    TvProgrammeFilter() : m_combineMode(CombineAnd) {}
-    ~TvProgrammeFilter() {}
-
-    QString title() const { return m_title; }
-    void setTitle(const QString &title) { m_title = title; }
-
-    QString episodeName() const { return m_episodeName; }
-    void setEpisodeName(const QString &episodeName) { m_episodeName = episodeName; }
-
-    QString description() const { return m_description; }
-    void setDescription(const QString &description) { m_description = description; }
-
-    QString credit() const { return m_credit; }
-    void setCredit(const QString &credit) { m_credit = credit; }
-
-    QString category() const { return m_category; }
-    void setCategory(const QString &category) { m_category = category; }
-
-    CombineMode combineMode() const { return m_combineMode; }
-    void setCombineMode(CombineMode combineMode) { m_combineMode = combineMode; }
-
-    bool match(const TvProgramme *prog) const;
-
-private:
-    QString m_title;
-    QString m_episodeName;
-    QString m_description;
-    QString m_credit;
-    QString m_category;
-    CombineMode m_combineMode;
-};
-
 #endif

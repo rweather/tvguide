@@ -22,6 +22,7 @@
 #include <QtGui/qstyleoption.h>
 #include <QtCore/qvector.h>
 #include "tvprogramme.h"
+#include "tvprogrammefilter.h"
 
 class ProgrammeHeaderView;
 
@@ -32,13 +33,30 @@ public:
     explicit ProgrammeView(QWidget *parent = 0);
     ~ProgrammeView();
 
-    void setProgrammes(const QList<TvProgramme *> &programmes);
-    void setMultiChannelProgrammes(const QList<TvProgramme *> &programmes);
+    enum Mode {
+        SingleDaySingleChannel,
+        SingleDayMultiChannel,
+        BookmarksSingleChannel,
+        BookmarksMultiChannel
+    };
+
+    Mode mode() const { return m_mode; }
+
+    void setProgrammes(const QList<TvProgramme *> &programmes, Mode mode);
+    void setMultiChannelProgrammes(const QList<TvProgramme *> &programmes, Mode mode);
 
     TvProgramme *selectedProgramme() const { return m_selection.prog; }
     void updateSelection();
 
     void scrollToTime(const QTime &time);
+
+    void updateIcons();
+
+    QString filter() const { return m_filter; }
+    void setFilter(const QString &str);
+
+    TvProgrammeFilter *advancedFilter() const { return m_advancedFilter; }
+    void setAdvancedFilter(TvProgrammeFilter *filter);
 
 Q_SIGNALS:
     void selectionChanged();
@@ -57,10 +75,12 @@ private:
         ProgInfo(TvProgramme *programme)
             : prog(programme)
             , document(0)
+            , enabled(true)
             {}
         TvProgramme *prog;
         QTextDocument *document;
         QRectF rect;
+        bool enabled;
     };
     struct ColumnInfo
     {
@@ -88,23 +108,38 @@ private:
         }
     };
     QList<ColumnInfo *> m_columns;
+    QList<ColumnInfo *> m_activeColumns;
     QSize m_timeSize;
     QRectF m_totalRect;
     bool m_is24HourClock;
     int m_columnWidth;
     int m_columnSpacing;
     int m_options;
+    int m_savedScrollTime;
+    Mode m_mode;
     ProgrammeHeaderView *m_headerView;
     QImage m_tickIcon;
     QImage m_returnedIcon;
     Selection m_selection;
     TvProgramme *m_prevSelection;
+    QString m_filter;
+    TvProgrammeFilter *m_advancedFilter;
+
+    enum DisplayMode
+    {
+        FullDay,
+        SubsetOfDay
+    };
+    DisplayMode m_displayMode;
+
+    void paintFullDay(QPainter *painter);
+    void paintSearchResults(QPainter *painter);
 
     void writeColumn(ColumnInfo *column, int columnIndex);
     void writeProgramme(ProgInfo *info, int index);
 
     void clearColumns();
-    void layout();
+    void layout(Mode mode);
     void layoutColumns();
     void layoutHeaderView();
     void levelHours();
@@ -114,7 +149,10 @@ private:
     void drawTimeSpan(QPainter *painter, const QRectF &rect, const QTime &start, const QTime &stop, int posn);
     static qreal yOffset(const ColumnInfo *column, int timeValue);
 
-    Selection programmeAtPosition(const QPoint &pos, bool includeTime) const;
+    Selection programmeAtPosition(const QPoint &pos) const;
+
+    void applyFilter();
+    bool hasFilter() const { return !m_filter.isEmpty() || m_advancedFilter != 0; }
 };
 
 class ProgrammeHeaderView : public QWidget

@@ -13,6 +13,7 @@ SOURCES += \
     tvchannelmodel.cpp \
     tvprogramme.cpp \
     tvprogrammedelegate.cpp \
+    tvprogrammefilter.cpp \
     tvprogrammemodel.cpp \
     tvtick.cpp \
 
@@ -26,6 +27,7 @@ HEADERS += \
     tvchannelmodel.h \
     tvprogramme.h \
     tvprogrammedelegate.h \
+    tvprogrammefilter.h \
     tvprogrammemodel.h \
     tvtick.h \
 

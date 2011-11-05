@@ -16,6 +16,7 @@
  */
 
 #include "tvprogrammemodel.h"
+#include "tvprogrammefilter.h"
 #include "tvchannel.h"
 #include <QtCore/qdebug.h>
 #include <QtGui/qfont.h>
@@ -224,49 +225,4 @@ void TvProgrammeModel::updateFilter()
         }
     }
     reset();
-}
-
-bool TvProgrammeFilter::match(const TvProgramme *prog) const
-{
-    bool matchTitle = (m_combineMode == CombineAnd);
-    bool matchEpisodeName = (m_combineMode == CombineAnd);
-    bool matchDescription = (m_combineMode == CombineAnd);
-    bool matchCredit = (m_combineMode == CombineAnd);
-    bool matchCategory = (m_combineMode == CombineAnd);
-    bool haveCriteria = false;
-    if (!m_title.isEmpty()) {
-        matchTitle = prog->containsSearchString(m_title, TvProgramme::SearchTitle);
-        haveCriteria = true;
-    }
-    if (!m_episodeName.isEmpty()) {
-        matchEpisodeName = prog->containsSearchString(m_episodeName, TvProgramme::SearchEpisodeName);
-        haveCriteria = true;
-    }
-    if (!m_description.isEmpty()) {
-        matchDescription = prog->containsSearchString(m_description, TvProgramme::SearchDescription);
-        haveCriteria = true;
-    }
-    if (!m_credit.isEmpty()) {
-        matchCredit = prog->containsSearchString(m_credit, TvProgramme::SearchCredits);
-        haveCriteria = true;
-    }
-    if (!m_category.isEmpty()) {
-        matchCategory = prog->containsSearchString(m_category, TvProgramme::SearchCategories);
-        haveCriteria = true;
-    }
-    if (!haveCriteria)
-        return true;        // No criteria always means "match all".
-    if (m_combineMode == CombineAnd) {
-        return matchTitle &&
-               matchEpisodeName &&
-               matchDescription &&
-               matchCredit &&
-               matchCategory;
-    } else {
-        return matchTitle ||
-               matchEpisodeName ||
-               matchDescription ||
-               matchCredit ||
-               matchCategory;
-    }
 }
