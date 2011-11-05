@@ -75,19 +75,8 @@ public:
     void addProgramme(TvProgramme *programme);
     bool trimProgrammes();
 
-    enum TimePeriod
-    {
-        Morning     = 0x0001,
-        Afternoon   = 0x0002,
-        Night       = 0x0004,
-        LateNight   = 0x0008,
-        AllPeriods  = 0xFFFF
-    };
-    Q_DECLARE_FLAGS(TimePeriods, TimePeriod)
-
     QList<TvProgramme *> programmesForDay
-        (const QDate &date, TimePeriods periods,
-         TvBookmark::MatchOptions options);
+        (const QDate &date, TvBookmark::MatchOptions options);
 
     QList<TvProgramme *> bookmarkedProgrammes
         (const QDate &first, const QDate &last,
@@ -123,7 +112,5 @@ private:
 
     friend class TvProgramme;
 };
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(TvChannel::TimePeriods)
 
 #endif

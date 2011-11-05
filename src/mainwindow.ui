@@ -404,45 +404,21 @@
    </property>
   </action>
   <action name="actionMorning">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>&amp;Morning</string>
    </property>
   </action>
   <action name="actionAfternoon">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>&amp;Afternoon</string>
    </property>
   </action>
   <action name="actionNight">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>Ni&amp;ght</string>
    </property>
   </action>
   <action name="actionLateNight">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
    <property name="text">
     <string>&amp;Late Night</string>
    </property>

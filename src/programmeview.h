@@ -37,6 +37,8 @@ public:
 
     TvProgramme *selectedProgramme() const { return m_selection.prog; }
 
+    void scrollToTime(const QTime &time);
+
 Q_SIGNALS:
     void selectionChanged();
 

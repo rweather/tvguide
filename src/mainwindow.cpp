@@ -145,14 +145,14 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(showNextWeek()));
     connect(actionPreviousWeek, SIGNAL(triggered()),
             this, SLOT(showPreviousWeek()));
-    connect(actionMorning, SIGNAL(toggled(bool)),
-            this, SLOT(updateTimePeriods()));
-    connect(actionAfternoon, SIGNAL(toggled(bool)),
-            this, SLOT(updateTimePeriods()));
-    connect(actionNight, SIGNAL(toggled(bool)),
-            this, SLOT(updateTimePeriods()));
-    connect(actionLateNight, SIGNAL(toggled(bool)),
-            this, SLOT(updateTimePeriods()));
+    connect(actionMorning, SIGNAL(triggered()),
+            this, SLOT(showMorning()));
+    connect(actionAfternoon, SIGNAL(triggered()),
+            this, SLOT(showAfternoon()));
+    connect(actionNight, SIGNAL(triggered()),
+            this, SLOT(showNight()));
+    connect(actionLateNight, SIGNAL(triggered()),
+            this, SLOT(showLateNight()));
     connect(actionEditChannels, SIGNAL(triggered()),
             this, SLOT(editChannels()));
     connect(actionAddBookmark, SIGNAL(triggered()),
@@ -196,13 +196,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
-    settings.beginGroup(QLatin1String("TimePeriods"));
-    actionMorning->setChecked(settings.value(QLatin1String("morning"), true).toBool());
-    actionAfternoon->setChecked(settings.value(QLatin1String("afternoon"), true).toBool());
-    actionNight->setChecked(settings.value(QLatin1String("night"), true).toBool());
-    actionLateNight->setChecked(settings.value(QLatin1String("latenight"), true).toBool());
-    settings.endGroup();
-
     settings.beginGroup(QLatin1String("View"));
     m_fontMultiplier = qreal(settings.value(QLatin1String("zoom"), 1.0).toDouble());
     actionShowPartialMatches->setChecked(settings.value(QLatin1String("partial"), true).toBool());
@@ -255,18 +248,6 @@ MainWindow::~MainWindow()
 {
     QSettings settings(QLatin1String("Southern Storm"),
                        QLatin1String("qtvguide"));
-
-    settings.beginGroup(QLatin1String("TimePeriods"));
-    TvChannel::TimePeriods periods = timePeriods();
-    settings.setValue(QLatin1String("morning"),
-                      (periods & TvChannel::Morning) != 0);
-    settings.setValue(QLatin1String("afternoon"),
-                      (periods & TvChannel::Afternoon) != 0);
-    settings.setValue(QLatin1String("night"),
-                      (periods & TvChannel::Night) != 0);
-    settings.setValue(QLatin1String("latenight"),
-                      (periods & TvChannel::LateNight) != 0);
-    settings.endGroup();
 
     settings.beginGroup(QLatin1String("View"));
     settings.setValue(QLatin1String("zoom"), m_fontMultiplier);
@@ -390,6 +371,26 @@ void MainWindow::showNextWeek()
 void MainWindow::showPreviousWeek()
 {
     calendar->setSelectedDate(calendar->selectedDate().addDays(-7));
+}
+
+void MainWindow::showMorning()
+{
+    programmeView->scrollToTime(QTime(6, 0));
+}
+
+void MainWindow::showAfternoon()
+{
+    programmeView->scrollToTime(QTime(12, 0));
+}
+
+void MainWindow::showNight()
+{
+    programmeView->scrollToTime(QTime(18, 0));
+}
+
+void MainWindow::showLateNight()
+{
+    programmeView->scrollToTime(QTime(0, 0));
 }
 
 void MainWindow::updateTimePeriods()
@@ -723,20 +724,6 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
     }
 }
 
-TvChannel::TimePeriods MainWindow::timePeriods() const
-{
-    TvChannel::TimePeriods periods(0);
-    //if (actionMorning->isChecked())
-        periods |= TvChannel::Morning;
-    //if (actionAfternoon->isChecked())
-        periods |= TvChannel::Afternoon;
-    //if (actionNight->isChecked())
-        periods |= TvChannel::Night;
-    //if (actionLateNight->isChecked())
-        periods |= TvChannel::LateNight;
-    return periods;
-}
-
 TvBookmark::MatchOptions MainWindow::matchOptions() const
 {
     TvBookmark::MatchOptions options(0);
@@ -784,7 +771,7 @@ void MainWindow::updateProgrammes
     } else {
         if (request)
             m_channelList->requestChannelDay(channel, date);
-        programmes = channel->programmesForDay(date, timePeriods(), matchOptions());
+        programmes = channel->programmesForDay(date, matchOptions());
     }
     programmes = combineShowings(programmes);
     m_programmeModel->setProgrammes(programmes, channel, date);
@@ -820,7 +807,7 @@ void MainWindow::updateMultiChannelProgrammes
         } else {
             if (request)
                 m_channelList->requestChannelDay(channel, date, 1, index == 0);
-            programmes += channel->programmesForDay(date, timePeriods(), matchOptions());
+            programmes += channel->programmesForDay(date, matchOptions());
         }
     }
 

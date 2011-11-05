@@ -56,6 +56,11 @@ private Q_SLOTS:
     void showNextWeek();
     void showPreviousWeek();
 
+    void showMorning();
+    void showAfternoon();
+    void showNight();
+    void showLateNight();
+
     void updateTimePeriods();
     void sevenDayOutlookChanged();
     void multiChannelChanged();
@@ -111,7 +116,6 @@ private:
     QTableView *programmes;
     ProgrammeView *programmeView;
 
-    TvChannel::TimePeriods timePeriods() const;
     TvBookmark::MatchOptions matchOptions() const;
     void setDay(const QModelIndexList &selected, const QDate &date, TvChannel *changedChannel = 0, bool request = true);
     void updateProgrammes(TvChannel *channel, const QDate &date, bool request);

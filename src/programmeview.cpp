@@ -170,6 +170,17 @@ void ProgrammeView::setMultiChannelProgrammes(const QList<TvProgramme *> &progra
         emit selectionChanged();
 }
 
+void ProgrammeView::scrollToTime(const QTime &time)
+{
+    int timeValue = time.minute() - MINUTES_OF_6AM;
+    int hour = time.hour();
+    if (hour < 6)
+        timeValue += (hour + 24) * 60;
+    else
+        timeValue += hour * 60;
+    verticalScrollBar()->setValue(timeValue);
+}
+
 void ProgrammeView::resizeEvent(QResizeEvent *)
 {
     layoutColumns();
