@@ -489,7 +489,7 @@ void MainWindow::tickShow()
     if (row >= 0)
         m_programmeModel->updateTick(row);
     else
-        updateTimePeriods();
+        programmeView->updateSelection();
 }
 
 void MainWindow::selectService()

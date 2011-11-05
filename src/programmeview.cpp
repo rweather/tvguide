@@ -35,6 +35,7 @@ ProgrammeView::ProgrammeView(QWidget *parent)
     : QAbstractScrollArea(parent)
     , m_columnWidth(200)
     , m_columnSpacing(2)
+    , m_options(TvProgramme::Write_Short)
     , m_tickIcon(QLatin1String(":/images/tick.png"))
     , m_returnedIcon(QLatin1String(":/images/ledred.png"))
     , m_prevSelection(0)
@@ -102,22 +103,20 @@ void ProgrammeView::setProgrammes(const QList<TvProgramme *> &programmes)
     clearColumns();
 
     // Write all of the programme details to a single column.
+    m_options = TvProgramme::Write_Short;
     if (!programmes.isEmpty()) {
         ColumnInfo *column = new ColumnInfo();
         for (int index = 0; index < programmes.size(); ++index) {
             ProgInfo info(programmes.at(index));
             column->programmes.append(info);
         }
-        writeColumn(column, 0, TvProgramme::Write_Short);
+        writeColumn(column, 0);
         m_columns.append(column);
     }
 
     // Lay out the view and update it.
     m_prevSelection = 0;
-    layoutColumns();
-    layoutHeaderView();
-    viewport()->update();
-    m_headerView->update();
+    layout();
     if (m_selection.prog)
         emit selectionChanged();
 }
@@ -142,7 +141,7 @@ void ProgrammeView::setMultiChannelProgrammes(const QList<TvProgramme *> &progra
     clearColumns();
 
     // Break the list up into columns and format them.
-    int options = TvProgramme::Write_EpisodeName | TvProgramme::Write_StarRating;
+    m_options = TvProgramme::Write_EpisodeName | TvProgramme::Write_StarRating;
     int start = 0;
     int end;
     while (start < sorted.size()) {
@@ -155,19 +154,25 @@ void ProgrammeView::setMultiChannelProgrammes(const QList<TvProgramme *> &progra
             ProgInfo info(sorted.at(index));
             column->programmes.append(info);
         }
-        writeColumn(column, m_columns.size(), options);
+        writeColumn(column, m_columns.size());
         m_columns.append(column);
         start = end;
     }
 
     // Lay out the view and update it.
     m_prevSelection = 0;
-    layoutColumns();
-    layoutHeaderView();
-    viewport()->update();
-    m_headerView->update();
+    layout();
     if (m_selection.prog)
         emit selectionChanged();
+}
+
+void ProgrammeView::updateSelection()
+{
+    if (m_selection.prog) {
+        ProgInfo &info = m_columns.at(m_selection.column)->programmes[m_selection.row];
+        writeProgramme(&info, m_selection.row);
+        layout();
+    }
 }
 
 void ProgrammeView::scrollToTime(const QTime &time)
@@ -292,35 +297,39 @@ void ProgrammeView::paintEvent(QPaintEvent *)
     }
 }
 
-void ProgrammeView::writeColumn
-    (ColumnInfo *column, int columnIndex, int options)
+void ProgrammeView::writeColumn(ColumnInfo *column, int columnIndex)
 {
-    QTime sixam(6, 0);
     for (int index = 0; index < column->programmes.size(); ++index) {
         ProgInfo &info = column->programmes[index];
-        info.document = new QTextDocument();
-        info.document->setDocumentMargin(0);
-        QTextCursor cursor(info.document);
-        int opts = options;
-        if (info.prog->isMovie())
-            opts |= TvProgramme::Write_Date | TvProgramme::Write_Actor | TvProgramme::Write_Category;
-        if (!index && info.prog->start().time() < sixam)
-            opts |= TvProgramme::Write_Continued;
-        TvBookmark::Match match = info.prog->match();
-        TvBookmark *bookmark = info.prog->bookmark();
-        if (match == TvBookmark::TickMatch) {
-            cursor.insertImage(m_tickIcon, QString());
-        } else if (bookmark && !bookmark->isOnAir() &&
-                   match != TvBookmark::ShouldMatch) {
-            cursor.insertImage(m_returnedIcon, QString());
-        }
-        info.prog->writeShortDescription(&cursor, opts);
+        writeProgramme(&info, index);
         if (m_prevSelection == info.prog) {
             m_selection.column = columnIndex;
             m_selection.row = index;
             m_selection.prog = info.prog;
         }
     }
+}
+
+void ProgrammeView::writeProgramme(ProgInfo *info, int index)
+{
+    delete info->document;
+    info->document = new QTextDocument();
+    info->document->setDocumentMargin(0);
+    QTextCursor cursor(info->document);
+    int opts = m_options;
+    if (info->prog->isMovie())
+        opts |= TvProgramme::Write_Date | TvProgramme::Write_Actor | TvProgramme::Write_Category;
+    if (!index && info->prog->start().time() < QTime(6, 0))
+        opts |= TvProgramme::Write_Continued;
+    TvBookmark::Match match = info->prog->match();
+    TvBookmark *bookmark = info->prog->bookmark();
+    if (match == TvBookmark::TickMatch) {
+        cursor.insertImage(m_tickIcon, QString());
+    } else if (bookmark && !bookmark->isOnAir() &&
+               match != TvBookmark::ShouldMatch) {
+        cursor.insertImage(m_returnedIcon, QString());
+    }
+    info->prog->writeShortDescription(&cursor, opts);
 }
 
 void ProgrammeView::clearColumns()
@@ -331,6 +340,14 @@ void ProgrammeView::clearColumns()
         m_selection = Selection();
         emit selectionChanged();
     }
+}
+
+void ProgrammeView::layout()
+{
+    layoutColumns();
+    layoutHeaderView();
+    viewport()->update();
+    m_headerView->update();
 }
 
 void ProgrammeView::layoutColumns()

@@ -36,6 +36,7 @@ public:
     void setMultiChannelProgrammes(const QList<TvProgramme *> &programmes);
 
     TvProgramme *selectedProgramme() const { return m_selection.prog; }
+    void updateSelection();
 
     void scrollToTime(const QTime &time);
 
@@ -92,15 +93,18 @@ private:
     bool m_is24HourClock;
     int m_columnWidth;
     int m_columnSpacing;
+    int m_options;
     ProgrammeHeaderView *m_headerView;
     QImage m_tickIcon;
     QImage m_returnedIcon;
     Selection m_selection;
     TvProgramme *m_prevSelection;
 
-    void writeColumn(ColumnInfo *column, int columnIndex, int options);
+    void writeColumn(ColumnInfo *column, int columnIndex);
+    void writeProgramme(ProgInfo *info, int index);
 
     void clearColumns();
+    void layout();
     void layoutColumns();
     void layoutHeaderView();
     void levelHours();
