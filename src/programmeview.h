@@ -42,8 +42,8 @@ public:
 
     Mode mode() const { return m_mode; }
 
-    void setProgrammes(const QList<TvProgramme *> &programmes, Mode mode);
-    void setMultiChannelProgrammes(const QList<TvProgramme *> &programmes, Mode mode);
+    void setProgrammes(const QDate &date, const QList<TvProgramme *> &programmes, Mode mode);
+    void setMultiChannelProgrammes(const QDate &date, const QList<TvProgramme *> &programmes, Mode mode);
 
     TvProgramme *selectedProgramme() const { return m_selection.prog; }
     void updateSelection();
@@ -76,11 +76,13 @@ private:
             : prog(programme)
             , document(0)
             , enabled(true)
+            , dayNumber(0)
             {}
         TvProgramme *prog;
         QTextDocument *document;
         QRectF rect;
         bool enabled;
+        short dayNumber;
     };
     struct ColumnInfo
     {
@@ -117,6 +119,7 @@ private:
     int m_options;
     int m_savedScrollTime;
     Mode m_mode;
+    QDate m_startDate;
     ProgrammeHeaderView *m_headerView;
     QImage m_tickIcon;
     QImage m_returnedIcon;
@@ -124,25 +127,30 @@ private:
     TvProgramme *m_prevSelection;
     QString m_filter;
     TvProgrammeFilter *m_advancedFilter;
+    QList<qreal> m_dayHeights;
+    QList<qreal> m_dayOffsets;
 
     enum DisplayMode
     {
         FullDay,
-        SubsetOfDay
+        SubsetOfDay,
+        Bookmarks
     };
     DisplayMode m_displayMode;
 
     void paintFullDay(QPainter *painter);
     void paintSearchResults(QPainter *painter);
+    void paintBookmarks(QPainter *painter);
 
     void writeColumn(ColumnInfo *column, int columnIndex);
     void writeProgramme(ProgInfo *info, int index);
 
     void clearColumns();
-    void layout(Mode mode);
+    void layout();
     void layoutColumns();
     void layoutHeaderView();
     void levelHours();
+    qreal calculateDayHeights();
     void updateScrollBars();
 
     static int adjustTimeSpan(QTime *start, QTime *stop, int posn);

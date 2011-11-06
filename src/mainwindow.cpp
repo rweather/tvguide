@@ -757,9 +757,9 @@ void MainWindow::updateProgrammes
     this->programmes->resizeRowsToContents();
     m_fetching = false;
     if (action7DayOutlook->isChecked())
-        programmeView->setProgrammes(programmes, ProgrammeView::BookmarksSingleChannel);
+        programmeView->setProgrammes(date, programmes, ProgrammeView::BookmarksSingleChannel);
     else
-        programmeView->setProgrammes(programmes, ProgrammeView::SingleDaySingleChannel);
+        programmeView->setProgrammes(date, programmes, ProgrammeView::SingleDaySingleChannel);
 }
 
 static bool sortByStartTimeAndChannel(TvProgramme *p1, TvProgramme *p2)
@@ -803,9 +803,9 @@ void MainWindow::updateMultiChannelProgrammes
     this->programmes->resizeRowsToContents();
     m_fetching = false;
     if (action7DayOutlook->isChecked())
-        programmeView->setMultiChannelProgrammes(programmes, ProgrammeView::BookmarksMultiChannel);
+        programmeView->setMultiChannelProgrammes(date, programmes, ProgrammeView::BookmarksMultiChannel);
     else
-        programmeView->setMultiChannelProgrammes(programmes, ProgrammeView::SingleDayMultiChannel);
+        programmeView->setMultiChannelProgrammes(date, programmes, ProgrammeView::SingleDayMultiChannel);
 }
 
 QList<TvProgramme *> MainWindow::combineShowings
@@ -862,8 +862,8 @@ QList<TvProgramme *> MainWindow::combineShowings
 void MainWindow::selectView()
 {
     bool newView = true;
-    if (action7DayOutlook->isChecked())
-        newView = false;
+    //if (action7DayOutlook->isChecked())
+        //newView = false;
     if (newView)
         viewStack->setCurrentIndex(1);
     else
@@ -872,7 +872,7 @@ void MainWindow::selectView()
 
 void MainWindow::clearView()
 {
-    programmeView->setProgrammes(QList<TvProgramme *>(), ProgrammeView::SingleDaySingleChannel);
+    programmeView->setProgrammes(QDate(), QList<TvProgramme *>(), ProgrammeView::SingleDaySingleChannel);
 }
 
 TvProgramme *MainWindow::selectedProgramme(int *row) const

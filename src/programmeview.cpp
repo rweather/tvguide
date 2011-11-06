@@ -106,10 +106,12 @@ ProgrammeView::~ProgrammeView()
     delete m_advancedFilter;
 }
 
-void ProgrammeView::setProgrammes(const QList<TvProgramme *> &programmes, Mode mode)
+void ProgrammeView::setProgrammes(const QDate &date, const QList<TvProgramme *> &programmes, Mode mode)
 {
     // Clear the current columns.
     m_prevSelection = m_selection.prog;
+    m_mode = mode;
+    m_startDate = date;
     clearColumns();
 
     // Write all of the programme details to a single column.
@@ -118,6 +120,7 @@ void ProgrammeView::setProgrammes(const QList<TvProgramme *> &programmes, Mode m
         ColumnInfo *column = new ColumnInfo();
         for (int index = 0; index < programmes.size(); ++index) {
             ProgInfo info(programmes.at(index));
+            info.dayNumber = date.daysTo(info.prog->start().date());
             column->programmes.append(info);
         }
         writeColumn(column, 0);
@@ -126,7 +129,7 @@ void ProgrammeView::setProgrammes(const QList<TvProgramme *> &programmes, Mode m
 
     // Lay out the view and update it.
     m_prevSelection = 0;
-    layout(mode);
+    layout();
     if (m_selection.prog)
         emit selectionChanged();
 }
@@ -139,7 +142,7 @@ static bool sortByChannelAndStartTime(TvProgramme *p1, TvProgramme *p2)
     return p1->start() < p2->start();
 }
 
-void ProgrammeView::setMultiChannelProgrammes(const QList<TvProgramme *> &programmes, Mode mode)
+void ProgrammeView::setMultiChannelProgrammes(const QDate &date, const QList<TvProgramme *> &programmes, Mode mode)
 {
     // Sort the programmes so that all programmes on one channel
     // are continuous in the list.
@@ -148,10 +151,14 @@ void ProgrammeView::setMultiChannelProgrammes(const QList<TvProgramme *> &progra
 
     // Clear the current columns.
     m_prevSelection = m_selection.prog;
+    m_mode = mode;
+    m_startDate = date;
     clearColumns();
 
     // Break the list up into columns and format them.
     m_options = TvProgramme::Write_EpisodeName | TvProgramme::Write_StarRating;
+    if (mode == BookmarksMultiChannel)
+        m_options |= TvProgramme::Write_OtherShowings;
     int start = 0;
     int end;
     while (start < sorted.size()) {
@@ -162,6 +169,7 @@ void ProgrammeView::setMultiChannelProgrammes(const QList<TvProgramme *> &progra
         ColumnInfo *column = new ColumnInfo();
         for (int index = start; index < end; ++index) {
             ProgInfo info(sorted.at(index));
+            info.dayNumber = date.daysTo(info.prog->start().date());
             column->programmes.append(info);
         }
         writeColumn(column, m_columns.size());
@@ -171,7 +179,7 @@ void ProgrammeView::setMultiChannelProgrammes(const QList<TvProgramme *> &progra
 
     // Lay out the view and update it.
     m_prevSelection = 0;
-    layout(mode);
+    layout();
     if (m_selection.prog)
         emit selectionChanged();
 }
@@ -181,7 +189,7 @@ void ProgrammeView::updateSelection()
     if (m_selection.prog) {
         ProgInfo &info = m_columns.at(m_selection.column)->programmes[m_selection.row];
         writeProgramme(&info, m_selection.row);
-        layout(m_mode);
+        layout();
     }
 }
 
@@ -278,6 +286,8 @@ void ProgrammeView::paintEvent(QPaintEvent *)
     QPainter painter(viewport());
     if (m_displayMode == FullDay)
         paintFullDay(&painter);
+    else if (m_displayMode == Bookmarks)
+        paintBookmarks(&painter);
     else
         paintSearchResults(&painter);
 }
@@ -384,6 +394,73 @@ void ProgrammeView::paintSearchResults(QPainter *painter)
     }
 }
 
+void ProgrammeView::paintBookmarks(QPainter *painter)
+{
+    QPen linePen(palette().mid(), 0);
+    qreal columnx = 0;
+    for (int index = 0; index < m_activeColumns.size(); ++index) {
+        // Skip the column if it is obviously empty or off-screen.
+        const ColumnInfo *column = m_activeColumns.at(index);
+        if (column->programmes.isEmpty())
+            continue;
+        qreal x = columnx - horizontalScrollBar()->value();
+        columnx += column->columnRect.width() + m_columnSpacing;
+        if ((x + column->columnRect.width()) <= 0 || x >= width())
+            continue;
+
+        // Draw the column at the vertical scrollbar offset.
+        painter->save();
+        painter->translate(x, -verticalScrollBar()->value());
+        qreal y = 0;
+        int dayNumber = -1;
+        for (int index2 = 0; index2 < column->programmes.size(); ++index2) {
+            const ProgInfo &info = column->programmes.at(index2);
+            if (!info.enabled)
+                continue;
+            if (info.dayNumber != dayNumber) {
+                dayNumber = info.dayNumber;
+                y = m_dayOffsets[dayNumber];
+            }
+            QRectF timeRect(0, y, m_timeSize.width(), info.rect.height());
+            drawTimeSpan(painter, timeRect, info.prog->start().time(),
+                         info.prog->stop().time(), index2);
+            painter->translate(info.rect.x(), y);
+            info.document->drawContents(painter);
+            painter->translate(-info.rect.x(), -y);
+            painter->setPen(linePen);
+            painter->drawLine
+                (QPointF(info.rect.left(), y + info.rect.height() - 1),
+                 QPointF(info.rect.right() - 1, y + info.rect.height() - 1));
+            if (info.prog == m_selection.prog) {
+                QRectF rect(info.rect.x(), y,
+                            info.rect.width(), info.rect.height());
+                painter->setPen(QPen(palette().highlight(), 2));
+                painter->drawRect(rect);
+            }
+            y += info.rect.height();
+        }
+        painter->restore();
+    }
+    QFontMetrics metrics(font(), this);
+    qreal headerHeight = metrics.height() + 5;
+    QPen textPen(palette().buttonText(), 0);
+    for (int index = 0; index < m_dayHeights.size(); ++index) {
+        // Draw the day names between each block of bookmarks.
+        if (m_dayHeights.at(index) == 0)
+            continue;
+        QRectF rect(0, m_dayOffsets.at(index) - headerHeight -
+                            verticalScrollBar()->value(),
+                    viewport()->width(), headerHeight);
+        QDate date = m_startDate.addDays(index);
+        QString text = date.toString(Qt::DefaultLocaleLongDate);
+        painter->fillRect(rect, palette().button());
+        painter->setPen(linePen);
+        painter->drawLine(rect.left(), rect.y(), rect.right(), rect.y());
+        painter->setPen(textPen);
+        painter->drawText(rect, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextSingleLine, text);
+    }
+}
+
 void ProgrammeView::writeColumn(ColumnInfo *column, int columnIndex)
 {
     bool filter = hasFilter();
@@ -417,8 +494,12 @@ void ProgrammeView::writeProgramme(ProgInfo *info, int index)
     int opts = m_options;
     if (info->prog->isMovie())
         opts |= TvProgramme::Write_Date | TvProgramme::Write_Actor | TvProgramme::Write_Category;
-    if (!index && info->prog->start().time() < QTime(6, 0))
-        opts |= TvProgramme::Write_Continued;
+    if (!index && info->prog->start().time() < QTime(6, 0)) {
+        if (m_mode != BookmarksSingleChannel &&
+                m_mode != BookmarksMultiChannel) {
+            opts |= TvProgramme::Write_Continued;
+        }
+    }
     TvBookmark::Match match = info->prog->match();
     TvBookmark *bookmark = info->prog->bookmark();
     if (match == TvBookmark::TickMatch) {
@@ -435,15 +516,16 @@ void ProgrammeView::clearColumns()
     qDeleteAll(m_columns);
     m_columns.clear();
     m_activeColumns.clear();
+    m_dayHeights.clear();
+    m_dayOffsets.clear();
     if (m_selection.prog) {
         m_selection = Selection();
         emit selectionChanged();
     }
 }
 
-void ProgrammeView::layout(Mode mode)
+void ProgrammeView::layout()
 {
-    m_mode = mode;
     layoutColumns();
     layoutHeaderView();
     viewport()->update();
@@ -469,6 +551,8 @@ void ProgrammeView::layoutColumns()
     qreal maxFilteredHeight = 0;
     qreal filteredWidth = 0;
     m_activeColumns.clear();
+    bool bookmarksOnly = (m_mode == BookmarksSingleChannel ||
+                          m_mode == BookmarksMultiChannel);
     for (index = 0; index < m_columns.size(); ++index) {
         // Lay out the columns across the viewing area.
         ColumnInfo *column = m_columns.at(index);
@@ -484,9 +568,9 @@ void ProgrammeView::layoutColumns()
             // Derive a minimum height from the number of minutes
             // that are covered by the programme.  One line of text
             // is equated with 15 minutes of time.  We don't do this
-            // if there is only one column.
+            // if there is only one column or in bookmarks-only mode.
             qreal detailsHeight;
-            if (m_columns.size() > 1) {
+            if (m_columns.size() > 1 && !bookmarksOnly) {
                 QTime start = info.prog->start().time();
                 QTime stop = info.prog->stop().time();
                 int length = adjustTimeSpan(&start, &stop, index2);
@@ -517,7 +601,9 @@ void ProgrammeView::layoutColumns()
             filteredWidth += columnWidth + m_columnSpacing;
         }
     }
-    if (hasFilter())
+    if (bookmarksOnly)
+        m_totalRect = QRectF(0, 0, filteredWidth, calculateDayHeights());
+    else if (hasFilter())
         m_totalRect = QRectF(0, 0, filteredWidth, maxFilteredHeight);
     else
         m_totalRect = QRectF(0, 0, x, maxHeight);
@@ -599,6 +685,42 @@ void ProgrammeView::levelHours()
     }
 }
 
+qreal ProgrammeView::calculateDayHeights()
+{
+    m_dayHeights.clear();
+    m_dayOffsets.clear();
+    for (int index = 0; index < 10; ++index)
+        m_dayHeights.append(0.0f);
+    for (int index = 0; index < m_columns.size(); ++index) {
+        const ColumnInfo *column = m_columns.at(index);
+        qreal height = 0.0f;
+        int dayNumber = 0;
+        for (int index2 = 0; index2 < column->programmes.size(); ++index2) {
+            const ProgInfo &info = column->programmes.at(index2);
+            if (!info.enabled)
+                continue;
+            if (info.dayNumber != dayNumber) {
+                m_dayHeights[dayNumber] =
+                    qMax(m_dayHeights[dayNumber], height);
+                dayNumber = info.dayNumber;
+                height = 0;
+            }
+            height += info.rect.height();
+        }
+        m_dayHeights[dayNumber] = qMax(m_dayHeights[dayNumber], height);
+    }
+    QFontMetrics metrics(font(), this);
+    qreal headerHeight = metrics.height() + 5;
+    qreal y = 0;
+    for (int index = 0; index < 10; ++index) {
+        if (m_dayHeights[index] != 0)
+            y += headerHeight;
+        m_dayOffsets.append(y);
+        y += m_dayHeights[index];
+    }
+    return y;
+}
+
 void ProgrammeView::updateScrollBars()
 {
     // Determine the display mode for the view.
@@ -606,19 +728,21 @@ void ProgrammeView::updateScrollBars()
     int horizontalValue = horizontalScrollBar()->value();
     int verticalValue = verticalScrollBar()->value();
     if (m_mode == BookmarksSingleChannel ||
-            m_mode == BookmarksMultiChannel || hasFilter()) {
+            m_mode == BookmarksMultiChannel) {
+        displayMode = Bookmarks;
+    } else if (hasFilter()) {
         displayMode = SubsetOfDay;
     } else {
         displayMode = FullDay;
     }
     if (m_displayMode != displayMode) {
-        m_displayMode = displayMode;
         if (displayMode == FullDay) {
             verticalValue = m_savedScrollTime;
-        } else {
+        } else if (m_displayMode == FullDay) {
             m_savedScrollTime = verticalValue;
             verticalValue = 0;
         }
+        m_displayMode = displayMode;
         horizontalValue = 0;
     }
 
@@ -626,9 +750,9 @@ void ProgrammeView::updateScrollBars()
     horizontalScrollBar()->setSingleStep(m_columnWidth / 10);
     horizontalScrollBar()->setPageStep(m_columnWidth + m_columnSpacing);
     horizontalScrollBar()->setRange(0, m_totalRect.width() - viewport()->width());
-    if (displayMode == SubsetOfDay) {
+    if (displayMode != FullDay) {
         verticalScrollBar()->setSingleStep(20);
-        verticalScrollBar()->setPageStep(height() - 20);
+        verticalScrollBar()->setPageStep(viewport()->height() - 20);
         verticalScrollBar()->setRange(0, m_totalRect.height() - viewport()->height());
     } else {
         verticalScrollBar()->setSingleStep(MINUTES_SINGLE_STEP);
@@ -672,6 +796,10 @@ void ProgrammeView::drawTimeSpan
     (QPainter *painter, const QRectF &rect,
      const QTime &_start, const QTime &_stop, int posn)
 {
+    // Adjust the time span to start and end at 6am.
+    if (m_mode == BookmarksSingleChannel ||
+            m_mode == BookmarksMultiChannel)
+        posn = 1;
     QTime start(_start);
     QTime stop(_stop);
     int length = adjustTimeSpan(&start, &stop, posn);
@@ -820,10 +948,15 @@ ProgrammeView::Selection ProgrammeView::programmeAtPosition(const QPoint &pos) c
         }
         x -= columnx;
         qreal recty = 0;
+        int dayNumber = -1;
         for (int index2 = 0; index2 < column->programmes.size(); ++index2) {
             const ProgInfo &info = column->programmes.at(index2);
             if (!info.enabled)
                 continue;
+            if (m_displayMode == Bookmarks && info.dayNumber != dayNumber) {
+                dayNumber = info.dayNumber;
+                recty = m_dayOffsets[dayNumber];
+            }
             if (y < recty)
                 break;
             recty += info.rect.height();
@@ -879,6 +1012,10 @@ void ProgrammeView::applyFilter()
             width += column->columnRect.width() + m_columnSpacing;
         }
     }
+    if (m_mode == BookmarksSingleChannel ||
+            m_mode == BookmarksMultiChannel) {
+        maxHeight = calculateDayHeights();
+    }
     m_totalRect.setWidth(width);
     m_totalRect.setHeight(maxHeight);
     updateScrollBars();
@@ -908,7 +1045,8 @@ void ProgrammeHeaderView::paintEvent(QPaintEvent *)
     if (m_view->m_columns.isEmpty() || m_view->m_activeColumns.isEmpty()) {
         drawSection(&painter, rect(), 0, QString(), QIcon(),
                     QStyleOptionHeader::OnlyOneSection);
-    } else if (m_view->m_activeColumns.size() == 1) {
+    } else if (m_view->m_activeColumns.size() == 1 &&
+               m_view->m_displayMode != ProgrammeView::Bookmarks) {
         TvProgramme *prog = m_view->m_activeColumns.at(0)->programmes.at(0).prog;
         QString text = prog->channel()->name();
         text += QLatin1String(" - ");
@@ -927,8 +1065,9 @@ void ProgrammeHeaderView::paintEvent(QPaintEvent *)
                 position = QStyleOptionHeader::Beginning;
             } else if (index == (m_view->m_columns.size() - 1)) {
                 position = QStyleOptionHeader::End;
-                rect.setRight
-                    (m_view->horizontalScrollBar()->value() + width());
+                int right = m_view->horizontalScrollBar()->value() + width();
+                if (right > rect.right())
+                    rect.setRight(right);
             } else {
                 position = QStyleOptionHeader::Middle;
             }
