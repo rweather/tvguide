@@ -98,29 +98,7 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
     while (!reader->hasError()) {
         QXmlStreamReader::TokenType token = reader->readNext();
         if (token == QXmlStreamReader::StartElement) {
-            if (reader->name() == QLatin1String("channel")) {
-                channelId = reader->attributes().value
-                        (QLatin1String("id")).toString();
-                channel = m_channels.value(channelId, 0);
-                if (channel) {
-                    if (channel->load(reader)) {
-                        newChannels = true;
-                        if (channel->trimProgrammes())
-                            newProgrammes.insert(channel);
-                    }
-                } else {
-                    channel = new TvChannel(this);
-                    channel->load(reader);
-                    m_channels.insert(channelId, channel);
-                    newChannels = true;
-                    if (m_hiddenChannelIds.contains(channelId))
-                        channel->setHidden(true);
-                    if (m_timezoneConvertChannelIds.contains(channelId))
-                        channel->setConvertTimezone(true);
-                }
-                if (channel->hasDataFor())
-                    m_hasDataFor = true;
-            } else if (reader->name() == QLatin1String("programme")) {
+            if (reader->name() == QLatin1String("programme")) {
                 channelId = reader->attributes().value
                         (QLatin1String("channel")).toString();
                 channel = m_channels.value(channelId, 0);
@@ -143,6 +121,28 @@ void TvChannelList::load(QXmlStreamReader *reader, const QUrl &url)
                 // Update the category and credit sets with new values.
                 programme->updateCategorySet(m_categories);
                 programme->updateCreditSet(m_credits);
+            } else if (reader->name() == QLatin1String("channel")) {
+                channelId = reader->attributes().value
+                        (QLatin1String("id")).toString();
+                channel = m_channels.value(channelId, 0);
+                if (channel) {
+                    if (channel->load(reader)) {
+                        newChannels = true;
+                        if (channel->trimProgrammes())
+                            newProgrammes.insert(channel);
+                    }
+                } else {
+                    channel = new TvChannel(this);
+                    channel->load(reader);
+                    m_channels.insert(channelId, channel);
+                    newChannels = true;
+                    if (m_hiddenChannelIds.contains(channelId))
+                        channel->setHidden(true);
+                    if (m_timezoneConvertChannelIds.contains(channelId))
+                        channel->setConvertTimezone(true);
+                }
+                if (channel->hasDataFor())
+                    m_hasDataFor = true;
             }
         } else if (token == QXmlStreamReader::EndElement) {
             if (reader->name() == QLatin1String("tv"))

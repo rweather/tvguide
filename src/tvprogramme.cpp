@@ -104,118 +104,198 @@ void TvProgramme::load(QXmlStreamReader *reader)
     while (!reader->hasError()) {
         QXmlStreamReader::TokenType token = reader->readNext();
         if (token == QXmlStreamReader::StartElement) {
-            if (reader->name() == QLatin1String("title")) {
-                m_title = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-                m_indexTitle = m_title.toLower();
-            } else if (reader->name() == QLatin1String("sub-title")) {
-                m_subTitle = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("desc")) {
-                m_description = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("date")) {
-                m_date = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("director")) {
-                m_directors += reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("actor")) {
-                m_actors += reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("presenter")) {
-                m_presenters += reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("guest")) {
-                addOtherCredit
-                    (QObject::tr("Guest"),
-                     reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements));
-            } else if (reader->name() == QLatin1String("commentator")) {
-                addOtherCredit
-                    (QObject::tr("Commentator"),
-                     reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements));
-            } else if (reader->name() == QLatin1String("writer")) {
-                addOtherCredit
-                    (QObject::tr("Writer"),
-                     reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements));
-            } else if (reader->name() == QLatin1String("adapter")) {
-                addOtherCredit
-                    (QObject::tr("Adapted By"),
-                     reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements));
-            } else if (reader->name() == QLatin1String("producer")) {
-                addOtherCredit
-                    (QObject::tr("Producer"),
-                     reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements));
-            } else if (reader->name() == QLatin1String("composer")) {
-                addOtherCredit
-                    (QObject::tr("Composer"),
-                     reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements));
-            } else if (reader->name() == QLatin1String("editor")) {
-                addOtherCredit
-                    (QObject::tr("Editor"),
-                     reader->readElementText
-                        (QXmlStreamReader::IncludeChildElements));
-            } else if (reader->name() == QLatin1String("category")) {
-                QString category = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-                m_categories += category;
-                if (category == QLatin1String("Movie") ||
-                        category == QLatin1String("Movies"))
-                    m_isMovie = true;   // FIXME: other languages
-            } else if (reader->name() == QLatin1String("rating")) {
-                m_rating = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("star-rating")) {
-                m_starRating = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("episode-num")) {
-                QStringRef system = reader->attributes().value(QLatin1String("system"));
-                if (system == QLatin1String("xmltv_ns")) {
-                    m_episodeNumber = fixEpisodeNumber
-                        (reader->readElementText
-                            (QXmlStreamReader::IncludeChildElements),
-                         &m_season);
+            bool handled = true;
+            switch (reader->name().at(0).unicode()) {
+            case 'a':
+                if (reader->name() == QLatin1String("actor")) {
+                    m_actors += reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else if (reader->name() == QLatin1String("aspect")) {
+                    m_aspectRatio = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else if (reader->name() == QLatin1String("adapter")) {
+                    addOtherCredit
+                        (QObject::tr("Adapted By"),
+                         reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
+                } else {
+                    handled = false;
                 }
-            } else if (reader->name() == QLatin1String("language")) {
-                m_language = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("orig-language")) {
-                m_originalLanguage = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("country")) {
-                m_country = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("aspect")) {
-                m_aspectRatio = reader->readElementText
-                    (QXmlStreamReader::IncludeChildElements);
-            } else if (reader->name() == QLatin1String("premiere")) {
-                m_isPremiere = true;
-            } else if (reader->name() == QLatin1String("previously-shown")) {
-                m_isRepeat = true;
-            // The following are container elements that are ignored.
-            } else if (reader->name() == QLatin1String("credits") ||
-                       reader->name() == QLatin1String("video")) {
-            // The following are in the DTD, but not processed yet.
-            } else if (reader->name() == QLatin1String("present") ||
-                       reader->name() == QLatin1String("quality") ||
-                       reader->name() == QLatin1String("audio") ||
-                       reader->name() == QLatin1String("stereo") ||
-                       reader->name() == QLatin1String("last-chance") ||
-                       reader->name() == QLatin1String("new") ||
-                       reader->name() == QLatin1String("subtitles") ||
-                       reader->name() == QLatin1String("review") ||
-                       reader->name() == QLatin1String("url") ||
-                       reader->name() == QLatin1String("length") ||
-                       reader->name() == QLatin1String("icon")) {
-                qWarning() << "Warning: unhandled standard programme element:" << reader->name();
-            } else {
-                qWarning() << "Warning: unknown programme element:" << reader->name();
+                break;
+            case 'c':
+                if (reader->name() == QLatin1String("category")) {
+                    QString category = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                    if (!category.isEmpty()) {
+                        m_categories += category;
+                        int ch = category.at(0).unicode();
+                        if (ch == 'M') {
+                            if (category == QLatin1String("Movie") ||
+                                    category == QLatin1String("Movies"))
+                                m_isMovie = true;
+                        } else if (ch == 'm') {
+                            if (category == QLatin1String("movie") ||
+                                    category == QLatin1String("movies"))
+                                m_isMovie = true;
+                        }
+                    }
+                } else if (reader->name() == QLatin1String("credits")) {
+                    // Container element - nothing to do.
+                } else if (reader->name() == QLatin1String("country")) {
+                    m_country = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else if (reader->name() == QLatin1String("commentator")) {
+                    addOtherCredit
+                        (QObject::tr("Commentator"),
+                         reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
+                } else if (reader->name() == QLatin1String("composer")) {
+                    addOtherCredit
+                        (QObject::tr("Composer"),
+                         reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'd':
+                if (reader->name() == QLatin1String("desc")) {
+                    m_description = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else if (reader->name() == QLatin1String("date")) {
+                    m_date = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else if (reader->name() == QLatin1String("director")) {
+                    m_directors += reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'e':
+                if (reader->name() == QLatin1String("episode-num")) {
+                    QStringRef system = reader->attributes().value(QLatin1String("system"));
+                    if (system == QLatin1String("xmltv_ns")) {
+                        m_episodeNumber = fixEpisodeNumber
+                            (reader->readElementText
+                                (QXmlStreamReader::IncludeChildElements),
+                            &m_season);
+                    }
+                } else if (reader->name() == QLatin1String("editor")) {
+                    addOtherCredit
+                        (QObject::tr("Editor"),
+                         reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'g':
+                if (reader->name() == QLatin1String("guest")) {
+                    addOtherCredit
+                        (QObject::tr("Guest"),
+                         reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'l':
+                if (reader->name() == QLatin1String("language")) {
+                    m_language = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'o':
+                if (reader->name() == QLatin1String("orig-language")) {
+                    m_originalLanguage = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'p':
+                if (reader->name() == QLatin1String("premiere")) {
+                    m_isPremiere = true;
+                } else if (reader->name() == QLatin1String("previously-shown")) {
+                    m_isRepeat = true;
+                } else if (reader->name() == QLatin1String("presenter")) {
+                    m_presenters += reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else if (reader->name() == QLatin1String("producer")) {
+                    addOtherCredit
+                        (QObject::tr("Producer"),
+                         reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'r':
+                if (reader->name() == QLatin1String("rating")) {
+                    m_rating = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else {
+                    handled = false;
+                }
+                break;
+            case 's':
+                if (reader->name() == QLatin1String("sub-title")) {
+                    m_subTitle = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else if (reader->name() == QLatin1String("star-rating")) {
+                    m_starRating = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                } else {
+                    handled = false;
+                }
+                break;
+            case 't':
+                if (reader->name() == QLatin1String("title")) {
+                    m_title = reader->readElementText
+                        (QXmlStreamReader::IncludeChildElements);
+                    m_indexTitle = m_title.toLower();
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'v':
+                if (reader->name() == QLatin1String("video")) {
+                    // Container element - nothing to do.
+                } else {
+                    handled = false;
+                }
+                break;
+            case 'w':
+                if (reader->name() == QLatin1String("writer")) {
+                    addOtherCredit
+                        (QObject::tr("Writer"),
+                         reader->readElementText
+                            (QXmlStreamReader::IncludeChildElements));
+                } else {
+                    handled = false;
+                }
+                break;
+            }
+            if (!handled) {
+                // The following are in the DTD, but not processed yet.
+                if (reader->name() == QLatin1String("present") ||
+                        reader->name() == QLatin1String("quality") ||
+                        reader->name() == QLatin1String("audio") ||
+                        reader->name() == QLatin1String("stereo") ||
+                        reader->name() == QLatin1String("last-chance") ||
+                        reader->name() == QLatin1String("new") ||
+                        reader->name() == QLatin1String("subtitles") ||
+                        reader->name() == QLatin1String("review") ||
+                        reader->name() == QLatin1String("url") ||
+                        reader->name() == QLatin1String("length") ||
+                        reader->name() == QLatin1String("icon")) {
+                    qWarning() << "Warning: unhandled standard programme element:" << reader->name();
+                } else {
+                    qWarning() << "Warning: unknown programme element:" << reader->name();
+                }
             }
         } else if (token == QXmlStreamReader::EndElement) {
             if (reader->name() == QLatin1String("programme"))
