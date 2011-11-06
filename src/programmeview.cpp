@@ -135,14 +135,6 @@ void ProgrammeView::setProgrammes(const QDate &date, const QList<TvProgramme *> 
         emit selectionChanged();
 }
 
-static bool sortByChannelAndStartTime(TvProgramme *p1, TvProgramme *p2)
-{
-    int cmp = p1->channel()->compare(p2->channel());
-    if (cmp != 0)
-        return cmp < 0;
-    return p1->start() < p2->start();
-}
-
 void ProgrammeView::setMultiChannelProgrammes(const QDate &date, const QList<TvProgramme *> &programmes, Mode mode)
 {
     // Clear the current columns.
