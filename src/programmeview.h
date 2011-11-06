@@ -62,6 +62,7 @@ Q_SIGNALS:
     void selectionChanged();
 
 protected:
+    bool event(QEvent *event);
     void resizeEvent(QResizeEvent *event);
     void paintEvent(QPaintEvent *event);
     bool viewportEvent(QEvent *event);

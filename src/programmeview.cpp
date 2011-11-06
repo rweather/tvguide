@@ -230,6 +230,13 @@ void ProgrammeView::setAdvancedFilter(TvProgrammeFilter *filter)
     }
 }
 
+bool ProgrammeView::event(QEvent *event)
+{
+    if (event->type() == QEvent::FontChange)
+        layout();
+    return QAbstractScrollArea::event(event);
+}
+
 void ProgrammeView::resizeEvent(QResizeEvent *)
 {
     layoutColumns();

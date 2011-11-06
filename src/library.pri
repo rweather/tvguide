@@ -12,9 +12,7 @@ SOURCES += \
     tvchannellist.cpp \
     tvchannelmodel.cpp \
     tvprogramme.cpp \
-    tvprogrammedelegate.cpp \
     tvprogrammefilter.cpp \
-    tvprogrammemodel.cpp \
     tvtick.cpp \
 
 HEADERS += \
@@ -26,9 +24,7 @@ HEADERS += \
     tvchannellist.h \
     tvchannelmodel.h \
     tvprogramme.h \
-    tvprogrammedelegate.h \
     tvprogrammefilter.h \
-    tvprogrammemodel.h \
     tvtick.h \
 
 QT += network

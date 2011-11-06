@@ -26,7 +26,6 @@
 #include "ui_mainwindow.h"
 #include "tvchannellist.h"
 #include "tvchannelmodel.h"
-#include "tvprogrammemodel.h"
 
 class HelpBrowser;
 class ProgrammeView;
@@ -46,7 +45,6 @@ private Q_SLOTS:
     void dateChanged();
     void channelChanged();
     void programmeChanged();
-    void programmesReset();
     void programmesChanged(TvChannel *channel);
     void networkRequest(TvChannel *channel, const QDate &date, bool isIconFetch);
 
@@ -102,7 +100,6 @@ protected:
 private:
     TvChannelList *m_channelList;
     TvChannelModel *m_channelModel;
-    TvProgrammeModel *m_programmeModel;
     QProgressBar *m_progress;
     QTimer *m_hideProgressTimer;
     bool m_firstTimeChannelList;
@@ -112,7 +109,6 @@ private:
     HelpBrowser *m_helpBrowser;
     QLabel *m_searchLabel;
     QLineEdit *m_searchFilter;
-    QTableView *programmes;
     ProgrammeView *programmeView;
 
     TvBookmark::MatchOptions matchOptions() const;
@@ -123,7 +119,7 @@ private:
 
     void selectView();
     void clearView();
-    TvProgramme *selectedProgramme(int *row = 0) const;
+    TvProgramme *selectedProgramme() const;
 };
 
 #endif
