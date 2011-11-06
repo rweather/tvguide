@@ -145,11 +145,6 @@ static bool sortByChannelAndStartTime(TvProgramme *p1, TvProgramme *p2)
 
 void ProgrammeView::setMultiChannelProgrammes(const QDate &date, const QList<TvProgramme *> &programmes, Mode mode)
 {
-    // Sort the programmes so that all programmes on one channel
-    // are continuous in the list.
-    QList<TvProgramme *> sorted(programmes);
-    qSort(sorted.begin(), sorted.end(), sortByChannelAndStartTime);
-
     // Clear the current columns.
     m_prevSelection = m_selection.prog;
     m_mode = mode;
@@ -162,14 +157,14 @@ void ProgrammeView::setMultiChannelProgrammes(const QDate &date, const QList<TvP
         m_options |= TvProgramme::Write_OtherShowings;
     int start = 0;
     int end;
-    while (start < sorted.size()) {
-        TvChannel *channel = sorted.at(start)->channel();
+    while (start < programmes.size()) {
+        TvChannel *channel = programmes.at(start)->channel();
         end = start + 1;
-        while (end < sorted.size() && sorted.at(end)->channel() == channel)
+        while (end < programmes.size() && programmes.at(end)->channel() == channel)
             ++end;
         ColumnInfo *column = new ColumnInfo();
         for (int index = start; index < end; ++index) {
-            ProgInfo info(sorted.at(index));
+            ProgInfo info(programmes.at(index));
             info.dayNumber = date.daysTo(info.prog->start().date());
             column->programmes.append(info);
         }
