@@ -757,14 +757,12 @@ QList<TvProgramme *> MainWindow::combineShowings
     QList<TvProgramme *> newProgrammes;
     TvProgramme *prog;
 
-    // Clear all "other showings" indications.
-    for (index = 0; index < programmes.size(); ++index) {
-        prog = programmes.at(index);
-        prog->setSuppressed(false);
-    }
-
     // Filter the list in 7-day mode to combine the showings.
     if (action7DayOutlook->isChecked()) {
+        for (index = 0; index < programmes.size(); ++index) {
+            prog = programmes.at(index);
+            prog->setSuppressed(false);
+        }
         for (index = 0; index < programmes.size(); ++index) {
             TvProgramme *prog = programmes.at(index);
             if (prog->isSuppressed())
