@@ -35,6 +35,7 @@ ProgrammeView::ProgrammeView(QWidget *parent)
     : QAbstractScrollArea(parent)
     , m_columnWidth(200)
     , m_columnSpacing(2)
+    , m_actualColumnWidth(200)
     , m_options(TvProgramme::Write_Short)
     , m_savedScrollTime(0)
     , m_mode(ProgrammeView::SingleDaySingleChannel)
@@ -239,7 +240,7 @@ bool ProgrammeView::event(QEvent *event)
 
 void ProgrammeView::resizeEvent(QResizeEvent *)
 {
-    layoutColumns();
+    layoutColumns(true);
     layoutHeaderView();
 }
 
@@ -533,13 +534,13 @@ void ProgrammeView::clearColumns()
 
 void ProgrammeView::layout()
 {
-    layoutColumns();
+    layoutColumns(false);
     layoutHeaderView();
     viewport()->update();
     m_headerView->update();
 }
 
-void ProgrammeView::layoutColumns()
+void ProgrammeView::layoutColumns(bool shortcut)
 {
     int index;
     int columnWidth = m_columnWidth;
@@ -548,6 +549,9 @@ void ProgrammeView::layoutColumns()
         if (tempWidth > columnWidth)
             columnWidth = tempWidth;
     }
+    if (shortcut && m_actualColumnWidth == columnWidth)
+        return;     // Don't need to re-layout the columns for a resize.
+    m_actualColumnWidth = columnWidth;
     QFontMetrics metrics(font(), this);
     QRect bounds = metrics.boundingRect(QLatin1String(" 00:00 "));
     m_timeSize = bounds.size();
@@ -754,8 +758,8 @@ void ProgrammeView::updateScrollBars()
     }
 
     // Update the scroll bars to match the current display mode.
-    horizontalScrollBar()->setSingleStep(m_columnWidth / 10);
-    horizontalScrollBar()->setPageStep(m_columnWidth + m_columnSpacing);
+    horizontalScrollBar()->setSingleStep(m_actualColumnWidth / 10);
+    horizontalScrollBar()->setPageStep(m_actualColumnWidth + m_columnSpacing);
     horizontalScrollBar()->setRange(0, m_totalRect.width() - viewport()->width());
     if (displayMode != FullDay) {
         verticalScrollBar()->setSingleStep(20);

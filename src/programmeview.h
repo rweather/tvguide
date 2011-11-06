@@ -117,6 +117,7 @@ private:
     bool m_is24HourClock;
     int m_columnWidth;
     int m_columnSpacing;
+    int m_actualColumnWidth;
     int m_options;
     int m_savedScrollTime;
     Mode m_mode;
@@ -148,7 +149,7 @@ private:
 
     void clearColumns();
     void layout();
-    void layoutColumns();
+    void layoutColumns(bool shortcut);
     void layoutHeaderView();
     void levelHours();
     qreal calculateDayHeights();
