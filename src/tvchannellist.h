@@ -19,6 +19,7 @@
 #define _TVCHANNELLIST_H
 
 #include "tvchannel.h"
+#include "tvchannelgroup.h"
 #include "tvbookmark.h"
 #include "tvbookmarklist.h"
 #include "tvtick.h"
@@ -65,6 +66,9 @@ public:
     QSet<QString> categories() const { return m_categories; }
     QSet<QString> credits() const { return m_credits; }
 
+    QList<TvChannelGroup *> groups() { return m_groups; }
+    void setGroups(const QList<TvChannelGroup *> &groups, bool notify = false);
+
 public Q_SLOTS:
     void refreshChannels(bool forceReload = false);
     void requestChannelDay(TvChannel *channel, const QDate &date, int days = 1, bool trimPrevious = true);
@@ -98,6 +102,7 @@ Q_SIGNALS:
     void bookmarksChanged();
     void networkRequest(TvChannel *channel, const QDate &date, bool isIconFetch);
     void channelIconsChanged();
+    void groupsChanged();
 
 private:
     struct Request
@@ -142,6 +147,7 @@ private:
     TvBookmarkList m_bookmarkList;
     QSet<QString> m_categories;
     QSet<QString> m_credits;
+    QList<TvChannelGroup *> m_groups;
 
     void load(QXmlStreamReader *reader, const QUrl &url);
     void loadOzTivoChannelData();
@@ -152,6 +158,7 @@ private:
     void forceProgressUpdate();
     void loadServiceSettings(QSettings *settings);
     void saveChannelSettings();
+    void saveGroups();
     void refreshIcons();
     void setIconData(TvChannel *channel, const QByteArray &data, const QUrl &url);
 

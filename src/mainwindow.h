@@ -64,6 +64,7 @@ private Q_SLOTS:
     void multiChannelChanged();
 
     void editChannels();
+    void editChannelGroups();
     void addBookmark();
     void organizeBookmarks();
     void tickShow();
@@ -94,6 +95,8 @@ private Q_SLOTS:
 
     void advancedSearchChanged();
 
+    void recalculateChannelSpans();
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 
@@ -112,7 +115,7 @@ private:
     ProgrammeView *programmeView;
 
     TvBookmark::MatchOptions matchOptions() const;
-    void setDay(const QModelIndexList &selected, const QDate &date, TvChannel *changedChannel = 0, bool request = true);
+    void setDay(const QList<TvChannel *> &channels, const QDate &date, TvChannel *changedChannel = 0, bool request = true);
     void updateProgrammes(TvChannel *channel, const QDate &date, bool request);
     void updateMultiChannelProgrammes(const QDate &date, const QList<TvChannel *> channels, bool request);
     QList<TvProgramme *> combineShowings(const QList<TvProgramme *> &programmes);
@@ -120,6 +123,9 @@ private:
     void selectView();
     void clearView();
     TvProgramme *selectedProgramme() const;
+
+    QList<TvChannel *> selectedChannels(const QModelIndexList &list) const;
+    QList<TvChannel *> selectedChannels() const;
 };
 
 #endif

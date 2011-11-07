@@ -40,6 +40,11 @@ public:
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
+    QList<TvChannel *> channelsForIndex(const QModelIndex &index) const;
+    TvChannelGroup *groupForIndex(const QModelIndex &index) const;
+
+    int groupCount() const { return m_groups.size(); }
+
 private Q_SLOTS:
     void channelsChanged();
     void channelIconsChanged();
@@ -47,6 +52,7 @@ private Q_SLOTS:
 private:
     TvChannelList *m_channelList;
     QList<TvChannel *> m_visibleChannels;
+    QList<TvChannelGroup *> m_groups;
 
     void loadVisibleChannels();
 };

@@ -72,11 +72,21 @@ TvChannelList::TvChannelList(QObject *parent)
 TvChannelList::~TvChannelList()
 {
     qDeleteAll(m_channels);
+    qDeleteAll(m_groups);
 }
 
 TvChannel *TvChannelList::channel(const QString &id) const
 {
     return m_channels.value(id, 0);
+}
+
+void TvChannelList::setGroups(const QList<TvChannelGroup *> &groups, bool notify)
+{
+    qDeleteAll(m_groups);
+    m_groups = groups;
+    saveGroups();
+    if (notify)
+        emit groupsChanged();
 }
 
 static bool sortActiveChannels(TvChannel *c1, TvChannel *c2)
@@ -781,6 +791,8 @@ void TvChannelList::loadServiceSettings(QSettings *settings)
 
     m_bookmarkList.loadTicks(settings);
 
+    setGroups(TvChannelGroup::loadSettings(this, settings));
+
     settings->endGroup();
 }
 
@@ -809,6 +821,18 @@ void TvChannelList::saveChannelSettings()
         settings.setValue(QLatin1String("convertTimezone"), channel->convertTimezone());
     }
     settings.endArray();
+    settings.endGroup();
+    settings.sync();
+}
+
+void TvChannelList::saveGroups()
+{
+    if (m_serviceId.isEmpty())
+        return;
+    QSettings settings(QLatin1String("Southern Storm"),
+                       QLatin1String("qtvguide"));
+    settings.beginGroup(m_serviceId);
+    TvChannelGroup::saveSettings(m_groups, &settings);
     settings.endGroup();
     settings.sync();
 }

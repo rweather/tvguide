@@ -18,6 +18,7 @@
 #include "mainwindow.h"
 #include "categoryselector.h"
 #include "channeleditor.h"
+#include "channelgroupeditor.h"
 #include "bookmarkitemeditor.h"
 #include "bookmarklisteditor.h"
 #include "programmeview.h"
@@ -88,6 +89,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_channelModel = new TvChannelModel(m_channelList, this);
     channels->setModel(m_channelModel);
 
+    connect(m_channelModel, SIGNAL(modelReset()), this,
+            SLOT(recalculateChannelSpans()));
+
     if (m_channelList->largeIcons())
         channels->setIconSize(QSize(32, 32));
     else
@@ -138,6 +142,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(showLateNight()));
     connect(actionEditChannels, SIGNAL(triggered()),
             this, SLOT(editChannels()));
+    connect(actionChannelGroups, SIGNAL(triggered()),
+            this, SLOT(editChannelGroups()));
     connect(actionAddBookmark, SIGNAL(triggered()),
             this, SLOT(addBookmark()));
     connect(actionOrganizeBookmarks, SIGNAL(triggered()),
@@ -284,17 +290,16 @@ void MainWindow::dateChanged()
 {
     QDate date = calendar->selectedDate();
     actionToday->setEnabled(date != QDate::currentDate());
-    setDay(channels->selectionModel()->selectedRows(), date);
+    setDay(selectedChannels(), date);
 }
 
 void MainWindow::channelChanged()
 {
-    TvChannel *channel;
-    QList<QModelIndex> indexes;
+    QList<TvChannel *> channels;
     if (!actionMultiChannel->isChecked())
-        indexes = channels->selectionModel()->selectedRows();
-    if (indexes.size() == 1) {
-        channel = static_cast<TvChannel *>(indexes.at(0).internalPointer());
+        channels = selectedChannels();
+    if (channels.size() == 1) {
+        TvChannel *channel = channels.at(0);
         QDate first, last;
         channel->dataForRange(&first, &last);
         calendar->setMinimumDate(first);
@@ -303,7 +308,7 @@ void MainWindow::channelChanged()
         calendar->setMinimumDate(QDate::fromJulianDay(1));
         calendar->setMaximumDate(QDate(7999, 12, 31));
     }
-    setDay(indexes, calendar->selectedDate());
+    setDay(channels, calendar->selectedDate());
 }
 
 void MainWindow::programmeChanged()
@@ -315,8 +320,7 @@ void MainWindow::programmesChanged(TvChannel *channel)
 {
     if (m_fetching)
         return;
-    setDay(channels->selectionModel()->selectedRows(),
-           calendar->selectedDate(), channel, false);
+    setDay(selectedChannels(), calendar->selectedDate(), channel, false);
 }
 
 void MainWindow::showToday()
@@ -366,7 +370,7 @@ void MainWindow::showLateNight()
 
 void MainWindow::updateTimePeriods()
 {
-    setDay(channels->selectionModel()->selectedRows(), calendar->selectedDate());
+    setDay(selectedChannels(), calendar->selectedDate());
 }
 
 void MainWindow::sevenDayOutlookChanged()
@@ -387,14 +391,21 @@ void MainWindow::editChannels()
     ce.exec();
 }
 
+void MainWindow::editChannelGroups()
+{
+    ChannelGroupEditor ce(m_channelList, this);
+    QModelIndexList selected = channels->selectionModel()->selectedRows();
+    if (!selected.isEmpty())
+        ce.setActiveGroup(m_channelModel->groupForIndex(selected.at(0)));
+    ce.exec();
+}
+
 void MainWindow::addBookmark()
 {
     BookmarkItemEditor bookmarkDlg(m_channelList, this);
-    QModelIndex index = channels->selectionModel()->currentIndex();
-    if (index.isValid()) {
-        TvChannel *channel = static_cast<TvChannel *>(index.internalPointer());
-        bookmarkDlg.setChannelId(channel->id());
-    }
+    QList<TvChannel *> channels = selectedChannels();
+    if (!channels.isEmpty())
+        bookmarkDlg.setChannelId(channels.at(0)->id());
     TvProgramme *programme = selectedProgramme();
     TvBookmark *editBookmark = 0;
     if (programme) {
@@ -671,24 +682,18 @@ TvBookmark::MatchOptions MainWindow::matchOptions() const
     return options;
 }
 
-void MainWindow::setDay(const QModelIndexList &selected, const QDate &date, TvChannel *changedChannel, bool request)
+void MainWindow::setDay(const QList<TvChannel *> &channels, const QDate &date, TvChannel *changedChannel, bool request)
 {
-    TvChannel *channel;
     if (actionMultiChannel->isChecked()) {
         updateMultiChannelProgrammes(date, m_channelList->activeChannels(), request);
-    } else if (selected.size() == 1) {
-        QModelIndex index = selected.at(0);
-        channel = static_cast<TvChannel *>(index.internalPointer());
+    } else if (channels.size() == 1) {
+        TvChannel *channel = channels.at(0);
         if (!changedChannel || channel == changedChannel)
             updateProgrammes(channel, date, request);
-    } else if (selected.size() > 1) {
-        QList<TvChannel *> channels;
-        for (int index = 0; index < selected.size(); ++index)
-            channels.append(static_cast<TvChannel *>(selected.at(index).internalPointer()));
+    } else if (channels.size() > 1) {
         if (!changedChannel || channels.contains(changedChannel))
             updateMultiChannelProgrammes(date, channels, request);
     } else {
-        channel = 0;
         clearView();
     }
 }
@@ -812,4 +817,38 @@ void MainWindow::clearView()
 TvProgramme *MainWindow::selectedProgramme() const
 {
     return programmeView->selectedProgramme();
+}
+
+static bool sortChannels(TvChannel *c1, TvChannel *c2)
+{
+    return c1->compare(c2) < 0;
+}
+
+QList<TvChannel *> MainWindow::selectedChannels(const QModelIndexList &list) const
+{
+    QList<TvChannel *> channels;
+    for (int posn = 0; posn < list.size(); ++posn) {
+        QList<TvChannel *> indexChannels =
+            m_channelModel->channelsForIndex(list.at(posn));
+        for (int index = 0; index < indexChannels.size(); ++index) {
+            TvChannel *channel = indexChannels.at(index);
+            if (!channels.contains(channel))
+                channels.append(channel);
+        }
+    }
+    qSort(channels.begin(), channels.end(), sortChannels);
+    return channels;
+}
+
+QList<TvChannel *> MainWindow::selectedChannels() const
+{
+    return selectedChannels(channels->selectionModel()->selectedRows());
+}
+
+void MainWindow::recalculateChannelSpans()
+{
+    int count = m_channelModel->groupCount();
+    channels->clearSpans();
+    while (count-- > 0)
+        channels->setSpan(count, 0, 1, TvChannelModel::ColumnCount);
 }

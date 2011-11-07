@@ -16,6 +16,7 @@
  */
 
 #include "tvchannelmodel.h"
+#include <QtCore/qdebug.h>
 
 TvChannelModel::TvChannelModel(TvChannelList *channelList, QObject *parent)
     : QAbstractItemModel(parent)
@@ -27,6 +28,8 @@ TvChannelModel::TvChannelModel(TvChannelList *channelList, QObject *parent)
             this, SLOT(channelsChanged()));
     connect(channelList, SIGNAL(channelIconsChanged()),
             this, SLOT(channelIconsChanged()));
+    connect(channelList, SIGNAL(groupsChanged()),
+            this, SLOT(channelsChanged()));
     loadVisibleChannels();
 }
 
@@ -38,9 +41,12 @@ QModelIndex TvChannelModel::index(int row, int column, const QModelIndex &) cons
 {
     if (column < 0 || column >= ColumnCount)
         return QModelIndex();
-    if (row < 0 || row >= m_visibleChannels.size())
+    if (row >= 0 && row < m_groups.size())
+        return createIndex(row, column);
+    int chrow = row - m_groups.size();
+    if (chrow < 0 || chrow >= m_visibleChannels.size())
         return QModelIndex();
-    return createIndex(row, column, m_visibleChannels.at(row));
+    return createIndex(row, column, m_visibleChannels.at(chrow));
 }
 
 QModelIndex TvChannelModel::parent(const QModelIndex &) const
@@ -55,7 +61,7 @@ int TvChannelModel::columnCount(const QModelIndex &) const
 
 int TvChannelModel::rowCount(const QModelIndex &) const
 {
-    return m_visibleChannels.size();
+    return m_groups.size() + m_visibleChannels.size();
 }
 
 QVariant TvChannelModel::data(const QModelIndex &index, int role) const
@@ -63,6 +69,13 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
     int row = index.row();
+    if (row >= 0 && row < m_groups.size()) {
+        TvChannelGroup *group = m_groups.at(row);
+        if (role == Qt::DisplayRole)
+            return group->name();
+        return QVariant();
+    }
+    row -= m_groups.size();
     if (row < 0 || row >= m_visibleChannels.size())
         return QVariant();
     TvChannel *channel = m_visibleChannels.at(row);
@@ -76,9 +89,6 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
             else
                 return numbers.join(QLatin1String(", "));
         }
-    //} else if (role == Qt::TextAlignmentRole) {
-        //if (index.column() == ColumnNumber)
-            //return int(Qt::AlignRight | Qt::AlignVCenter);
     } else if (role == Qt::DecorationRole) {
         if (m_channelList->haveChannelNumbers()) {
             if (index.column() == ColumnNumber)
@@ -102,6 +112,33 @@ QVariant TvChannelModel::headerData(int section, Qt::Orientation orientation, in
     return QVariant();
 }
 
+QList<TvChannel *> TvChannelModel::channelsForIndex(const QModelIndex &index) const
+{
+    QList<TvChannel *> channels;
+    TvChannel *channel = static_cast<TvChannel *>(index.internalPointer());
+    if (channel) {
+        channels.append(channel);
+    } else {
+        TvChannelGroup *group = m_groups.at(index.row());
+        QStringList ids = group->channelIds();
+        for (int posn = 0; posn < ids.size(); ++posn) {
+            channel = m_channelList->channel(ids.at(posn));
+            if (channel)
+                channels.append(channel);
+        }
+    }
+    return channels;
+}
+
+TvChannelGroup *TvChannelModel::groupForIndex(const QModelIndex &index) const
+{
+    int row = index.row();
+    if (row >= 0 && row < m_groups.size())
+        return m_groups.at(row);
+    else
+        return 0;
+}
+
 void TvChannelModel::channelsChanged()
 {
     loadVisibleChannels();
@@ -113,6 +150,11 @@ void TvChannelModel::channelIconsChanged()
     reset();
 }
 
+static bool sortGroups(TvChannelGroup *g1, TvChannelGroup *g2)
+{
+    return g1->name().compare(g2->name(), Qt::CaseInsensitive) < 0;
+}
+
 void TvChannelModel::loadVisibleChannels()
 {
     QList<TvChannel *> channels = m_channelList->activeChannels();
@@ -122,4 +164,6 @@ void TvChannelModel::loadVisibleChannels()
         if (!channel->isHidden())
             m_visibleChannels.append(channel);
     }
+    m_groups = m_channelList->groups();
+    qSort(m_groups.begin(), m_groups.end(), sortGroups);
 }
