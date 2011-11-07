@@ -28,6 +28,7 @@
 #include <QtGui/qtextcursor.h>
 #include <QtGui/qtextdocument.h>
 #include "tvbookmark.h"
+#include "tvdatetime.h"
 
 class TvChannel;
 
@@ -39,10 +40,10 @@ public:
 
     TvChannel *channel() const { return m_channel; }
 
-    QDateTime start() const { return m_start; }
+    TvDateTime start() const { return m_start; }
     void setStart(const QDateTime &start) { m_start = start; }
 
-    QDateTime stop() const { return m_stop; }
+    TvDateTime stop() const { return m_stop; }
     void setStop(const QDateTime &stop) { m_stop = stop; }
 
     QString title() const { return m_title; }
@@ -120,8 +121,8 @@ public:
 
 private:
     TvChannel *m_channel;
-    QDateTime m_start;
-    QDateTime m_stop;
+    TvDateTime m_start;
+    TvDateTime m_stop;
     QString m_title;
     QString m_indexTitle;
     QString m_subTitle;

@@ -23,6 +23,7 @@ HEADERS += \
     tvchanneleditmodel.h \
     tvchannellist.h \
     tvchannelmodel.h \
+    tvdatetime.h \
     tvprogramme.h \
     tvprogrammefilter.h \
     tvtick.h \

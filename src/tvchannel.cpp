@@ -316,8 +316,8 @@ QList<TvProgramme *> TvChannel::programmesForDay
     Q_UNUSED(options);
     QList<TvProgramme *> list;
     TvProgramme *prog = m_programmes;
-    QDateTime morningStart = QDateTime(date, QTime(6, 0, 0));
-    QDateTime lateNightEnd = QDateTime(date.addDays(1), QTime(6, 0, 0));
+    TvDateTime morningStart(date, QTime(6, 0, 0));
+    TvDateTime lateNightEnd(date.addDays(1), QTime(6, 0, 0));
     refreshBookmarks();
     while (prog != 0) {
         if (prog->start() < lateNightEnd &&
@@ -341,8 +341,8 @@ QList<TvProgramme *> TvChannel::bookmarkedProgrammes
     TvProgramme *prev = 0;
     TvBookmark::Match prevMatch = TvBookmark::NoMatch;
     TvBookmark *prevBookmark = 0;
-    QDateTime startTime = QDateTime(first, QTime(0, 0, 0));
-    QDateTime stopTime = QDateTime(last.addDays(1), QTime(6, 0, 0));
+    TvDateTime startTime(first, QTime(0, 0, 0));
+    TvDateTime stopTime(last.addDays(1), QTime(6, 0, 0));
     refreshBookmarks();
     while (prog != 0) {
         if ((prog->start() >= startTime &&
