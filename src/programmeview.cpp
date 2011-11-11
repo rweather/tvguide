@@ -899,31 +899,37 @@ qreal ProgrammeView::yOffset(const ColumnInfo *column, int timeValue)
 
     // Find the programme in this column that overlaps with
     // the starting time value.
+    int left = 0;
+    int right = column->programmes.size() - 1;
     int start = 0;
     int startValue = 0;
-    for (; start < column->programmes.size(); ++start) {
-        TvProgramme *prog = column->programmes.at(start).prog;
-        int pvalue = minuteIndexForProgramme(prog, start);
-        if (pvalue == timeValue) {
-            startValue = pvalue;
+    while (left <= right) {
+        int middle = (left + right) / 2;
+        TvProgramme *prog = column->programmes.at(middle).prog;
+        int value = minuteIndexForProgramme(prog, middle);
+        int stopValue = value + prog->secondsLength() / 60;
+        if (timeValue >= value && timeValue < stopValue) {
+            start = middle;
+            startValue = value;
             break;
-        } else if (pvalue > timeValue) {
-            if (start > 0)
-                --start;
-            else
-                startValue = pvalue;
-            break;
+        } else if (value > timeValue) {
+            right = middle - 1;
+        } else {
+            left = middle + 1;
         }
-        startValue = pvalue;
     }
-    if (start >= column->programmes.size())
-        --start;    // Must fall within the last programme.
+    if (left > right) {
+        // Probably looking for the last item in the list.
+        start = column->programmes.size() - 1;
+        TvProgramme *prog = column->programmes.at(start).prog;
+        startValue = minuteIndexForProgramme(prog, start);
+    }
 
     // Determine the progress through this programme's visual
     // layout to the designated time; where 0 shows the whole
     // programme, 0.5 the bottom half, 1 the next programme.
     TvProgramme *prog = column->programmes.at(start).prog;
-    int length = prog->start().secsTo(prog->stop()) / 60;
+    int length = prog->secondsLength() / 60;
     qreal progress;
     if (length <= 0)
         progress = 0.0f;

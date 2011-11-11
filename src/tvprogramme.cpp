@@ -45,6 +45,17 @@ TvProgramme::~TvProgramme()
     delete m_shortDescriptionDocument;
 }
 
+// Length of the programme in seconds.
+int TvProgramme::secondsLength() const
+{
+    QTime start = m_start.time();
+    QTime stop = m_stop.time();
+    if (start <= stop)
+        return start.secsTo(stop);
+    else
+        return 86400 + start.secsTo(stop);
+}
+
 int TvProgramme::year() const
 {
     bool ok = false;

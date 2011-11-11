@@ -46,6 +46,8 @@ public:
     TvDateTime stop() const { return m_stop; }
     void setStop(const QDateTime &stop) { m_stop = stop; }
 
+    int secondsLength() const;
+
     QString title() const { return m_title; }
     void setTitle(const QString &title)
         { m_title = title; m_indexTitle = title.toLower(); }
