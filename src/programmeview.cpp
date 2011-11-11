@@ -321,10 +321,14 @@ void ProgrammeView::paintFullDay(QPainter *painter)
             y = (1 - offsetProgress) * column->hourOffsets.at(offsetHour) +
                 offsetProgress * column->hourOffsets.at(offsetHour + 1);
         }
-        painter->save();
+        qreal visibleTop = y;
+        qreal visibleBottom = y + viewport()->height();
         painter->translate(x, -y);
         for (int index2 = 0; index2 < column->programmes.size(); ++index2) {
             const ProgInfo &info = column->programmes.at(index2);
+            if (info.rect.bottom() <= visibleTop ||
+                    info.rect.top() >= visibleBottom)
+                continue;   // Programme is completely off-screen.
             QRectF timeRect(0, info.rect.y(),
                             m_timeSize.width(), info.rect.height());
             drawTimeSpan(painter, timeRect, info.prog->start().time(),
@@ -341,7 +345,7 @@ void ProgrammeView::paintFullDay(QPainter *painter)
                 painter->drawRect(info.rect);
             }
         }
-        painter->restore();
+        painter->translate(-x, y);
     }
 }
 
@@ -360,13 +364,21 @@ void ProgrammeView::paintSearchResults(QPainter *painter)
             continue;
 
         // Draw the column at the vertical scrollbar offset.
-        painter->save();
-        painter->translate(x, -verticalScrollBar()->value());
+        qreal scrollBarOffset = verticalScrollBar()->value();
+        painter->translate(x, -scrollBarOffset);
         qreal y = 0;
+        qreal visibleTop = scrollBarOffset;
+        qreal visibleBottom = visibleTop + viewport()->height();
         for (int index2 = 0; index2 < column->programmes.size(); ++index2) {
             const ProgInfo &info = column->programmes.at(index2);
             if (!info.enabled)
                 continue;
+            if ((y + info.rect.height()) <= visibleTop ||
+                    y >= visibleBottom) {
+                // Programme is completely off-screen.
+                y += info.rect.height();
+                continue;
+            }
             QRectF timeRect(0, y, m_timeSize.width(), info.rect.height());
             drawTimeSpan(painter, timeRect, info.prog->start().time(),
                          info.prog->stop().time(), index2);
@@ -385,7 +397,7 @@ void ProgrammeView::paintSearchResults(QPainter *painter)
             }
             y += info.rect.height();
         }
-        painter->restore();
+        painter->translate(-x, scrollBarOffset);
     }
 }
 
@@ -404,9 +416,11 @@ void ProgrammeView::paintBookmarks(QPainter *painter)
             continue;
 
         // Draw the column at the vertical scrollbar offset.
-        painter->save();
-        painter->translate(x, -verticalScrollBar()->value());
+        qreal scrollBarOffset = verticalScrollBar()->value();
+        painter->translate(x, -scrollBarOffset);
         qreal y = 0;
+        qreal visibleTop = scrollBarOffset;
+        qreal visibleBottom = visibleTop + viewport()->height();
         int dayNumber = -1;
         for (int index2 = 0; index2 < column->programmes.size(); ++index2) {
             const ProgInfo &info = column->programmes.at(index2);
@@ -415,6 +429,12 @@ void ProgrammeView::paintBookmarks(QPainter *painter)
             if (info.dayNumber != dayNumber) {
                 dayNumber = info.dayNumber;
                 y = m_dayOffsets[dayNumber];
+            }
+            if ((y + info.rect.height()) <= visibleTop ||
+                    y >= visibleBottom) {
+                // Programme is completely off-screen.
+                y += info.rect.height();
+                continue;
             }
             QRectF timeRect(0, y, m_timeSize.width(), info.rect.height());
             drawTimeSpan(painter, timeRect, info.prog->start().time(),
@@ -434,7 +454,7 @@ void ProgrammeView::paintBookmarks(QPainter *painter)
             }
             y += info.rect.height();
         }
-        painter->restore();
+        painter->translate(-x, scrollBarOffset);
     }
     QFontMetrics metrics(font(), this);
     qreal headerHeight = metrics.height() + 5;
