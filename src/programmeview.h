@@ -113,6 +113,7 @@ private:
     QList<ColumnInfo *> m_columns;
     QList<ColumnInfo *> m_activeColumns;
     QSize m_timeSize;
+    QSize m_channelNameSize;
     QRectF m_totalRect;
     bool m_is24HourClock;
     int m_columnWidth;
@@ -157,12 +158,15 @@ private:
 
     static int adjustTimeSpan(QTime *start, QTime *stop, int posn);
     void drawTimeSpan(QPainter *painter, const QRectF &rect, const QTime &start, const QTime &stop, int posn);
+    void drawChannelName(QPainter *painter, const QRectF &rect, TvProgramme *prog);
     static qreal yOffset(const ColumnInfo *column, int timeValue);
 
     Selection programmeAtPosition(const QPoint &pos) const;
 
     void applyFilter();
     bool hasFilter() const { return !m_filter.isEmpty() || m_advancedFilter != 0; }
+
+    bool hasCollisions(const ColumnInfo *column, const TvProgramme *prog, int offset) const;
 };
 
 class ProgrammeHeaderView : public QWidget

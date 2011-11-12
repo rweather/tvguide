@@ -722,6 +722,15 @@ void MainWindow::updateProgrammes
         programmeView->setProgrammes(date, programmes, ProgrammeView::SingleDaySingleChannel);
 }
 
+static bool sortTimeAndChannel(TvProgramme *p1, TvProgramme *p2)
+{
+    if (p1->start() < p2->start())
+        return true;
+    else if (p1->start() > p2->start())
+        return false;
+    return p1->channel()->compare(p2->channel()) < 0;
+}
+
 void MainWindow::updateMultiChannelProgrammes
     (const QDate &date, const QList<TvChannel *> channels, bool request)
 {
@@ -747,10 +756,14 @@ void MainWindow::updateMultiChannelProgrammes
     // Combine multiple showings of the same episode.
     programmes = combineShowings(programmes);
 
+    // Sort the programmes in 7 days mode to interleave the channels.
+    if (action7DayOutlook->isChecked())
+        qSort(programmes.begin(), programmes.end(), sortTimeAndChannel);
+
     // Set the programme list on the view.
     m_fetching = false;
     if (action7DayOutlook->isChecked())
-        programmeView->setMultiChannelProgrammes(date, programmes, ProgrammeView::BookmarksMultiChannel);
+        programmeView->setProgrammes(date, programmes, ProgrammeView::BookmarksMultiChannel);
     else
         programmeView->setMultiChannelProgrammes(date, programmes, ProgrammeView::SingleDayMultiChannel);
 }

@@ -121,6 +121,8 @@ public:
     void updateCategorySet(QSet<QString> &set) const;
     void updateCreditSet(QSet<QString> &set) const;
 
+    bool overlapsWith(const TvProgramme *prog) const;
+
 private:
     TvChannel *m_channel;
     TvDateTime m_start;

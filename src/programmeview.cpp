@@ -17,6 +17,7 @@
 
 #include "programmeview.h"
 #include "tvchannel.h"
+#include "tvchannellist.h"
 #include <QtGui/qtextdocument.h>
 #include <QtGui/qtexttable.h>
 #include <QtGui/qabstracttextdocumentlayout.h>
@@ -405,6 +406,7 @@ void ProgrammeView::paintBookmarks(QPainter *painter)
 {
     QPen linePen(palette().mid(), 0);
     qreal columnx = 0;
+    QBrush collisionBrush(QColor(Qt::yellow).lighter(150));
     for (int index = 0; index < m_activeColumns.size(); ++index) {
         // Skip the column if it is obviously empty or off-screen.
         const ColumnInfo *column = m_activeColumns.at(index);
@@ -439,7 +441,18 @@ void ProgrammeView::paintBookmarks(QPainter *painter)
             QRectF timeRect(0, y, m_timeSize.width(), info.rect.height());
             drawTimeSpan(painter, timeRect, info.prog->start().time(),
                          info.prog->stop().time(), index2);
+            if (!m_channelNameSize.isEmpty()) {
+                QRectF chanRect(timeRect.width() - m_channelNameSize.width(),
+                                y, m_channelNameSize.width(),
+                                info.rect.height());
+                drawChannelName(painter, chanRect, info.prog);
+            }
             painter->translate(info.rect.x(), y);
+            if (hasCollisions(column, info.prog, index2)) {
+                painter->fillRect
+                    (QRectF(0, 0, info.rect.width(), info.rect.height()),
+                     collisionBrush);
+            }
             info.document->drawContents(painter);
             painter->translate(-info.rect.x(), -y);
             painter->setPen(linePen);
@@ -562,6 +575,15 @@ void ProgrammeView::layoutColumns(bool shortcut)
     QFontMetrics metrics(font(), this);
     QRect bounds = metrics.boundingRect(QLatin1String(" 00:00 "));
     m_timeSize = bounds.size();
+    m_channelNameSize = QSize();
+    bool useIcons = false;
+    if (m_mode == BookmarksMultiChannel) {
+        // Add the channel name and icon in another column.
+        int width = m_timeSize.width();
+        m_channelNameSize = QSize(width * 3, m_timeSize.height());
+        m_timeSize.setWidth(width * 4);
+        useIcons = true;
+    }
     int detailsOffset = m_timeSize.width() + m_columnSpacing;
     int detailsWidth = columnWidth - detailsOffset;
     qreal x = 0;
@@ -599,6 +621,20 @@ void ProgrammeView::layoutColumns(bool shortcut)
                 detailsHeight = size.height();
             }
             detailsHeight += 4; // Extra spacing between rows.
+
+            // Create space for the channel icon.
+            if (useIcons) {
+                QIcon icon = info.prog->channel()->icon();
+                if (!icon.isNull()) {
+                    int iconSize;
+                    //if (info.prog->channel()->channelList()->largeIcons())
+                        //iconSize = 32;
+                    //else
+                        iconSize = 16;
+                    if (detailsHeight < iconSize)
+                        detailsHeight = iconSize;
+                }
+            }
 
             // Calculate the bounding rectangle for the details.
             info.rect = QRectF(detailsOffset, height, size.width(), detailsHeight);
@@ -875,6 +911,9 @@ void ProgrammeView::drawTimeSpan
     }
 
     // Draw the time in either 12-hour or 24-hour format.
+    QRectF timeRect(rect);
+    if (!m_channelNameSize.isEmpty())
+        timeRect.setWidth(timeRect.width() - m_channelNameSize.width());
     int hour = start.hour();
     if (!m_is24HourClock) {
         if (hour == 0)
@@ -887,7 +926,29 @@ void ProgrammeView::drawTimeSpan
     painter->setFont(font());
     painter->setPen(QPen(palette().foreground(), 0));
     painter->drawText
-        (rect, Qt::AlignRight | Qt::AlignTop | Qt::TextSingleLine, str);
+        (timeRect, Qt::AlignRight | Qt::AlignTop | Qt::TextSingleLine, str);
+}
+
+void ProgrammeView::drawChannelName
+    (QPainter *painter, const QRectF &rect, TvProgramme *prog)
+{
+    QRectF nameRect(rect.left() + 2, rect.top(),
+                    rect.width() - 2, rect.height());
+    QIcon icon = prog->channel()->icon();
+    if (!icon.isNull()) {
+        int iconSize;
+        //if (prog->channel()->channelList()->largeIcons())
+            //iconSize = 32;
+        //else
+            iconSize = 16;
+        icon.paint(painter, int(nameRect.left()), int(nameRect.top()),
+                   iconSize, iconSize, Qt::AlignLeft | Qt::AlignVCenter);
+        nameRect.setLeft(nameRect.left() + iconSize);
+    }
+    QFontMetrics metrics(font(), this);
+    painter->drawText
+        (nameRect, Qt::AlignLeft | Qt::AlignTop | Qt::TextSingleLine,
+         metrics.elidedText(prog->channel()->name(), Qt::ElideRight, nameRect.width()));
 }
 
 // Determine the y offset from the top of a column of a
@@ -1047,6 +1108,21 @@ void ProgrammeView::applyFilter()
     m_headerView->update();
 }
 
+bool ProgrammeView::hasCollisions
+    (const ColumnInfo *column, const TvProgramme *prog, int offset) const
+{
+    int first = qMax(offset - 3, 0);
+    int last = qMin(offset + 3, column->programmes.size() - 1);
+    for (int index = first; index < last; ++index) {
+        if (index == offset)
+            continue;
+        const TvProgramme *prog2 = column->programmes.at(index).prog;
+        if (prog->overlapsWith(prog2))
+            return true;
+    }
+    return false;
+}
+
 ProgrammeHeaderView::ProgrammeHeaderView(ProgrammeView *view)
     : QWidget(view)
     , m_view(view)
@@ -1066,7 +1142,8 @@ int ProgrammeHeaderView::bestHeight()
 void ProgrammeHeaderView::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    if (m_view->m_columns.isEmpty() || m_view->m_activeColumns.isEmpty()) {
+    if (m_view->m_columns.isEmpty() || m_view->m_activeColumns.isEmpty() ||
+            m_view->m_mode == ProgrammeView::BookmarksMultiChannel) {
         drawSection(&painter, rect(), 0, QString(), QIcon(),
                     QStyleOptionHeader::OnlyOneSection);
     } else if (m_view->m_activeColumns.size() == 1 &&

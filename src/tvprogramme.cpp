@@ -832,3 +832,8 @@ void TvProgramme::updateSet(QSet<QString> &set, const QStringList &list)
     for (int index = 0; index < list.size(); ++index)
         set.insert(list.at(index));
 }
+
+bool TvProgramme::overlapsWith(const TvProgramme *prog) const
+{
+    return m_start < prog->m_stop && m_stop > prog->m_start;
+}
