@@ -1164,11 +1164,12 @@ void ProgrammeHeaderView::paintEvent(QPaintEvent *)
             QStyleOptionHeader::SectionPosition position;
             if (!index) {
                 position = QStyleOptionHeader::Beginning;
-            } else if (index == (m_view->m_columns.size() - 1)) {
-                position = QStyleOptionHeader::End;
+            } else if (index == (m_view->m_activeColumns.size() - 1)) {
                 int right = m_view->horizontalScrollBar()->value() + width();
                 if (right > rect.right())
-                    rect.setRight(right);
+                    position = QStyleOptionHeader::Middle;
+                else
+                    position = QStyleOptionHeader::End;
             } else {
                 position = QStyleOptionHeader::Middle;
             }
@@ -1177,6 +1178,11 @@ void ProgrammeHeaderView::paintEvent(QPaintEvent *)
                         info.prog->channel()->icon(),
                         position);
             x += column->columnRect.width() + m_view->m_columnSpacing;
+        }
+        int right = m_view->horizontalScrollBar()->value() + width();
+        if (x < right) {
+            QRect rect(int(x), 0, right - x, height());
+            drawPadding(&painter, rect);
         }
     }
 }
@@ -1197,6 +1203,25 @@ void ProgrammeHeaderView::drawSection
     opt.icon = icon;
     opt.orientation = Qt::Horizontal;
     opt.position = position;
+    opt.selectedPosition = QStyleOptionHeader::NotAdjacent;
+    opt.sortIndicator = QStyleOptionHeader::None;
+    style()->drawControl(QStyle::CE_Header, &opt, painter, this);
+}
+
+void ProgrammeHeaderView::drawPadding
+    (QPainter *painter, const QRect &rect)
+{
+    QStyleOptionHeader opt;
+    opt.initFrom(this);
+    opt.state |= QStyle::State_Raised;
+    opt.rect = rect;
+    opt.section = 0;
+    opt.textAlignment = Qt::AlignCenter;
+    opt.iconAlignment = Qt::AlignVCenter;
+    opt.text = QString();
+    opt.icon = QIcon();
+    opt.orientation = Qt::Horizontal;
+    opt.position = QStyleOptionHeader::End;
     opt.selectedPosition = QStyleOptionHeader::NotAdjacent;
     opt.sortIndicator = QStyleOptionHeader::None;
     style()->drawControl(QStyle::CE_Header, &opt, painter, this);

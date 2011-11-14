@@ -187,6 +187,7 @@ private:
     void drawSection(QPainter *painter, const QRect &rect, int index,
                      const QString &text, const QIcon &icon,
                      QStyleOptionHeader::SectionPosition position);
+    void drawPadding(QPainter *painter, const QRect &rect);
 };
 
 #endif
