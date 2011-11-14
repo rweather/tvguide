@@ -803,7 +803,7 @@ void ProgrammeView::updateScrollBars()
     // Update the scroll bars to match the current display mode.
     horizontalScrollBar()->setSingleStep(m_actualColumnWidth / 10);
     horizontalScrollBar()->setPageStep(m_actualColumnWidth + m_columnSpacing);
-    horizontalScrollBar()->setRange(0, m_totalRect.width() - viewport()->width());
+    horizontalScrollBar()->setRange(0, m_totalRect.width() - viewport()->width() - 6);
     if (displayMode != FullDay) {
         verticalScrollBar()->setSingleStep(20);
         verticalScrollBar()->setPageStep(viewport()->height() - 20);
