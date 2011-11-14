@@ -406,7 +406,7 @@ void ProgrammeView::paintBookmarks(QPainter *painter)
 {
     QPen linePen(palette().mid(), 0);
     qreal columnx = 0;
-    QBrush collisionBrush(QColor(Qt::yellow).lighter(150));
+    QBrush collisionBrush(QColor(Qt::yellow).lighter(180));
     for (int index = 0; index < m_activeColumns.size(); ++index) {
         // Skip the column if it is obviously empty or off-screen.
         const ColumnInfo *column = m_activeColumns.at(index);
