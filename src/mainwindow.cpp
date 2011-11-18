@@ -298,10 +298,19 @@ void MainWindow::channelChanged()
     QList<TvChannel *> channels;
     if (!actionMultiChannel->isChecked())
         channels = selectedChannels();
-    if (channels.size() == 1) {
+    if (channels.size() != 0) {
         TvChannel *channel = channels.at(0);
         QDate first, last;
         channel->dataForRange(&first, &last);
+        for (int index = 1; index < channels.size(); ++index) {
+            channel = channels.at(index);
+            QDate cfirst, clast;
+            channel->dataForRange(&cfirst, &clast);
+            if (cfirst < first)
+                first = cfirst;
+            if (clast > last)
+                last = clast;
+        }
         calendar->setMinimumDate(first);
         calendar->setMaximumDate(last);
     } else {
