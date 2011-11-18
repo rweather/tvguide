@@ -94,7 +94,6 @@
     <addaction name="actionOrganizeBookmarks"/>
     <addaction name="separator"/>
     <addaction name="action7DayOutlook"/>
-    <addaction name="actionShowPartialMatches"/>
     <addaction name="separator"/>
     <addaction name="actionTickShow"/>
    </widget>

@@ -675,7 +675,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 TvBookmark::MatchOptions MainWindow::matchOptions() const
 {
     TvBookmark::MatchOptions options(0);
-    if (actionShowPartialMatches->isChecked())
+    //if (actionShowPartialMatches->isChecked())
         options |= TvBookmark::PartialMatches;
     if (actionShowFailedMatches->isChecked())
         options |= TvBookmark::NonMatching;
