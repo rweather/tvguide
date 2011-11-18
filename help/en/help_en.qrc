@@ -4,6 +4,7 @@
 
     <file>bookmarks.html</file>
     <file>edit_channels.html</file>
+    <file>groups.html</file>
     <file>searching.html</file>
     <file>select_guide.html</file>
     <file>ticks.html</file>
@@ -12,12 +13,15 @@
     <file>bookmark_7days.png</file>
     <file>bookmark_edit.png</file>
     <file>bookmark_failed.png</file>
+    <file>bookmark_failed_moved.png</file>
     <file>bookmark_new.png</file>
     <file>bookmark_other.png</file>
     <file>bookmark_partial.png</file>
     <file>bookmark_returned.png</file>
     <file>bookmark_set.png</file>
     <file>edit_channels.png</file>
+    <file>groups_edit.png</file>
+    <file>groups_list.png</file>
     <file>new_service.png</file>
     <file>search_web.png</file>
     <file>search_web_options.png</file>

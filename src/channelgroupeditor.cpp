@@ -264,7 +264,7 @@ void ChannelGroupEditor::channelSelectionChanged()
 
 void ChannelGroupEditor::help()
 {
-    HelpBrowser::showContextHelp(QLatin1String("channel_groups.html"), this);
+    HelpBrowser::showContextHelp(QLatin1String("groups.html"), this);
 }
 
 void ChannelGroupEditor::updateGroupList()
