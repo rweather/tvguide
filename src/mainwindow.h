@@ -61,7 +61,6 @@ private Q_SLOTS:
 
     void updateTimePeriods();
     void sevenDayOutlookChanged();
-    void multiChannelChanged();
 
     void editChannels();
     void editChannelGroups();

@@ -37,13 +37,15 @@ TvChannelModel::~TvChannelModel()
 {
 }
 
+// Index 0 is always "All Channels".  Indexes 1..N are the N groups.
+// The remaining indexes are individual channels.
 QModelIndex TvChannelModel::index(int row, int column, const QModelIndex &) const
 {
     if (column < 0 || column >= ColumnCount)
         return QModelIndex();
-    if (row >= 0 && row < m_groups.size())
+    if (row >= 0 && row <= m_groups.size())
         return createIndex(row, column);
-    int chrow = row - m_groups.size();
+    int chrow = row - m_groups.size() - 1;
     if (chrow < 0 || chrow >= m_visibleChannels.size())
         return QModelIndex();
     return createIndex(row, column, m_visibleChannels.at(chrow));
@@ -61,7 +63,7 @@ int TvChannelModel::columnCount(const QModelIndex &) const
 
 int TvChannelModel::rowCount(const QModelIndex &) const
 {
-    return m_groups.size() + m_visibleChannels.size();
+    return m_groups.size() + m_visibleChannels.size() + 1;
 }
 
 QVariant TvChannelModel::data(const QModelIndex &index, int role) const
@@ -69,13 +71,18 @@ QVariant TvChannelModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
     int row = index.row();
-    if (row >= 0 && row < m_groups.size()) {
-        TvChannelGroup *group = m_groups.at(row);
+    if (!row) {
+        if (role == Qt::DisplayRole)
+            return tr("All Channels");
+        return QVariant();
+    }
+    if (row > 0 && row <= m_groups.size()) {
+        TvChannelGroup *group = m_groups.at(row - 1);
         if (role == Qt::DisplayRole)
             return group->name();
         return QVariant();
     }
-    row -= m_groups.size();
+    row -= m_groups.size() + 1;
     if (row < 0 || row >= m_visibleChannels.size())
         return QVariant();
     TvChannel *channel = m_visibleChannels.at(row);
@@ -118,14 +125,16 @@ QList<TvChannel *> TvChannelModel::channelsForIndex(const QModelIndex &index) co
     TvChannel *channel = static_cast<TvChannel *>(index.internalPointer());
     if (channel) {
         channels.append(channel);
-    } else {
-        TvChannelGroup *group = m_groups.at(index.row());
+    } else if (index.row() != 0) {
+        TvChannelGroup *group = m_groups.at(index.row() - 1);
         QStringList ids = group->channelIds();
         for (int posn = 0; posn < ids.size(); ++posn) {
             channel = m_channelList->channel(ids.at(posn));
             if (channel)
                 channels.append(channel);
         }
+    } else {
+        return m_visibleChannels;
     }
     return channels;
 }
@@ -133,8 +142,8 @@ QList<TvChannel *> TvChannelModel::channelsForIndex(const QModelIndex &index) co
 TvChannelGroup *TvChannelModel::groupForIndex(const QModelIndex &index) const
 {
     int row = index.row();
-    if (row >= 0 && row < m_groups.size())
-        return m_groups.at(row);
+    if (row > 0 && row <= m_groups.size())
+        return m_groups.at(row - 1);
     else
         return 0;
 }

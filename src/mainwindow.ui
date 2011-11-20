@@ -64,8 +64,6 @@
     <addaction name="actionNight"/>
     <addaction name="actionLateNight"/>
     <addaction name="separator"/>
-    <addaction name="actionMultiChannel"/>
-    <addaction name="separator"/>
     <addaction name="menu_Zoom"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
@@ -319,10 +317,9 @@
    <addaction name="action_Stop"/>
    <addaction name="separator"/>
    <addaction name="action7DayOutlook"/>
-   <addaction name="actionMultiChannel"/>
-   <addaction name="separator"/>
-   <addaction name="actionTickShow"/>
    <addaction name="actionAddBookmark"/>
+   <addaction name="actionTickShow"/>
+   <addaction name="separator"/>
    <addaction name="actionWebSearch"/>
   </widget>
   <action name="actionSelectService">
@@ -483,18 +480,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+K</string>
-   </property>
-  </action>
-  <action name="actionMultiChannel">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="tvguide.qrc">
-     <normaloff>:/images/format-justify-right.png</normaloff>:/images/format-justify-right.png</iconset>
-   </property>
-   <property name="text">
-    <string>All &amp;Channels</string>
    </property>
   </action>
   <action name="actionZoomIn">

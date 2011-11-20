@@ -156,8 +156,6 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(updateTimePeriods()));
     connect(actionTickShow, SIGNAL(triggered()),
             this, SLOT(tickShow()));
-    connect(actionMultiChannel, SIGNAL(toggled(bool)),
-            this, SLOT(multiChannelChanged()));
     connect(actionWebSearch, SIGNAL(triggered()),
             this, SLOT(webSearch()));
     connect(actionAbout, SIGNAL(triggered()), this, SLOT(about()));
@@ -186,7 +184,6 @@ MainWindow::MainWindow(QWidget *parent)
     //actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), false).toBool());
     actionShowFailedMatches->setChecked(true);
     action7DayOutlook->setChecked(settings.value(QLatin1String("outlook7days"), false).toBool());
-    actionMultiChannel->setChecked(settings.value(QLatin1String("allchannels"), false).toBool());
     settings.endGroup();
 
     toolBar->addSeparator();
@@ -242,8 +239,7 @@ MainWindow::~MainWindow()
     settings.remove(QLatin1String("failed"));
     settings.setValue(QLatin1String("outlook7days"),
                       action7DayOutlook->isChecked());
-    settings.setValue(QLatin1String("allchannels"),
-                      actionMultiChannel->isChecked());
+    settings.remove(QLatin1String("allchannels"));
     settings.remove(QLatin1String("filteroptions"));
     settings.endGroup();
 
@@ -296,8 +292,7 @@ void MainWindow::dateChanged()
 void MainWindow::channelChanged()
 {
     QList<TvChannel *> channels;
-    if (!actionMultiChannel->isChecked())
-        channels = selectedChannels();
+    channels = selectedChannels();
     if (channels.size() != 0) {
         TvChannel *channel = channels.at(0);
         QDate first, last;
@@ -386,12 +381,6 @@ void MainWindow::sevenDayOutlookChanged()
 {
     selectView();
     updateTimePeriods();
-}
-
-void MainWindow::multiChannelChanged()
-{
-    channels->setEnabled(!actionMultiChannel->isChecked());
-    channelChanged();
 }
 
 void MainWindow::editChannels()
@@ -536,8 +525,7 @@ void MainWindow::channelIconsChanged()
 {
     channels->resizeRowsToContents();
     channels->resizeColumnsToContents();
-    if (actionMultiChannel->isChecked())
-        programmeView->updateIcons();
+    programmeView->updateIcons();
 }
 
 void MainWindow::refineChannels()
@@ -693,9 +681,7 @@ TvBookmark::MatchOptions MainWindow::matchOptions() const
 
 void MainWindow::setDay(const QList<TvChannel *> &channels, const QDate &date, TvChannel *changedChannel, bool request)
 {
-    if (actionMultiChannel->isChecked()) {
-        updateMultiChannelProgrammes(date, m_channelList->activeChannels(), request);
-    } else if (channels.size() == 1) {
+    if (channels.size() == 1) {
         TvChannel *channel = channels.at(0);
         if (!changedChannel || channel == changedChannel)
             updateProgrammes(channel, date, request);
@@ -869,7 +855,7 @@ QList<TvChannel *> MainWindow::selectedChannels() const
 
 void MainWindow::recalculateChannelSpans()
 {
-    int count = m_channelModel->groupCount();
+    int count = m_channelModel->groupCount() + 1; // Extra for "All Channels"
     channels->clearSpans();
     while (count-- > 0)
         channels->setSpan(count, 0, 1, TvChannelModel::ColumnCount);
