@@ -504,7 +504,7 @@ void MainWindow::hiddenChannelsChanged()
         channels->setIconSize(QSize(32, 32));
     else
         channels->setIconSize(QSize(16, 16));
-    channels->resizeRowsToContents();
+    //channels->resizeRowsToContents();
     channels->resizeColumnsToContents();
 }
 
@@ -516,14 +516,14 @@ void MainWindow::channelIndexLoaded()
     }
     channels->setColumnHidden
         (TvChannelModel::ColumnNumber, !m_channelList->haveChannelNumbers());
-    channels->resizeRowsToContents();
+    //channels->resizeRowsToContents();
     channels->resizeColumnsToContents();
     updateTimePeriods();
 }
 
 void MainWindow::channelIconsChanged()
 {
-    channels->resizeRowsToContents();
+    //channels->resizeRowsToContents();
     channels->resizeColumnsToContents();
     programmeView->updateIcons();
 }
