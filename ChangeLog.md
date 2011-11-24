@@ -1,5 +1,18 @@
 ## Change log
 
+### 0.1.3
+
+* Completely new programme list widget that displays programmes for
+  multiple channels in columns.
+* "Moved to" and "Other showings" details are now in the tooltip.
+* Morning/afternoon/etc scrolls to the relevant time rather than
+  enabling/disabling the time period.
+* Improve performance of XMLTV parsing and programme matching.
+* Channel groups.
+* "All Channels" is now an always-present group rather than a checkbox.
+* Remove the "Show Partial Matches" menu option - partial matches
+  will always be shown.
+
 ### 0.1.2
 
 * Multi-selection of channels in the main window.
