@@ -12,7 +12,7 @@
         android:textColor="#ff000000"
         android:text="11:30" />
     
-    <TextView android:id="@+id/progx_line1"
+    <TextView android:id="@+id/progx_short_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/progx_time"
@@ -22,24 +22,13 @@
         android:text="Line 1" />
 
     <TextView
-        android:id="@+id/progx_line2"
+        android:id="@+id/progx_long_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/progx_time"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/progx_line1"
-        android:textColor="#ff606060"
-        android:text="Line 2"
-        android:textStyle="italic" />
-
-    <TextView
-        android:id="@+id/progx_line3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/progx_time"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/progx_line2"
-        android:textColor="#ff606060"
+        android:layout_below="@+id/progx_short_desc"
+        android:textColor="#ff000000"
         android:text="Line 3" />
 
 </RelativeLayout>

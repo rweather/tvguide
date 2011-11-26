@@ -98,9 +98,8 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
     private class GroupViewDetails {
         public boolean isExpanded;
         public TextView time;
-        public TextView line1;
-        public TextView line2;
-        public TextView line3;
+        public TextView short_desc;
+        public TextView long_desc;
     }
 
     public View getGroupView(int position, boolean isExpanded, View convertView, ViewGroup parent) {
@@ -116,16 +115,14 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
                 view = new GroupViewDetails();
                 view.isExpanded = isExpanded;
                 view.time = (TextView)convertView.findViewById(R.id.progx_time);
-                view.line1 = (TextView)convertView.findViewById(R.id.progx_line1);
-                view.line2 = (TextView)convertView.findViewById(R.id.progx_line2);
-                view.line3 = (TextView)convertView.findViewById(R.id.progx_line3);
+                view.short_desc = (TextView)convertView.findViewById(R.id.progx_short_desc);
+                view.long_desc = (TextView)convertView.findViewById(R.id.progx_long_desc);
             } else {
                 convertView = inflater.inflate(R.layout.programme, null);
                 view = new GroupViewDetails();
                 view.isExpanded = isExpanded;
                 view.time = (TextView)convertView.findViewById(R.id.prog_time);
-                view.line1 = (TextView)convertView.findViewById(R.id.prog_line1);
-                view.line2 = (TextView)convertView.findViewById(R.id.prog_line2);
+                view.short_desc = (TextView)convertView.findViewById(R.id.prog_short_desc);
             }
             convertView.setTag(view);
         }
@@ -151,10 +148,9 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
             view.time.setText(" " + hour + ":0" + minute);
         else
             view.time.setText(" " + hour + ":" + minute);
-        view.line1.setText(prog.getTitle());
-        view.line2.setText(prog.getSubTitle());
+        view.short_desc.setText(prog.getShortDescription());
         if (isExpanded)
-            view.line3.setText(prog.getDescription());
+            view.long_desc.setText(prog.getLongDescription());
         return convertView;
     }
 

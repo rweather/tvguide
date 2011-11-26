@@ -47,6 +47,8 @@ public class TVGuideActivity extends Activity {
             prog.setSubTitle("Episode 1." + count);
             prog.setDescription("This is a very long description to check that the text will wrap across lines - " + count);
             prog.setStart((count - 1 + 12) * 30);
+            prog.setDate(Integer.toString(1989 + count));
+            prog.setRating("PG");
             progs.add(prog);
         }
 

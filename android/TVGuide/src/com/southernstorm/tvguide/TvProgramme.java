@@ -17,9 +17,11 @@
 
 package com.southernstorm.tvguide;
 
-import java.lang.String;
 import java.util.List;
+
 import org.xmlpull.v1.XmlPullParser;
+
+import android.text.SpannableString;
 
 public class TvProgramme {
 
@@ -44,6 +46,11 @@ public class TvProgramme {
     public void setDescription(String desc) { m_description = desc; }
 
     public String getDate() { return m_date; }
+    public void setDate(String date) { m_date = date; }
+
+    public String getRating() { return m_rating; }
+    public void setRating(String rating) { m_rating = rating; }
+
     public List<String> getDirectors() { return m_directors; }
     public List<String> getActors() { return m_actors; }
     public List<String> getPresenters() { return m_presenters; }
@@ -58,6 +65,31 @@ public class TvProgramme {
     public void load(XmlPullParser parser) {
     }
 
+    public SpannableString getShortDescription() {
+        RichTextFormatter formatter = new RichTextFormatter();
+        formatter.append(m_title);
+        formatter.setColor(0xFF606060);
+        if (m_date != null && !m_date.equals("0"))
+            formatter.append(" (" + m_date + ")");
+        if (m_rating != null)
+            formatter.append(" (" + m_rating + ")");
+        if (m_subTitle != null) {
+            formatter.nl();
+            formatter.setItalic(true);
+            formatter.append(m_subTitle);
+            formatter.setItalic(false);
+        }
+        return formatter.toSpannableString();
+    }
+
+    public SpannableString getLongDescription() {
+        RichTextFormatter formatter = new RichTextFormatter();
+        formatter.setColor(0xFF606060);
+        if (m_description != null)
+            formatter.append(m_description);
+        return formatter.toSpannableString();
+    }
+
     // Internal state.
     private long m_start;
     private long m_stop;
@@ -65,6 +97,7 @@ public class TvProgramme {
     private String m_subTitle;
     private String m_description;
     private String m_date;
+    private String m_rating;
     private List<String> m_directors;
     private List<String> m_actors;
     private List<String> m_presenters;

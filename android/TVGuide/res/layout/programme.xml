@@ -12,24 +12,13 @@
         android:textColor="#ff000000"
         android:text="11:30" />
     
-    <TextView android:id="@+id/prog_line1"
+    <TextView android:id="@+id/prog_short_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/prog_time"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:textColor="#ff000000"
-        android:text="Line 1" />
-
-    <TextView
-        android:id="@+id/prog_line2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/prog_time"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/prog_line1"
-        android:textColor="#ff606060"
-        android:text="Line 2"
-        android:textStyle="italic" />
+        android:text="Details" />
 
 </RelativeLayout>
