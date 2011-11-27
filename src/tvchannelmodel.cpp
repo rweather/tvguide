@@ -148,6 +148,64 @@ TvChannelGroup *TvChannelModel::groupForIndex(const QModelIndex &index) const
         return 0;
 }
 
+QString TvChannelModel::itemToId(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return QString();
+    int row = index.row();
+    if (!row) {
+        return QLatin1String("all");
+    } else if (row > 0 && row <= m_groups.size()) {
+        return QLatin1String("group:") + m_groups.at(row - 1)->name();
+    } else {
+        row -= m_groups.size() + 1;
+        return QLatin1String("channel:") + m_visibleChannels.at(row)->id();
+    }
+}
+
+QModelIndex TvChannelModel::itemFromId(const QString &id) const
+{
+    if (id == QLatin1String("all")) {
+        return createIndex(0, 0);
+    } else if (id.startsWith(QLatin1String("group:"))) {
+        QString name = id.mid(6);
+        for (int index = 0; index < m_groups.size(); ++index) {
+            if (m_groups.at(index)->name() == name)
+                return createIndex(index + 1, 0);
+        }
+    } else if (id.startsWith(QLatin1String("channel:"))) {
+        QString channelId = id.mid(8);
+        for (int index = 0; index < m_visibleChannels.size(); ++index) {
+            TvChannel *channel = m_visibleChannels.at(index);
+            if (channel->id() == channelId)
+                return createIndex(index + m_groups.size() + 1, 0, channel);
+        }
+    }
+    return QModelIndex();
+}
+
+QStringList TvChannelModel::itemListToIds(const QModelIndexList &list) const
+{
+    QStringList ids;
+    for (int index = 0; index < list.size(); ++index) {
+        QString id = itemToId(list.at(index));
+        if (!id.isEmpty())
+            ids.append(id);
+    }
+    return ids;
+}
+
+QModelIndexList TvChannelModel::itemListFromIds(const QStringList &ids) const
+{
+    QModelIndexList list;
+    for (int index = 0; index < ids.size(); ++index) {
+        QModelIndex itemIndex = itemFromId(ids.at(index));
+        if (itemIndex.isValid())
+            list.append(itemIndex);
+    }
+    return list;
+}
+
 void TvChannelModel::channelsChanged()
 {
     loadVisibleChannels();

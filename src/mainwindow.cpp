@@ -184,6 +184,7 @@ MainWindow::MainWindow(QWidget *parent)
     //actionShowFailedMatches->setChecked(settings.value(QLatin1String("failed"), false).toBool());
     actionShowFailedMatches->setChecked(true);
     action7DayOutlook->setChecked(settings.value(QLatin1String("outlook7days"), false).toBool());
+    m_preselectedChannels = settings.value(QLatin1String("selectedChannels")).toStringList();
     settings.endGroup();
 
     toolBar->addSeparator();
@@ -241,6 +242,9 @@ MainWindow::~MainWindow()
                       action7DayOutlook->isChecked());
     settings.remove(QLatin1String("allchannels"));
     settings.remove(QLatin1String("filteroptions"));
+    settings.setValue(QLatin1String("selectedChannels"),
+                      m_channelModel->itemListToIds
+                          (channels->selectionModel()->selectedRows()));
     settings.endGroup();
 
     settings.sync();
@@ -292,6 +296,7 @@ void MainWindow::dateChanged()
 void MainWindow::channelChanged()
 {
     QList<TvChannel *> channels;
+    m_preselectedChannels = QStringList();
     channels = selectedChannels();
     if (channels.size() != 0) {
         TvChannel *channel = channels.at(0);
@@ -518,6 +523,20 @@ void MainWindow::channelIndexLoaded()
         (TvChannelModel::ColumnNumber, !m_channelList->haveChannelNumbers());
     //channels->resizeRowsToContents();
     channels->resizeColumnsToContents();
+    if (!m_preselectedChannels.isEmpty()) {
+        // Automatically select the channels that were loaded from
+        // the configuration settings at startup.
+        QModelIndexList list = m_channelModel->itemListFromIds(m_preselectedChannels);
+        m_preselectedChannels = QStringList();
+        QItemSelection selection;
+        for (int index = 0; index < list.size(); ++index) {
+            int row = list.at(index).row();
+            selection.select(m_channelModel->index(row, 0, QModelIndex()),
+                             m_channelModel->index(row, TvChannelModel::ColumnCount - 1, QModelIndex()));
+        }
+        if (!list.isEmpty())
+            channels->selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
+    }
     updateTimePeriods();
 }
 

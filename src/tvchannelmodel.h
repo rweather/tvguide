@@ -45,6 +45,12 @@ public:
 
     int groupCount() const { return m_groups.size(); }
 
+    QString itemToId(const QModelIndex &index) const;
+    QModelIndex itemFromId(const QString &id) const;
+
+    QStringList itemListToIds(const QModelIndexList &list) const;
+    QModelIndexList itemListFromIds(const QStringList &ids) const;
+
 private Q_SLOTS:
     void channelsChanged();
     void channelIconsChanged();

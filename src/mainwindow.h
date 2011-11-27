@@ -112,6 +112,7 @@ private:
     QLabel *m_searchLabel;
     QLineEdit *m_searchFilter;
     ProgrammeView *programmeView;
+    QStringList m_preselectedChannels;
 
     TvBookmark::MatchOptions matchOptions() const;
     void setDay(const QList<TvChannel *> &channels, const QDate &date, TvChannel *changedChannel = 0, bool request = true);
