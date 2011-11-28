@@ -24,5 +24,6 @@
     <file>images/view-refresh.png</file>
     <file>images/zoom-in.png</file>
     <file>images/zoom-out.png</file>
+    <file>images/tvlogo72x72.png</file>
 </qresource>
 </RCC>

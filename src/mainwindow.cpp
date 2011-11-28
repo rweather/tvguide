@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setupUi(this);
 
+    setWindowIcon(QIcon(QLatin1String(":images/tvlogo72x72.png")));
+
     programmeView = new ProgrammeView();
     viewStack->addWidget(programmeView);
 
