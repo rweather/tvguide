@@ -289,6 +289,9 @@ void TvProgramme::load(QXmlStreamReader *reader)
                     handled = false;
                 }
                 break;
+            default:
+                handled = false;
+                break;
             }
             if (!handled) {
                 // The following are in the DTD, but not processed yet.
