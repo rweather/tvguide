@@ -18,6 +18,7 @@
 package com.southernstorm.tvguide;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import android.content.Context;
@@ -127,9 +128,8 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
             convertView.setTag(view);
         }
         TvProgramme prog = programmes.get(position);
-        long timeval = prog.getStart();
-        int hour = (int)((timeval / 60) % 24);
-        int minute = (int)(timeval % 60);
+        Calendar timeval = prog.getStart();
+        int hour = timeval.get(Calendar.HOUR_OF_DAY);
         if (hour < 6)
             view.time.setBackgroundResource(timeColorLateNight);
         else if (hour < 12)
@@ -138,16 +138,7 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
             view.time.setBackgroundResource(timeColorAfternoon);
         else
             view.time.setBackgroundResource(timeColorNight);
-        if (hour > 12)
-            hour -= 12;
-        if (hour < 10 && minute < 10)
-            view.time.setText("  " + hour + ":0" + minute);
-        else if (hour < 10)
-            view.time.setText("  " + hour + ":" + minute);
-        else if (minute < 10)
-            view.time.setText(" " + hour + ":0" + minute);
-        else
-            view.time.setText(" " + hour + ":" + minute);
+        view.time.setText(" " + Utils.formatTimePadded(timeval));
         view.short_desc.setText(prog.getShortDescription());
         if (isExpanded)
             view.long_desc.setText(prog.getLongDescription());

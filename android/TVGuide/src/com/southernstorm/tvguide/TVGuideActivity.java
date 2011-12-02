@@ -39,6 +39,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     private TvProgrammeListAdapter programmeListAdapter;
     private TvChannelCache channelCache;
     private ProgressDialog progressDialog;
+    private TvChannel channel;
 
     /** Called when the activity is first created. */
     @Override
@@ -58,22 +59,30 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         programmeListAdapter = new TvProgrammeListAdapter(this);
         programmeListView.setAdapter(programmeListAdapter);
 
+        /*
         List<TvProgramme> progs = new ArrayList<TvProgramme>();
         for (int count = 1; count <= 48; ++count) {
             TvProgramme prog = new TvProgramme();
             prog.setTitle("Title " + count);
             prog.setSubTitle("Episode 1." + count);
             prog.setDescription("This is a very long description to check that the text will wrap across lines - " + count);
-            prog.setStart((count - 1 + 12) * 30);
+            Calendar calendar = new GregorianCalendar();
+            calendar.set(Calendar.HOUR_OF_DAY, (count - 1) / 2 + 6);
+            calendar.set(Calendar.MINUTE, ((count - 1) % 2) * 30);
+            prog.setStart(calendar);
             prog.setDate(Integer.toString(1989 + count));
             prog.setRating("PG");
             progs.add(prog);
         }
 
         programmeListAdapter.setProgrammes(progs);
+        */
 
-        //channelCache.fetch("ABC Queensland", "ABC-Qld", new GregorianCalendar());
-        //channelCache.fetch("ABC3", "ABC3", new GregorianCalendar());
+        channel = new TvChannel();
+        channel.setId("ABC-Qld");
+        channel.setName("ABC Queensland");
+        
+        //fetch("ABC Queensland", "ABC-Qld", new GregorianCalendar());
     }
 
     @Override
@@ -85,6 +94,10 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     @Override
     protected void onStop() {
         channelCache.unregisterReceivers();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
         super.onStop();
     }
 
@@ -100,6 +113,11 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     /** Save preferences when the activity is paused */
     @Override
     protected void onPause() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
+
         super.onPause();
 
         SharedPreferences.Editor editor = getPreferences(0).edit();
@@ -123,8 +141,27 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
             progressDialog.hide();
     }
 
+    private void fetch(String channelName, String channelId, Calendar date) {
+        InputStream stream = channelCache.openChannelData(channelId, date);
+        if (stream != null)
+            parseProgrammes(stream);
+        else
+            channelCache.fetch(channelName, channelId, date, false);
+    }
+    
     public void dataAvailable(String channelId, Calendar date) {
-        // TODO
+        InputStream stream = channelCache.openChannelData(channelId, date);
+        if (stream != null)
+            parseProgrammes(stream);
+    }
+    
+    private void parseProgrammes(InputStream stream) {
+        List<TvProgramme> programmes = channel.loadProgrammes(stream);
+        try {
+            stream.close();
+        } catch (IOException e) {
+        }
+        programmeListAdapter.setProgrammes(programmes);
     }
 
     public void requestFailed(String channelId, Calendar date) {

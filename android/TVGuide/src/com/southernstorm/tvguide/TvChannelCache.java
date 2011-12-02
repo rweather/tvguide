@@ -126,16 +126,6 @@ public class TvChannelCache extends ExternalMediaHandler {
         }
     }
 
-    private int parseField(String str, int posn, int length) {
-        int value = 0;
-        while (length-- > 0) {
-            char ch = str.charAt(posn++);
-            if (ch >= '0' && ch <= '9')
-                value = value * 10 + ch - '0';
-        }
-        return value;
-    }
-
     /**
      * Expire old entries in the cache.
      */
@@ -163,9 +153,9 @@ public class TvChannelCache extends ExternalMediaHandler {
             // Extract the date in the format YYYY-MM-DD from the name
             // and determine if it is less than today.
             int posn = name.length() - suffixLength - 10;
-            int year = parseField(name, posn, 4);
-            int month = parseField(name, posn + 5, 2);
-            int day = parseField(name, posn + 8, 2);
+            int year = Utils.parseField(name, posn, 4);
+            int month = Utils.parseField(name, posn + 5, 2);
+            int day = Utils.parseField(name, posn + 8, 2);
             if (year > todayYear)
                 continue;
             if (year == todayYear) {

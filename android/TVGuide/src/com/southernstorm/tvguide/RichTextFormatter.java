@@ -42,6 +42,7 @@ public class RichTextFormatter {
     private int color;
     private int startSpan;
     private boolean needEndParagraph;
+    private boolean needEndLine;
 
     private static final int STRIKE_THROUGH = 0x00010000;
     private static final int UNDERLINE      = 0x00020000;
@@ -53,6 +54,7 @@ public class RichTextFormatter {
         this.color = 0;
         this.startSpan = 0;
         this.needEndParagraph = false;
+        this.needEndLine = false;
     }
 
     /**
@@ -62,10 +64,10 @@ public class RichTextFormatter {
      * @return this formatter object
      */
     public RichTextFormatter append(String str) {
-        if (needEndParagraph) {
-            builder.append('\n');
+        if (needEndParagraph || needEndLine) {
             builder.append('\n');
             needEndParagraph = false;
+            needEndLine = false;
         }
         if (str != null)
             builder.append(str);
@@ -78,8 +80,7 @@ public class RichTextFormatter {
      * @return this formatter object
      */
     public RichTextFormatter nl() {
-        if (!needEndParagraph)
-            builder.append('\n');
+        needEndLine = true;
         return this;
     }
 
