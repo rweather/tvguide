@@ -49,27 +49,28 @@ public class Utils {
     }
 
     /**
-     * Format a time value with no AM/PM indicator, but pad it with leading spaces.
+     * Format a time value for the programme list.
      * 
      * @param time the time to format
      * @return the formatted time
      */
-    public static String formatTimePadded(Calendar time) {
+    public static String formatTimeProgrammeList(Calendar time) {
         // TODO: 24 hour clock support
         int hour = time.get(Calendar.HOUR_OF_DAY);
         int minute = time.get(Calendar.MINUTE);
+        String ampm = (hour < 12 ? "\n   AM" : "\n   PM");
         if (hour == 0)
             hour = 12;
         else if (hour > 12)
             hour -= 12;
         if (hour < 10 && minute < 10)
-            return " " + hour + ":0" + minute;
+            return "  " + hour + ":0" + minute + ampm;
         else if (hour < 10)
-            return " " + hour + ":" + minute;
+            return "  " + hour + ":" + minute + ampm;
         else if (minute < 10)
-            return hour + ":0" + minute;
+            return " " + hour + ":0" + minute + ampm;
         else
-            return hour + ":" + minute;
+            return " " + hour + ":" + minute + ampm;
     }
 
     /**

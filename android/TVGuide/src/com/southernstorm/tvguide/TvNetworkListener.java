@@ -24,10 +24,11 @@ public interface TvNetworkListener {
     /**
      * Sets the current network request channel and date.
      *
-     * @param channelName the human-readable name of the channel
+     * @param channel the channel that is being fetched
      * @param date the date that is being fetched
+     * @param primaryDate the primary date for multi-day requests
      */
-    public void setCurrentNetworkRequest(String channelName, Calendar date);
+    public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate);
 
     /**
      * Indicates that there are no more network requests pending.
@@ -37,30 +38,17 @@ public interface TvNetworkListener {
     /**
      * Reports that previously requested data is now available in the cache.
      *
-     * @param channelId the channel identifier
+     * @param channel the channel
      * @param date the date that was successfully fetched
+     * @param primaryDate the primary date for multi-day requests
      */
-    public void dataAvailable(String channelId, Calendar date);
+    public void dataAvailable(TvChannel channel, Calendar date, Calendar primaryDate);
 
     /**
      * Reports that a data request has failed.
      *
-     * @param channelName the human-readable name of the channel
+     * @param channel the channel
      * @param date the date that failed to be fetched
      */
-    public void requestFailed(String channelName, Calendar date);
-
-    /**
-     * Reports that an optional data request has failed.
-     *
-     * Optional data requests are typically those for the next day for
-     * populating the "late night" timeslot of 12am to 6am.  If the data
-     * cannot be fetched, then it probably does not need to be reported
-     * to the user because the earlier timeslots can still be viewed.
-     *
-     * @param channelName the human-readable name of the channel
-     * @param date the date that failed to be fetched
-     */
-    public void optionalRequestFailed(String channelName, Calendar date);
-
+    public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate);
 }

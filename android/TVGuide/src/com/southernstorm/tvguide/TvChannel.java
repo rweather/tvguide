@@ -21,7 +21,10 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -32,8 +35,11 @@ public class TvChannel {
     private String id;
     private String name;
     private boolean convertTimezone;
+    private List<String> baseUrls;
+    private Map< Calendar, List<TvProgramme> > programmes;
 
     public TvChannel() {
+        this.programmes = new TreeMap< Calendar, List<TvProgramme> >();
     }
 
     public String getId() { return id; }
@@ -45,13 +51,22 @@ public class TvChannel {
     public boolean getConvertTimezone() { return convertTimezone; }
     public void setConvertTimezone(boolean convert) { this.convertTimezone = convert; }
     
+    public List<String> getBaseUrls() {
+        return baseUrls;
+    }
+
+    public void setBaseUrls(List<String> baseUrls) {
+        this.baseUrls = baseUrls;
+    }
+
     /**
      * Loads programme details from an XML input stream.
      *
+     * @param date the date the programmes are for
      * @param stream the input stream
      */
-    public List<TvProgramme> loadProgrammes(InputStream stream) {
-        List<TvProgramme> programmes = new ArrayList<TvProgramme>();
+    public void loadProgrammesFromXml(Calendar date, InputStream stream) {
+        List<TvProgramme> progs = new ArrayList<TvProgramme>();
         try {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();
@@ -64,7 +79,7 @@ public class TvChannel {
                     eventType = parser.getEventType();
                     TvProgramme prog = new TvProgramme();
                     prog.load(parser, convertTimezone);
-                    programmes.add(prog);
+                    progs.add(prog);
                     eventType = parser.getEventType();
                 } else {
                     // Skip unknown element.
@@ -75,6 +90,53 @@ public class TvChannel {
             // Ignore - just stop parsing at the first error.
         } catch (IOException e) {
         }
-        return programmes;
+        this.programmes.put(date, progs);
+    }
+    
+    /**
+     * Gets the list of programmes for a specific day, from 6:00 AM one day to 6:00 AM the next.
+     * 
+     * @param date the date to fetch
+     * @return the list of programmes, or null if none available
+     */
+    public List<TvProgramme> programmesForDay(Calendar date) {
+        Calendar nextDay = (Calendar)date.clone();
+        nextDay.add(Calendar.DAY_OF_MONTH, 1);
+        List<TvProgramme> dayProgs = programmes.get(date);
+        List<TvProgramme> nextDayProgs = programmes.get(nextDay);
+        List<TvProgramme> progs = null;
+        if (dayProgs != null) {
+            int start = 0;
+            while (start < dayProgs.size()) {
+                TvProgramme prog = dayProgs.get(start);
+                if (prog.getStart().get(Calendar.HOUR_OF_DAY) >= 6)
+                    break;
+                if (prog.getStop().get(Calendar.HOUR_OF_DAY) > 6)
+                    break;
+                if (prog.getStop().get(Calendar.HOUR_OF_DAY) == 6 && prog.getStop().get(Calendar.MINUTE) > 0)
+                    break;
+                ++start;
+            }
+            if (start < dayProgs.size()) {
+                progs = new ArrayList<TvProgramme>();
+                progs.addAll(dayProgs.subList(start, dayProgs.size()));
+            }
+        }
+        if (nextDayProgs != null) {
+            int end = 0;
+            while (end < nextDayProgs.size()) {
+                TvProgramme prog = nextDayProgs.get(end);
+                if (prog.getStart().get(Calendar.HOUR_OF_DAY) >= 6)
+                    break;
+                ++end;
+            }
+            if (end > 0) {
+                List<TvProgramme> prefix = nextDayProgs.subList(0, end);
+                if (progs == null)
+                    progs = new ArrayList<TvProgramme>();
+                progs.addAll(prefix);
+            }
+        }
+        return progs;
     }
 }

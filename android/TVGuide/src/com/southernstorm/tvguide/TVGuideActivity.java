@@ -17,7 +17,6 @@
 
 package com.southernstorm.tvguide;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.format.DateFormat;
 import android.widget.ExpandableListView;
 
@@ -49,40 +47,35 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
 
         channelCache = new TvChannelCache(this, this);
         channelCache.setServiceName("OzTivo");
-        List<String> baseUrls = new ArrayList<String>();
-        baseUrls.add("http://www.oztivo.net/xmltv/");
-        baseUrls.add("http://xml.oztivo.net/xmltv/");
-        channelCache.setBaseUrls(baseUrls);
         channelCache.setDebug(true);
+        channelCache.expire();
 
         programmeListView = (ExpandableListView)findViewById(R.id.programmeList);
         programmeListAdapter = new TvProgrammeListAdapter(this);
         programmeListView.setAdapter(programmeListAdapter);
 
-        /*
-        List<TvProgramme> progs = new ArrayList<TvProgramme>();
-        for (int count = 1; count <= 48; ++count) {
-            TvProgramme prog = new TvProgramme();
-            prog.setTitle("Title " + count);
-            prog.setSubTitle("Episode 1." + count);
-            prog.setDescription("This is a very long description to check that the text will wrap across lines - " + count);
-            Calendar calendar = new GregorianCalendar();
-            calendar.set(Calendar.HOUR_OF_DAY, (count - 1) / 2 + 6);
-            calendar.set(Calendar.MINUTE, ((count - 1) % 2) * 30);
-            prog.setStart(calendar);
-            prog.setDate(Integer.toString(1989 + count));
-            prog.setRating("PG");
-            progs.add(prog);
-        }
-
-        programmeListAdapter.setProgrammes(progs);
-        */
-
         channel = new TvChannel();
-        channel.setId("ABC-Qld");
-        channel.setName("ABC Queensland");
+        //channel.setId("ABC-Qld");
+        //channel.setName("ABC Queensland");
+        channel.setId("Sci-Fi");
+        channel.setName("Sci Fi");
+        List<String> baseUrls = new ArrayList<String>();
+        baseUrls.add("http://www.oztivo.net/xmltv/");
+        baseUrls.add("http://xml.oztivo.net/xmltv/");
+        channel.setBaseUrls(baseUrls);
         
-        //fetch("ABC Queensland", "ABC-Qld", new GregorianCalendar());
+        Calendar date = new GregorianCalendar();
+        Calendar tomorrow = (Calendar)date.clone(); 
+        tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+        List<Calendar> datesCovered = new ArrayList<Calendar>();
+        datesCovered.add(date);
+        datesCovered.add(tomorrow);
+        
+        programmeListAdapter.setChannel(channel);
+        programmeListAdapter.setDatesCovered(datesCovered);
+        
+        fetch(channel, date, date);
+        fetch(channel, tomorrow, date);
     }
 
     @Override
@@ -106,7 +99,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     protected void onResume() {
         super.onResume();
 
-        SharedPreferences prefs = getPreferences(0);
+        //SharedPreferences prefs = getPreferences(0);
         // TODO
     }
 
@@ -125,8 +118,8 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         editor.commit();
     }
 
-    public void setCurrentNetworkRequest(String channelName, Calendar date) {
-        String message = channelName + " " + DateFormat.format("E, MMM dd", date);
+    public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate) {
+        String message = channel.getName() + " " + DateFormat.format("E, MMM dd", primaryDate);
         if (progressDialog == null) {
             progressDialog = ProgressDialog.show
                 (this, "Fetching guide data", message, true);
@@ -141,34 +134,33 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
             progressDialog.hide();
     }
 
-    private void fetch(String channelName, String channelId, Calendar date) {
-        InputStream stream = channelCache.openChannelData(channelId, date);
+    private void fetch(TvChannel channel, Calendar date, Calendar primaryDate) {
+        InputStream stream = channelCache.openChannelData(channel, date);
         if (stream != null)
-            parseProgrammes(stream);
+            parseProgrammes(channel, date, stream);
         else
-            channelCache.fetch(channelName, channelId, date, false);
+            channelCache.fetch(channel, date, primaryDate);
     }
     
-    public void dataAvailable(String channelId, Calendar date) {
-        InputStream stream = channelCache.openChannelData(channelId, date);
+    public void dataAvailable(TvChannel channel, Calendar date, Calendar primaryDate) {
+        InputStream stream = channelCache.openChannelData(channel, date);
         if (stream != null)
-            parseProgrammes(stream);
+            parseProgrammes(channel, date, stream);
     }
     
-    private void parseProgrammes(InputStream stream) {
-        List<TvProgramme> programmes = channel.loadProgrammes(stream);
+    private void parseProgrammes(TvChannel channel, Calendar date, InputStream stream) {
+        channel.loadProgrammesFromXml(date, stream);
         try {
             stream.close();
         } catch (IOException e) {
         }
-        programmeListAdapter.setProgrammes(programmes);
+        if (programmeListAdapter.isChannelCovered(channel) && programmeListAdapter.isDateCovered(date)) {
+            programmeListAdapter.setProgrammes
+                (channel.programmesForDay(programmeListAdapter.getPrimaryDate()));
+        }
     }
 
-    public void requestFailed(String channelId, Calendar date) {
-        // TODO
-    }
-
-    public void optionalRequestFailed(String channelId, Calendar date) {
+    public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate) {
         // TODO
     }
 }

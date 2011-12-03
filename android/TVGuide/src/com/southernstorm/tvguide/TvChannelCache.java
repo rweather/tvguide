@@ -50,7 +50,6 @@ import android.os.AsyncTask;
 public class TvChannelCache extends ExternalMediaHandler {
 
     private String serviceName;
-    private List<String> baseUrls;
     private File httpCacheDir;
     private Random rand;
     private boolean debug;
@@ -91,26 +90,18 @@ public class TvChannelCache extends ExternalMediaHandler {
         }
     }
 
-    public List<String> getBaseUrls() {
-        return baseUrls;
-    }
-
-    public void setBaseUrls(List<String> baseUrls) {
-        this.baseUrls = baseUrls;
-    }
-
     /**
      * Open the XMLTV data file in the cache for a specific channel and date.
      *
      * The data on the SD card is stored as gzip'ed XML.  The stream returned
      * by this function will unzip the data as it is read.
      *
-     * @param channelId the identifier for the channel
+     * @param channel the channel
      * @param date the date corresponding to the requested data
      * @return an input stream, or null if the data is not present
      */
-    public InputStream openChannelData(String channelId, Calendar date) {
-        File file = dataFile(channelId, date, ".xml.gz");
+    public InputStream openChannelData(TvChannel channel, Calendar date) {
+        File file = dataFile(channel, date, ".xml.gz");
         if (file == null || !file.exists())
             return null;
         try {
@@ -126,6 +117,21 @@ public class TvChannelCache extends ExternalMediaHandler {
         }
     }
 
+    /**
+     * Determine if data for a specific channel and date is available in the cache
+     * 
+     * @param channel the channel
+     * @param date the date to look for
+     * @return true if data is available, false if not
+     */
+    public boolean hasChannelData(TvChannel channel, Calendar date) {
+        File file = dataFile(channel, date, ".xml.gz");
+        if (file == null || !file.exists())
+            return false;
+        else
+            return true;
+    }
+    
     /**
      * Expire old entries in the cache.
      */
@@ -169,6 +175,36 @@ public class TvChannelCache extends ExternalMediaHandler {
 
             // Delete the file as it is older than today.
             File file = new File(httpCacheDir, name);
+            if (debug)
+                System.out.println("expiring " + file.getPath());
+            file.delete();
+        }
+    }
+    
+    /**
+     * Clear the entire contents of the cache.
+     */
+    public void clear() {
+        if (httpCacheDir == null)
+            return;
+        String[] entries = httpCacheDir.list();
+        for (int index = 0; index < entries.length; ++index) {
+            // Look for files that end in ".xml.gz" or ".cache".
+            String name = entries[index];
+            int suffixLength;
+            if (name.endsWith(".xml.gz"))
+                suffixLength = 7;
+            else if (name.endsWith(".cache"))
+                suffixLength = 6;
+            else
+                continue;
+            if ((name.length() - suffixLength) < 10)
+                continue;
+
+            // Delete the file.
+            File file = new File(httpCacheDir, name);
+            if (debug)
+                System.out.println("deleting " + file.getPath());
             file.delete();
         }
     }
@@ -218,19 +254,19 @@ public class TvChannelCache extends ExternalMediaHandler {
      * Get the name of the data file corresponding to a particular
      * channel and date.
      *
-     * @param channelId identifier for the channel
+     * @param channel the channel
      * @param date the date to fetch
      * @param extension the file extension, ".xml.gz" or ".cache"
      * @return the filename encapsulated in a File object, or null if no cache
      */
-    private File dataFile(String channelId, Calendar date, String extension) {
+    private File dataFile(TvChannel channel, Calendar date, String extension) {
         if (httpCacheDir == null)
             return null;
         StringBuilder name = new StringBuilder();
         int year = date.get(Calendar.YEAR);
         int month = date.get(Calendar.MONTH) + 1;
         int day = date.get(Calendar.DAY_OF_MONTH);
-        name.append(channelId);
+        name.append(channel.getId());
         name.append('_');
         name.append((char)('0' + ((year / 1000) % 10)));
         name.append((char)('0' + ((year / 100) % 10)));
@@ -247,9 +283,9 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     private class RequestInfo {
-        public String channelName;
-        public String channelId;
+        public TvChannel channel;
         public Calendar date;
+        public Calendar primaryDate;
         public URI uri;
         public File cacheFile;
         public File dataFile;
@@ -257,7 +293,7 @@ public class TvChannelCache extends ExternalMediaHandler {
         public String lastModified;
         public String userAgent;
         public boolean success;
-        public boolean optional;
+        public boolean notFound;
         public RequestInfo next;
 
         public void updateFromResponse(HttpResponse response) {
@@ -271,9 +307,9 @@ public class TvChannelCache extends ExternalMediaHandler {
     };
 
     private RequestInfo requestQueue;
-    private String currentRequestChannelId;
+    private TvChannel currentRequestChannel;
     private Calendar currentRequestDate;
-    private boolean currentRequestOptional;
+    private Calendar currentRequestPrimaryDate;
     private boolean requestsActive;
 
     /**
@@ -317,8 +353,12 @@ public class TvChannelCache extends ExternalMediaHandler {
                     // Data has not changed since the last request.
                     info.updateFromResponse(response);
                     return true;
+                } else if (status == HttpStatus.SC_NOT_FOUND) {
+                    // Explicit 404 Not Found from the server.
+                    info.notFound = true;
+                    return false;
                 } else {
-                    // Request failed for some other reason; e.g. 404 Not Found.
+                    // Request failed for some other reason.
                     return false;
                 }
             } catch (UnsupportedEncodingException e) {
@@ -360,14 +400,38 @@ public class TvChannelCache extends ExternalMediaHandler {
         }
     };
 
-    public void fetch(String channelName, String channelId, Calendar date, boolean optional) {
+    /**
+     * Fetches the guide data for a specific date and time.
+     * 
+     * @param channel the channel
+     * @param date the date to request
+     */
+    public void fetch(TvChannel channel, Calendar date) {
+        fetch(channel, date, date);
+    }
+
+    /**
+     * Fetches the guide data for a specific date and time, as part of a multi-day request.
+     * At least two days worth of data are needed to show 6:00am one day to 6:00am the next.
+     * The first day is the "primary" and typically must be fetched from the server.
+     * The second day's data is optional and an error will not be reported to the user
+     * if it is not available.
+     * 
+     * @param channel the channel
+     * @param date the date to request
+     * @param primaryDate the primary date for multi-day requests
+     */
+    public void fetch(TvChannel channel, Calendar date, Calendar primaryDate) {
         // Bail out if the cache is unusable.
-        if (httpCacheDir == null || baseUrls == null || baseUrls.isEmpty())
+        if (httpCacheDir == null)
             return;
 
         // Determine the base URL to use.  OzTivo rules specify that a
         // url should be chosen randomly from the list of base urls.
         // http://www.oztivo.net/twiki/bin/view/TVGuide/StaticXMLGuideAPI
+        List<String> baseUrls = channel.getBaseUrls();
+        if (baseUrls == null || baseUrls.isEmpty())
+            return;
         String baseUrl;
         if (baseUrls.size() >= 2)
             baseUrl = baseUrls.get(rand.nextInt(baseUrls.size()));
@@ -382,7 +446,7 @@ public class TvChannelCache extends ExternalMediaHandler {
         requestUrl.append(baseUrl);
         if (!baseUrl.endsWith("/"))
             requestUrl.append('/');
-        requestUrl.append(channelId);
+        requestUrl.append(channel.getId());
         requestUrl.append('_');
         requestUrl.append((char)('0' + ((year / 1000) % 10)));
         requestUrl.append((char)('0' + ((year / 100) % 10)));
@@ -404,17 +468,16 @@ public class TvChannelCache extends ExternalMediaHandler {
 
         // Create the request info block.
         RequestInfo info = new RequestInfo();
-        info.channelName  = channelName;
-        info.channelId  = channelId;
+        info.channel  = channel;
         info.date = date;
+        info.primaryDate = primaryDate;
         info.uri = uri;
-        info.cacheFile = dataFile(channelId, date, ".cache");
-        info.dataFile = dataFile(channelId, date, ".xml.gz");
+        info.cacheFile = dataFile(channel, date, ".cache");
+        info.dataFile = dataFile(channel, date, ".xml.gz");
         info.etag = null;
         info.lastModified = null;
         info.userAgent = getContext().getResources().getString(R.string.user_agent);
         info.success = false;
-        info.optional = optional;
 
         // Queue up the request to fetch the data from the network.
         addRequestToQueue(info);
@@ -430,20 +493,19 @@ public class TvChannelCache extends ExternalMediaHandler {
         RequestInfo current = requestQueue;
         RequestInfo prev = null;
         while (current != null) {
-            if (current.channelId.equals(info.channelId) &&
-                    current.date.equals(info.date)) {
-                if (!info.optional)
-                    current.optional = false;
+            if (current.channel == info.channel && current.date.equals(info.date)) {
+                // Upgrade the existing request to a primary day request if necessary.
+                if (info.primaryDate.equals(info.date))
+                    current.primaryDate = current.date;
                 return;
             }
             prev = current;
             current = current.next;
         }
-        if (currentRequestChannelId != null &&
-                currentRequestChannelId.equals(info.channelId) &&
+        if (currentRequestChannel == info.channel &&
                 currentRequestDate.equals(info.date)) {
-            if (!info.optional)
-                currentRequestOptional = false;
+            if (info.primaryDate.equals(info.date))
+                currentRequestPrimaryDate = currentRequestDate;
             return;
         }
 
@@ -455,7 +517,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             requestQueue = info;
 
         // If we don't have a request currently in progress, then start it.
-        if (currentRequestChannelId == null)
+        if (currentRequestChannel == null)
             startNextRequest();
     }
 
@@ -463,35 +525,41 @@ public class TvChannelCache extends ExternalMediaHandler {
      * Start downloading the next request on the queue.
      */
     private void startNextRequest() {
-        RequestInfo info = requestQueue;
-        if (info == null) {
-            currentRequestChannelId = null;
-            currentRequestDate = null;
-            currentRequestOptional = false;
-            if (requestsActive) {
-                requestsActive = false;
-                listener.endNetworkRequests();
+        for (;;) {
+            RequestInfo info = requestQueue;
+            if (info == null) {
+                currentRequestChannel = null;
+                currentRequestDate = null;
+                currentRequestPrimaryDate = null;
+                if (requestsActive) {
+                    requestsActive = false;
+                    listener.endNetworkRequests();
+                }
+                break;
             }
-            return;
+            requestQueue = info.next;
+            info.next = null;
+            if (hasChannelData(info.channel, info.date)) {
+                // A previous request on the queue already fetched this data.
+                listener.dataAvailable(info.channel, info.date, info.primaryDate);
+                continue;
+            }
+            currentRequestChannel = info.channel;
+            currentRequestDate = info.date;
+            currentRequestPrimaryDate = info.primaryDate;
+            if (debug)
+                System.out.println("fetching " + info.uri.toString());
+            requestsActive = true;
+            listener.setCurrentNetworkRequest(info.channel, info.date, info.primaryDate);
+            new DownloadAsyncTask().execute(info);
+            break;
         }
-        requestQueue = info.next;
-        info.next = null;
-        currentRequestChannelId = info.channelId;
-        currentRequestDate = info.date;
-        currentRequestOptional = info.optional;
-        if (debug)
-            System.out.println("fetching " + info.uri.toString());
-        requestsActive = true;
-        listener.setCurrentNetworkRequest(info.channelName, info.date);
-        new DownloadAsyncTask().execute(info);
     }
 
     private void reportRequestResult(RequestInfo info) {
         if (info.success)
-            listener.dataAvailable(info.channelId, info.date);
-        else if (currentRequestOptional)
-            listener.optionalRequestFailed(info.channelName, info.date);
+            listener.dataAvailable(info.channel, info.date, currentRequestPrimaryDate);
         else
-            listener.requestFailed(info.channelName, info.date);
+            listener.requestFailed(info.channel, info.date, currentRequestPrimaryDate);
     }
 }
