@@ -29,10 +29,13 @@ import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.widget.ListView;
 import android.widget.ExpandableListView;
 
 public class TVGuideActivity extends Activity implements TvNetworkListener {
 
+    private ListView channelListView;
+    private TvChannelListAdapter channelListAdapter;
     private ExpandableListView programmeListView;
     private TvProgrammeListAdapter programmeListAdapter;
     private TvChannelCache channelCache;
@@ -43,13 +46,19 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        //setContentView(R.layout.main);
+        setContentView(R.layout.channel_list);
 
         channelCache = new TvChannelCache(this, this);
         channelCache.setServiceName("OzTivo");
         channelCache.setDebug(true);
         channelCache.expire();
 
+        channelListView = (ListView)findViewById(R.id.channelList);
+        channelListAdapter = new TvChannelListAdapter(this);
+        channelListView.setAdapter(channelListAdapter);
+        
+        /*
         programmeListView = (ExpandableListView)findViewById(R.id.programmeList);
         programmeListAdapter = new TvProgrammeListAdapter(this);
         programmeListView.setAdapter(programmeListAdapter);
@@ -76,6 +85,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         
         fetch(channel, date, date);
         fetch(channel, tomorrow, date);
+        */
     }
 
     @Override

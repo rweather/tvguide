@@ -60,6 +60,6 @@ public class IconFactory {
         if (resources.containsKey(name))
             return resources.get(name);
         else
-            return -1;
+            return 0;
     }
 }

@@ -30,15 +30,21 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-public class TvChannel {
+public class TvChannel implements Comparable<TvChannel> {
 
+    public static final int NO_NUMBER = 0x7FFFFFFF;
     private String id;
     private String name;
+    private String numbers;
+    private int primaryChannelNumber;
+    private int iconResource;
     private boolean convertTimezone;
     private List<String> baseUrls;
     private Map< Calendar, List<TvProgramme> > programmes;
 
     public TvChannel() {
+        this.primaryChannelNumber = TvChannel.NO_NUMBER;
+        this.iconResource = 0;
         this.programmes = new TreeMap< Calendar, List<TvProgramme> >();
     }
 
@@ -48,8 +54,57 @@ public class TvChannel {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getNumbers() { return numbers; }
+    public void setNumbers(String numbers) { this.numbers = numbers; }
+
+    public int getPrimaryChannelNumber() { return primaryChannelNumber; }
+    public void setPrimaryChannelNumber(int number) { this.primaryChannelNumber = number; }
+    
+    public int getIconResource() { return iconResource; }
+    public void setIconResource(int id) { this.iconResource = id; }
+    
     public boolean getConvertTimezone() { return convertTimezone; }
     public void setConvertTimezone(boolean convert) { this.convertTimezone = convert; }
+    
+    public int compareTo(TvChannel other) {
+        // Compares using Australian channel number rules:
+        // 2, 20, 21, 3, 30, 31, ..., 9, 90, 91, ..., 10, 11, 1, ...
+        int num1 = getPrimaryChannelNumber();
+        int num2 = other.getPrimaryChannelNumber();
+        if (num1 >= 100 || num2 >= 100) {
+            if (num1 < num2)
+                return -1;
+            else if (num1 > num2)
+                return 1;
+        } else {
+            int high1, high2;
+            if (num1 == 1)
+                high1 = 11;
+            else if (num1 < 10)
+                high1 = num1;
+            else if (num1 < 20)
+                high1 = 10;
+            else
+                high1 = num1 / 10;
+            if (num2 == 1)
+                high2 = 11;
+            else if (num2 < 10)
+                high2 = num2;
+            else if (num2 < 20)
+                high2 = 10;
+            else
+                high2 = num2 / 10;
+            if (high1 < high2)
+                return -1;
+            else if (high1 > high2)
+                return 1;
+            if (num1 < num2)
+                return -1;
+            else if (num1 > num2)
+                return 1;
+        }
+        return name.compareToIgnoreCase(other.getName());
+    }
     
     public List<String> getBaseUrls() {
         return baseUrls;
@@ -76,7 +131,6 @@ public class TvChannel {
                 if (eventType == XmlPullParser.START_TAG &&
                         parser.getName().equals("programme")) {
                     // Parse the contents of a <programme> element.
-                    eventType = parser.getEventType();
                     TvProgramme prog = new TvProgramme();
                     prog.load(parser, convertTimezone);
                     progs.add(prog);
