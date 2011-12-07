@@ -30,6 +30,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import android.os.Bundle;
+
 public class TvChannel implements Comparable<TvChannel> {
 
     public static final int NO_NUMBER = 0x7FFFFFFF;
@@ -39,12 +41,13 @@ public class TvChannel implements Comparable<TvChannel> {
     private int primaryChannelNumber;
     private int iconResource;
     private boolean convertTimezone;
-    private List<String> baseUrls;
+    private ArrayList<String> baseUrls;
     private Map< Calendar, List<TvProgramme> > programmes;
 
     public TvChannel() {
         this.primaryChannelNumber = TvChannel.NO_NUMBER;
         this.iconResource = 0;
+        this.baseUrls = new ArrayList<String>();
         this.programmes = new TreeMap< Calendar, List<TvProgramme> >();
     }
 
@@ -111,7 +114,8 @@ public class TvChannel implements Comparable<TvChannel> {
     }
 
     public void setBaseUrls(List<String> baseUrls) {
-        this.baseUrls = baseUrls;
+        this.baseUrls.clear();
+        this.baseUrls.addAll(baseUrls);
     }
 
     /**
@@ -192,5 +196,43 @@ public class TvChannel implements Comparable<TvChannel> {
             }
         }
         return progs;
+    }
+    
+    /**
+     * Converts the information in this channel object into a bundle for passing
+     * to a new activity.
+     * 
+     * @return the bundle containing information about this channel
+     * @see fromBundle()
+     */
+    public Bundle toBundle() {
+        Bundle bundle = new Bundle();
+        bundle.putString("id", id);
+        bundle.putString("name", name);
+        bundle.putString("numbers", numbers);
+        bundle.putInt("primaryChannelNumber", primaryChannelNumber);
+        bundle.putInt("iconResource", iconResource);
+        bundle.putBoolean("convertTimezone", convertTimezone);
+        bundle.putStringArrayList("baseUrls", baseUrls);
+        return bundle;
+    }
+    
+    /**
+     * Creates a new channel object from the information in a bundle.
+     * 
+     * @param bundle the bundle containing the channel information
+     * @return the channel object
+     * @see toBundle()
+     */
+    public static TvChannel fromBundle(Bundle bundle) {
+        TvChannel channel = new TvChannel();
+        channel.setId(bundle.getString("id"));
+        channel.setName(bundle.getString("name"));
+        channel.setNumbers(bundle.getString("numbers"));
+        channel.setPrimaryChannelNumber(bundle.getInt("primaryChannelNumber"));
+        channel.setIconResource(bundle.getInt("iconResource"));
+        channel.setConvertTimezone(bundle.getBoolean("convertTimezone"));
+        channel.setBaseUrls(bundle.getStringArrayList("baseUrls"));
+        return channel;
     }
 }

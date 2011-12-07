@@ -430,7 +430,7 @@ public class TvChannelCache extends ExternalMediaHandler {
         // url should be chosen randomly from the list of base urls.
         // http://www.oztivo.net/twiki/bin/view/TVGuide/StaticXMLGuideAPI
         List<String> baseUrls = channel.getBaseUrls();
-        if (baseUrls == null || baseUrls.isEmpty())
+        if (baseUrls.isEmpty())
             return;
         String baseUrl;
         if (baseUrls.size() >= 2)

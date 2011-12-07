@@ -56,6 +56,10 @@ public class TvChannelListAdapter implements ListAdapter {
         return 0;
     }
 
+    public TvChannel getChannel(int position) {
+        return channels.get(position);
+    }
+    
     private class ViewDetails {
         public ImageView icon;
         public TextView name;
@@ -199,6 +203,10 @@ public class TvChannelListAdapter implements ListAdapter {
             }
             eventType = parser.next();
         }
+        List<String> baseUrls = new ArrayList<String>();
+        baseUrls.add("http://www.oztivo.net/xmltv/");
+        baseUrls.add("http://xml.oztivo.net/xmltv/");
+        channel.setBaseUrls(baseUrls);
         return channel;
     }
     
