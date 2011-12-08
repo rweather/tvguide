@@ -4,14 +4,14 @@
     android:layout_height="match_parent" >
 
     <ImageView android:id="@+id/channel_icon"
-        android:layout_width="64px"
-        android:layout_height="64px"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="8px"
-        android:layout_marginRight="8px"
-        android:layout_marginTop="2px"
-        android:layout_marginBottom="2px" />
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp" />
     
     <TextView android:id="@+id/channel_name"
         android:layout_width="wrap_content"
