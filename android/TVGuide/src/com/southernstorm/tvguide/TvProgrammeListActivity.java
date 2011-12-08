@@ -24,36 +24,47 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
+import android.app.TabActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.TabHost;
+import android.widget.TextView;
+import android.widget.TabHost.TabContentFactory;
 
-public class TvProgrammeListActivity extends Activity implements TvNetworkListener {
+public class TvProgrammeListActivity extends TabActivity implements TvNetworkListener {
 
-    private ExpandableListView programmeListView;
-    private TvProgrammeListAdapter programmeListAdapter;
+    private static final int NUM_DAYS = 5;
+    
+    private View[] tabViews;
+    private ExpandableListView[] programmeListViews;
+    private TvProgrammeListAdapter[] programmeListAdapters;
     private TvChannelCache channelCache;
     private ProgressDialog progressDialog;
     private TvChannel channel;
+    private LayoutInflater inflater;
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.programme_list);
-        
+        setContentView(R.layout.tabbed_view);
+       
+        inflater = LayoutInflater.from(this);
+
         channelCache = new TvChannelCache(this, this);
         channelCache.setServiceName("OzTivo");
         channelCache.setDebug(true);
         channelCache.expire();
-
-        programmeListView = (ExpandableListView)findViewById(R.id.programmeList);
-        programmeListAdapter = new TvProgrammeListAdapter(this);
-        programmeListView.setAdapter(programmeListAdapter);
+        
+        tabViews = new View[NUM_DAYS];
+        programmeListViews = new ExpandableListView[NUM_DAYS];
+        programmeListAdapters = new TvProgrammeListAdapter[NUM_DAYS];
     }
 
     @Override
@@ -69,8 +80,59 @@ public class TvProgrammeListActivity extends Activity implements TvNetworkListen
         Calendar date = new GregorianCalendar(year, month, day);
         channel = TvChannel.fromBundle(intent.getBundleExtra("channel"));
 
-        // Select the date that was passed in via the intent.
-        selectDate(date);
+        // Show the channel name in the title bar.
+        setTitle(channel.getName());
+
+        // Create the tabs for the next 5 days.
+        TabHost tabHost = getTabHost();
+        tabHost.clearAllTabs();
+        for (day = 0; day < 5; ++day) {
+            Calendar tabDate = (Calendar)date.clone(); 
+            tabDate.add(Calendar.DAY_OF_MONTH, day);
+            final int dayNum = day;
+            final Calendar dayDate = tabDate;
+            TabHost.TabSpec spec = tabHost.newTabSpec("day" + day)
+                    .setIndicator(DateFormat.format("E\nMMM dd", tabDate))
+                    .setContent(new TabContentFactory() {
+                        public View createTabContent(String tab) {
+                            return createTabView(dayNum, dayDate);
+                        }
+                    });
+            tabHost.addTab(spec);
+            
+            // Make the tab's title use multiple lines of text.
+            TextView title = (TextView)tabHost.getTabWidget().getChildAt(day).findViewById(android.R.id.title);
+            title.setSingleLine(false);
+            title.setGravity(0x11);     // Center the text in both directions.
+        }
+    }
+
+    /**
+     * Creates the programme list view for a specific tab.
+     * 
+     * @param day the day index for the tab
+     * @param date the date on the tab
+     * @return the view to display in the tab
+     */
+    private View createTabView(int day, Calendar date) {
+        // Return the existing view if we have one.
+        if (tabViews[day] != null)
+            return tabViews[day];
+        
+        // Create a new view.
+        View view = inflater.inflate(R.layout.programme_list, null);
+        ExpandableListView listView = (ExpandableListView)view.findViewById(R.id.programmeList);
+        TvProgrammeListAdapter adapter = new TvProgrammeListAdapter(this);
+        listView.setAdapter(adapter);
+        tabViews[day] = view;
+        programmeListViews[day] = listView;
+        programmeListAdapters[day] = adapter;
+        
+        // Fetch data from the network to fill the view.
+        selectDate(day, date);
+        
+        // Return the tab's view.
+        return view;
     }
 
     @Override
@@ -79,6 +141,11 @@ public class TvProgrammeListActivity extends Activity implements TvNetworkListen
         if (progressDialog != null) {
             progressDialog.dismiss();
             progressDialog = null;
+        }
+        for (int day = 0; day < NUM_DAYS; ++day) {
+            tabViews[day] = null;
+            programmeListViews[day] = null;
+            programmeListAdapters[day] = null;
         }
         super.onStop();
     }
@@ -107,26 +174,24 @@ public class TvProgrammeListActivity extends Activity implements TvNetworkListen
         editor.commit();
     }
 
-    private void selectDate(Calendar date) {
+    private void selectDate(int day, Calendar date) {
         // Set up the programme list view with the covered channels and dates.
         Calendar tomorrow = (Calendar)date.clone(); 
         tomorrow.add(Calendar.DAY_OF_MONTH, 1);
         List<Calendar> datesCovered = new ArrayList<Calendar>();
         datesCovered.add(date);
         datesCovered.add(tomorrow);
-        programmeListAdapter.setChannel(channel);
-        programmeListAdapter.setDatesCovered(datesCovered);
+        TvProgrammeListAdapter adapter = programmeListAdapters[day];
+        adapter.setChannel(channel);
+        adapter.setDatesCovered(datesCovered);
         
-        // Update the title bar.
-        setTitle(channel.getName() + " - " + DateFormat.format("E, MMM dd, yyyy", date));
-
         // Fetch the selected date and the next.
         fetch(channel, date, date);
         fetch(channel, tomorrow, date);
     }
 
     public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate) {
-        String message = channel.getName() + " " + DateFormat.format("E, MMM dd", primaryDate);
+        String message = channel.getName(); // + " " + DateFormat.format("E, MMM dd", primaryDate);
         if (progressDialog == null) {
             progressDialog = ProgressDialog.show
                 (this, "Fetching guide data", message, true);
@@ -161,9 +226,10 @@ public class TvProgrammeListActivity extends Activity implements TvNetworkListen
             stream.close();
         } catch (IOException e) {
         }
-        if (programmeListAdapter.isChannelCovered(channel) && programmeListAdapter.isDateCovered(date)) {
-            programmeListAdapter.setProgrammes
-                (channel.programmesForDay(programmeListAdapter.getPrimaryDate()));
+        for (int day = 0; day < NUM_DAYS; ++day) {
+            TvProgrammeListAdapter adapter = programmeListAdapters[day];
+            if (adapter != null && adapter.isChannelCovered(channel) && adapter.isDateCovered(date))
+                adapter.setProgrammes(channel.programmesForDay(adapter.getPrimaryDate()));
         }
     }
 
