@@ -36,8 +36,20 @@ public class TvChannelListAdapter implements ListAdapter {
         this.channels = new ArrayList<TvChannel>();
         this.observers = new ArrayList<DataSetObserver>();
         this.inflater = LayoutInflater.from(context);
-        this.region = "brisbane";    // TODO
-        loadChannels();
+        this.region = null;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+    
+    public void setRegion(String region) {
+        if (this.region == null || !this.region.equals(region)) {
+            this.region = region;
+            loadChannels();
+            for (DataSetObserver observer: observers)
+                observer.onChanged();
+        }
     }
 
     public int getCount() {
@@ -68,9 +80,9 @@ public class TvChannelListAdapter implements ListAdapter {
 
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewDetails view = null;
-        if (convertView != null) {
+        if (convertView != null)
             view = (ViewDetails)convertView.getTag();
-        } else {
+        if (view == null) {
             convertView = inflater.inflate(R.layout.channel, null);
             view = new ViewDetails();
             view.icon = (ImageView)convertView.findViewById(R.id.channel_icon);
@@ -121,6 +133,8 @@ public class TvChannelListAdapter implements ListAdapter {
      */
     private void loadChannels() {
         channels.clear();
+        if (region == null)
+            return;
         XmlResourceParser parser = context.getResources().getXml(R.xml.channels);
         regionTree = new TreeMap< String, List<String> >();
         String id = null;

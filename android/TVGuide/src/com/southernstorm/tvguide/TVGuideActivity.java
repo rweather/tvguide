@@ -24,6 +24,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -33,6 +35,7 @@ public class TVGuideActivity extends Activity {
 
     private ListView channelListView;
     private TvChannelListAdapter channelListAdapter;
+    private TvRegionListAdapter regionListAdapter;
 
     /** Called when the activity is first created. */
     @Override
@@ -42,12 +45,18 @@ public class TVGuideActivity extends Activity {
 
         channelListView = (ListView)findViewById(R.id.channelList);
         channelListAdapter = new TvChannelListAdapter(this);
-        channelListView.setAdapter(channelListAdapter);
         
+        regionListAdapter = new TvRegionListAdapter(this);
+
         channelListView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                TvChannel channel = channelListAdapter.getChannel(position);
-                selectChannel(channel);
+                if (parent.getAdapter() instanceof TvChannelListAdapter) {
+                    TvChannel channel = channelListAdapter.getChannel(position);
+                    selectChannel(channel);
+                } else if (parent.getAdapter() instanceof TvRegionListAdapter) {
+                    String regionId = regionListAdapter.getRegionId(position);
+                    selectRegion(regionId);
+                }
             }
         });
     }
@@ -55,6 +64,17 @@ public class TVGuideActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        SharedPreferences prefs = getPreferences(0);
+        String region = prefs.getString("region", "");
+        if (region != null && !region.equals(""))
+            channelListAdapter.setRegion(region);
+        
+        // If no region selected yet, then populate the initial channel list with regions.
+        if (channelListAdapter.getCount() == 0)
+            channelListView.setAdapter(regionListAdapter);
+        else
+            channelListView.setAdapter(channelListAdapter);
     }
 
     @Override
@@ -62,23 +82,14 @@ public class TVGuideActivity extends Activity {
         super.onStop();
     }
 
-    /** Load preferences when the activity is resumed */
     @Override
     protected void onResume() {
         super.onResume();
-
-        //SharedPreferences prefs = getPreferences(0);
-        // TODO
     }
 
-    /** Save preferences when the activity is paused */
     @Override
     protected void onPause() {
         super.onPause();
-
-        SharedPreferences.Editor editor = getPreferences(0).edit();
-        // TODO
-        editor.commit();
     }
 
     /**
@@ -94,5 +105,36 @@ public class TVGuideActivity extends Activity {
         intent.putExtra("date_day", date.get(Calendar.DAY_OF_MONTH));
         intent.putExtra("channel", channel.toBundle());
         startActivity(intent);
+    }
+    
+    /**
+     * Select a specific region and switch to the channels for that region.
+     * 
+     * @param regionId the region identifier
+     */
+    private void selectRegion(String regionId) {
+        channelListAdapter.setRegion(regionId);
+        channelListView.setAdapter(channelListAdapter);
+
+        SharedPreferences.Editor editor = getPreferences(0).edit();
+        editor.putString("region", regionId);
+        editor.commit();
+    }
+    
+    private static final int ITEM_CHANGE_REGION = 1;
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(ITEM_CHANGE_REGION, 0, 0, "Change Region");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getGroupId() == ITEM_CHANGE_REGION) {
+            channelListView.setAdapter(regionListAdapter);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
