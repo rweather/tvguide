@@ -19,6 +19,8 @@ package com.southernstorm.tvguide;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -28,11 +30,21 @@ import android.app.ProgressDialog;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
+import android.view.ViewParent;
+
 import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.TabHost.TabContentFactory;
@@ -127,6 +139,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         tabViews[day] = view;
         programmeListViews[day] = listView;
         programmeListAdapters[day] = adapter;
+        registerForContextMenu(listView);
         
         // Fetch data from the network to fill the view.
         selectDate(day, date);
@@ -235,5 +248,92 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
 
     public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate) {
         // TODO
+    }
+
+    private static final int ITEM_WEB_SEARCH = 1;
+    private static final int ITEM_WEB_SEARCH_GOOGLE = 2;
+    private static final int ITEM_WEB_SEARCH_IMDB = 3;
+    private static final int ITEM_WEB_SEARCH_EPGUIDES = 4;
+    private static final int ITEM_WEB_SEARCH_WIKIPEDIA = 5;
+    
+    // Workaround for the lack of expandable list item ID's on submenu items.
+    private ContextMenuInfo savedMenuInfo = null;
+    
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        menu.setHeaderTitle("Programme Menu");
+        SubMenu searchMenu = menu.addSubMenu("Web Search");
+        searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_GOOGLE, 0, "Google");
+        searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_IMDB, 0, "IMDb");
+        searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_EPGUIDES, 0, "epguides");
+        searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_WIKIPEDIA, 0, "Wikipedia");
+        savedMenuInfo = menuInfo;
+    }
+    
+    @Override
+    public void onContextMenuClosed(Menu menu) {
+        savedMenuInfo = null;
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)item.getMenuInfo();
+        if (info == null)
+            info = (ExpandableListContextMenuInfo)savedMenuInfo;
+        int type = ExpandableListView.getPackedPositionType(info.packedPosition);
+        int groupId = -1;
+        if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD ||
+                type == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+            groupId = ExpandableListView.getPackedPositionGroup(info.packedPosition);
+        }
+        if (groupId == -1)
+            return false;
+        TvProgramme prog = programmeForMenuItem(info, groupId);
+        if (prog == null)
+            return false;
+        if (item.getGroupId() == ITEM_WEB_SEARCH) {
+            switch (item.getItemId()) {
+            case ITEM_WEB_SEARCH_GOOGLE:
+                webSearch(prog, "http://www.google.com/search?q=");
+                break;
+            case ITEM_WEB_SEARCH_IMDB:
+                webSearch(prog, "http://www.imdb.com/find?q=");
+                break;
+            case ITEM_WEB_SEARCH_EPGUIDES:
+                webSearch(prog, "http://www.google.com/search?q=allintitle:+site:epguides.com+");
+                break;
+            case ITEM_WEB_SEARCH_WIKIPEDIA:
+                webSearch(prog, "http://en.wikipedia.org/wiki/Special:Search?search=");
+                break;
+            }
+        }
+        return false;
+    }
+    
+    private TvProgramme programmeForMenuItem(ExpandableListContextMenuInfo info, int groupId) {
+        ViewParent view = info.targetView.getParent();
+        while (view != null && !(view instanceof ExpandableListView))
+            view = view.getParent();
+        if (view == null)
+            return null;
+        TvProgrammeListAdapter adapter = (TvProgrammeListAdapter)(((ExpandableListView)view).getExpandableListAdapter());
+        return adapter.getProgrammes().get(groupId);
+    }
+
+    /**
+     * Search the web for a programme's title.
+     * 
+     * @param prog the programme details
+     * @param urlPrefix prefix for the search engine to use
+     */
+    private void webSearch(TvProgramme prog, String urlPrefix) {
+        try {
+            String encoded = URLEncoder.encode(prog.getTitle(), "utf-8");
+            Uri uri = Uri.parse(urlPrefix + encoded);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+        } catch (UnsupportedEncodingException e) {
+            // Ignore - shouldn't happen.
+        }
     }
 }
