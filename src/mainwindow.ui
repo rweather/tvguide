@@ -53,12 +53,6 @@
     <addaction name="actionReload"/>
     <addaction name="action_Stop"/>
     <addaction name="separator"/>
-    <addaction name="actionToday"/>
-    <addaction name="actionNextDay"/>
-    <addaction name="actionPreviousDay"/>
-    <addaction name="actionNextWeek"/>
-    <addaction name="actionPreviousWeek"/>
-    <addaction name="separator"/>
     <addaction name="actionMorning"/>
     <addaction name="actionAfternoon"/>
     <addaction name="actionNight"/>
@@ -307,12 +301,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionPreviousDay"/>
-   <addaction name="actionNextDay"/>
-   <addaction name="actionPreviousWeek"/>
-   <addaction name="actionNextWeek"/>
-   <addaction name="actionToday"/>
-   <addaction name="separator"/>
    <addaction name="actionReload"/>
    <addaction name="action_Stop"/>
    <addaction name="separator"/>
@@ -352,51 +340,6 @@
    </property>
    <property name="text">
     <string>&amp;Stop</string>
-   </property>
-  </action>
-  <action name="actionNextDay">
-   <property name="icon">
-    <iconset resource="tvguide.qrc">
-     <normaloff>:/images/go-next.png</normaloff>:/images/go-next.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Next Day</string>
-   </property>
-  </action>
-  <action name="actionPreviousDay">
-   <property name="icon">
-    <iconset resource="tvguide.qrc">
-     <normaloff>:/images/go-previous.png</normaloff>:/images/go-previous.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Previous Day</string>
-   </property>
-  </action>
-  <action name="actionNextWeek">
-   <property name="icon">
-    <iconset resource="tvguide.qrc">
-     <normaloff>:/images/go-down.png</normaloff>:/images/go-down.png</iconset>
-   </property>
-   <property name="text">
-    <string>Next &amp;Week</string>
-   </property>
-  </action>
-  <action name="actionPreviousWeek">
-   <property name="icon">
-    <iconset resource="tvguide.qrc">
-     <normaloff>:/images/go-up.png</normaloff>:/images/go-up.png</iconset>
-   </property>
-   <property name="text">
-    <string>Pre&amp;vious Week</string>
-   </property>
-  </action>
-  <action name="actionToday">
-   <property name="icon">
-    <iconset resource="tvguide.qrc">
-     <normaloff>:/images/today.png</normaloff>:/images/today.png</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Today</string>
    </property>
   </action>
   <action name="actionMorning">

@@ -49,10 +49,6 @@ private Q_SLOTS:
     void networkRequest(TvChannel *channel, const QDate &date, bool isIconFetch);
 
     void showToday();
-    void showNextDay();
-    void showPreviousDay();
-    void showNextWeek();
-    void showPreviousWeek();
 
     void showMorning();
     void showAfternoon();

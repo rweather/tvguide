@@ -52,14 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     action_Quit->setShortcuts(QKeySequence::Quit);
     actionReload->setShortcuts(QKeySequence::Refresh);
-    actionNextDay->setShortcuts(QKeySequence::MoveToNextPage);
-    actionPreviousDay->setShortcuts(QKeySequence::MoveToPreviousPage);
-    actionNextWeek->setShortcuts(QKeySequence::MoveToNextWord);
-    actionPreviousWeek->setShortcuts(QKeySequence::MoveToPreviousWord);
     actionZoomIn->setShortcuts(QKeySequence::ZoomIn);
     actionZoomOut->setShortcuts(QKeySequence::ZoomOut);
-
-    actionToday->setEnabled(false); // Calendar starts on today.
 
     connect(action_Quit, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -124,16 +118,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(action_Stop, SIGNAL(triggered()),
             m_channelList, SLOT(abort()));
     action_Stop->setEnabled(false);
-    connect(actionToday, SIGNAL(triggered()),
-            this, SLOT(showToday()));
-    connect(actionNextDay, SIGNAL(triggered()),
-            this, SLOT(showNextDay()));
-    connect(actionPreviousDay, SIGNAL(triggered()),
-            this, SLOT(showPreviousDay()));
-    connect(actionNextWeek, SIGNAL(triggered()),
-            this, SLOT(showNextWeek()));
-    connect(actionPreviousWeek, SIGNAL(triggered()),
-            this, SLOT(showPreviousWeek()));
     connect(actionMorning, SIGNAL(triggered()),
             this, SLOT(showMorning()));
     connect(actionAfternoon, SIGNAL(triggered()),
@@ -291,7 +275,6 @@ void MainWindow::networkRequest(TvChannel *channel, const QDate &date, bool isIc
 void MainWindow::dateChanged()
 {
     QDate date = calendar->selectedDate();
-    actionToday->setEnabled(date != QDate::currentDate());
     setDay(selectedChannels(), date);
 }
 
@@ -337,26 +320,6 @@ void MainWindow::programmesChanged(TvChannel *channel)
 void MainWindow::showToday()
 {
     calendar->setSelectedDate(QDate::currentDate());
-}
-
-void MainWindow::showNextDay()
-{
-    calendar->setSelectedDate(calendar->selectedDate().addDays(1));
-}
-
-void MainWindow::showPreviousDay()
-{
-    calendar->setSelectedDate(calendar->selectedDate().addDays(-1));
-}
-
-void MainWindow::showNextWeek()
-{
-    calendar->setSelectedDate(calendar->selectedDate().addDays(7));
-}
-
-void MainWindow::showPreviousWeek()
-{
-    calendar->setSelectedDate(calendar->selectedDate().addDays(-7));
 }
 
 void MainWindow::showMorning()
