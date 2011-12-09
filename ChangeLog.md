@@ -1,5 +1,13 @@
 ## Change log
 
+### 0.1.4
+
+* Save the selected channels/groups across runs.
+* Change the application title and set the window icon.
+* Remove next/previous day/week buttons to simplify the UI.
+* Start work on the Android version of the application.
+  Very basic channel selection and programme viewing, no bookmarks.
+
 ### 0.1.3
 
 * Completely new programme list widget that displays programmes for
