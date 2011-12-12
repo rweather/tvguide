@@ -49,6 +49,7 @@ public interface TvNetworkListener {
      *
      * @param channel the channel
      * @param date the date that failed to be fetched
+     * @param primaryDate the primary date for multi-day requests
      */
     public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate);
 }

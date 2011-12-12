@@ -92,6 +92,8 @@ public class TvProgramme {
      * @param parser Pull parser containing the input.  Must be positioned
      * on the programme element.
      * @param convertTimezone true to convert date/time values to local time
+     * @throws XmlPullParserException error in xml data
+     * @throws IOException error reading the xml data
      */
     public void load(XmlPullParser parser, boolean convertTimezone) throws XmlPullParserException, IOException {
         start = Utils.parseDateTime(parser.getAttributeValue(null, "start"), convertTimezone);

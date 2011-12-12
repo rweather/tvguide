@@ -203,7 +203,6 @@ public class TvChannel implements Comparable<TvChannel> {
      * to a new activity.
      * 
      * @return the bundle containing information about this channel
-     * @see fromBundle()
      */
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
@@ -222,7 +221,6 @@ public class TvChannel implements Comparable<TvChannel> {
      * 
      * @param bundle the bundle containing the channel information
      * @return the channel object
-     * @see toBundle()
      */
     public static TvChannel fromBundle(Bundle bundle) {
         TvChannel channel = new TvChannel();

@@ -123,6 +123,8 @@ public class Utils {
      * @param parser the XML parser to read from
      * @param name the name of the start element
      * @return the full text contents, or null if empty
+     * @throws XmlPullParserException error in xml data
+     * @throws IOException error reading the xml data
      */
     public static String getContents(XmlPullParser parser, String name) throws XmlPullParserException, IOException {
         String str = null;
