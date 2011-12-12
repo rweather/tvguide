@@ -24,6 +24,7 @@ import java.util.GregorianCalendar;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 public class Utils {
 
@@ -103,6 +104,8 @@ public class Utils {
      */
     public static Calendar parseDateTime(String str, boolean convertTimezone) {
         // Format looks like: 20111209060000 +1100
+        if (str == null)
+            return null;
         int year = parseField(str, 0, 4);
         int month = parseField(str, 4, 2);
         int day = parseField(str, 6, 2);
@@ -114,7 +117,34 @@ public class Utils {
         }
         return new GregorianCalendar(year, month - 1, day, hour, minute, second);
     }
-    
+
+    private static void appendField(StringBuilder builder, int value, int digits) {
+        int divider = 1;
+        while (digits-- > 1)
+            divider *= 10;
+        while (divider != 0) {
+            builder.append((char)('0' + (value / divider) % 10));
+            divider /= 10;
+        }
+    }
+
+    /**
+     * Formats a date/time value as a string.
+     * 
+     * @param date the date to format
+     * @return the formatted date
+     */
+    public static String formatDateTime(Calendar date) {
+        StringBuilder builder = new StringBuilder(16);
+        appendField(builder, date.get(Calendar.YEAR), 4);
+        appendField(builder, date.get(Calendar.MONTH) + 1, 2);
+        appendField(builder, date.get(Calendar.DAY_OF_MONTH), 2);
+        appendField(builder, date.get(Calendar.HOUR), 2);
+        appendField(builder, date.get(Calendar.MINUTE), 2);
+        appendField(builder, date.get(Calendar.SECOND), 2);
+        return builder.toString();
+    }
+
     /**
      * Gets the full text contents of an XML element.  The parser is assumed to be
      * positions on the start element.  Upon exit, the parser will be positioned
@@ -144,5 +174,18 @@ public class Utils {
         if (str != null && str.length() == 0)
             str = null;
         return str;
+    }
+    
+    public static void writeContents(XmlSerializer serializer, String name, String contents) throws IOException {
+        if (contents == null)
+            return;
+        serializer.startTag(null, name);
+        serializer.text(contents);
+        serializer.endTag(null, name);
+    }
+    
+    public static void writeEmptyTag(XmlSerializer serializer, String name) throws IOException {
+        serializer.startTag(null, name);
+        serializer.endTag(null, name);
     }
 }

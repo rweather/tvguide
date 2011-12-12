@@ -135,7 +135,7 @@ public class TvChannel implements Comparable<TvChannel> {
                 if (eventType == XmlPullParser.START_TAG &&
                         parser.getName().equals("programme")) {
                     // Parse the contents of a <programme> element.
-                    TvProgramme prog = new TvProgramme();
+                    TvProgramme prog = new TvProgramme(this);
                     prog.load(parser, convertTimezone);
                     progs.add(prog);
                     eventType = parser.getEventType();

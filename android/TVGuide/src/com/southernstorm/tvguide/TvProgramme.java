@@ -32,7 +32,8 @@ import android.text.SpannableString;
 
 public class TvProgramme {
 
-    public TvProgramme() {
+    public TvProgramme(TvChannel channel) {
+        this.channel = channel;
         directors = new ArrayList<String>();
         actors = new ArrayList<String>();
         presenters = new ArrayList<String>();
@@ -40,6 +41,8 @@ public class TvProgramme {
         otherCredits = new TreeMap<String, List<String>>();
     }
 
+    public TvChannel getChannel() { return channel; }
+    
     public Calendar getStart() { return start; }
     public void setStart(Calendar start) { this.start = start; }
 
@@ -70,6 +73,18 @@ public class TvProgramme {
     
     public String getEpisodeNumber() { return episodeNumber; }
     public int getSeason() { return season; }
+    
+    public int getYear() {
+        if (date == null || date.length() == 0) {
+            return 0;
+        } else {
+            try {
+                return Integer.valueOf(date);
+            } catch (NumberFormatException e) {
+                return 0;
+            }
+        }
+    }
 
     /**
      * Gets the duration of the programme in minutes.
@@ -482,6 +497,7 @@ public class TvProgramme {
     }
 
     // Internal state.
+    private TvChannel channel;
     private Calendar start;
     private Calendar stop;
     private String title;
