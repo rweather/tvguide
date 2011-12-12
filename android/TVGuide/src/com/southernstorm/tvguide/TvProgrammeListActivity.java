@@ -30,6 +30,7 @@ import android.app.ProgressDialog;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -58,8 +59,10 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private TvProgrammeListAdapter[] programmeListAdapters;
     private TvChannelCache channelCache;
     private ProgressDialog progressDialog;
+    private Calendar date;
     private TvChannel channel;
     private LayoutInflater inflater;
+    private boolean landscape;
 
     /** Called when the activity is first created. */
     @Override
@@ -89,11 +92,21 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         int year = intent.getIntExtra("date_year", 2000);
         int month = intent.getIntExtra("date_month", Calendar.JANUARY);
         int day = intent.getIntExtra("date_day", 1);
-        Calendar date = new GregorianCalendar(year, month, day);
+        date = new GregorianCalendar(year, month, day);
         channel = TvChannel.fromBundle(intent.getBundleExtra("channel"));
 
         // Show the channel name in the title bar.
         setTitle(channel.getName());
+
+        // Determine the initial portrait-vs-landscape orientation.
+        Configuration config = getResources().getConfiguration();
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            landscape = true;
+        else if (config.orientation == Configuration.ORIENTATION_PORTRAIT)
+            landscape = false;
+
+        // Calculate the tab height to use based on the orientation.
+        int tabHeight = getBestTabHeight();
 
         // Create the tabs for the next 5 days.
         TabHost tabHost = getTabHost();
@@ -103,17 +116,26 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             tabDate.add(Calendar.DAY_OF_MONTH, day);
             final int dayNum = day;
             final Calendar dayDate = tabDate;
+            CharSequence text;
+            if (landscape)
+                text = DateFormat.format("E MMM dd", tabDate);
+            else
+                text = DateFormat.format("E\nMMM dd", tabDate);
             TabHost.TabSpec spec = tabHost.newTabSpec("day" + day)
-                    .setIndicator(DateFormat.format("E\nMMM dd", tabDate))
+                    .setIndicator(text)
                     .setContent(new TabContentFactory() {
                         public View createTabContent(String tab) {
                             return createTabView(dayNum, dayDate);
                         }
                     });
             tabHost.addTab(spec);
+
+            // Adjust the height of the tab indicator to remove the icon display.
+            View indicator = tabHost.getTabWidget().getChildTabViewAt(day);
+            indicator.getLayoutParams().height = tabHeight;
             
             // Make the tab's title use multiple lines of text.
-            TextView title = (TextView)tabHost.getTabWidget().getChildAt(day).findViewById(android.R.id.title);
+            TextView title = (TextView)indicator.findViewById(android.R.id.title);
             title.setSingleLine(false);
             title.setGravity(0x11);     // Center the text in both directions.
         }
@@ -185,6 +207,41 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         SharedPreferences.Editor editor = getPreferences(0).edit();
         // TODO
         editor.commit();
+    }
+
+    @Override
+    public void onConfigurationChanged (Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+            changeOrientation(true);
+        else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT)
+            changeOrientation(false);
+    }
+
+    private int getBestTabHeight() {
+        int dp = (landscape ? 32 : 48);
+        return (int)(getResources().getDisplayMetrics().density * dp + 0.5f); // convert dp to pixels
+    }
+
+    private void changeOrientation(boolean landscape) {
+        if (this.landscape == landscape)
+            return;
+        this.landscape = landscape;
+        TabHost tabHost = getTabHost();
+        int tabHeight = getBestTabHeight();
+        for (int day = 0; day < NUM_DAYS; ++day) {
+            View indicator = tabHost.getTabWidget().getChildTabViewAt(day);
+            indicator.getLayoutParams().height = tabHeight;
+            TextView title = (TextView)indicator.findViewById(android.R.id.title);
+            Calendar tabDate = (Calendar)date.clone();
+            tabDate.add(Calendar.DAY_OF_MONTH, day);
+            CharSequence text;
+            if (landscape)
+                text = DateFormat.format("E MMM dd", tabDate);
+            else
+                text = DateFormat.format("E\nMMM dd", tabDate);
+            title.setText(text);
+        }
     }
 
     private void selectDate(int day, Calendar date) {
