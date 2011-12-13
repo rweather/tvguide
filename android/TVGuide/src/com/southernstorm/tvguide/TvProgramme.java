@@ -436,13 +436,14 @@ public class TvProgramme {
                     stars = 5;
                 String rating = "";
                 int istars = (int)(stars);
-                double leftOver = stars - istars;
+                //double leftOver = stars - istars;
                 for (int black = 0; black < istars; ++black)
                     rating += '\u2605';  // Black star.
-                if (leftOver >= 0.5f) {
+                // Android fonts don't have black outlined star.
+                /*if (leftOver >= 0.5f) {
                     rating += '\u272D';  // Black outlined star.
                     ++istars;
-                }
+                }*/
                 for (int white = istars; white < 5; ++white)
                     rating += '\u2606';  // White star.
                 return rating;
