@@ -312,6 +312,10 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private static final int ITEM_WEB_SEARCH_IMDB = 3;
     private static final int ITEM_WEB_SEARCH_EPGUIDES = 4;
     private static final int ITEM_WEB_SEARCH_WIKIPEDIA = 5;
+    private static final int ITEM_ADD_BOOKMARK = 10;
+    private static final int ITEM_EDIT_BOOKMARK = 11;
+    private static final int ITEM_TICK = 12;
+    private static final int ITEM_UNTICK = 13;
     
     // Workaround for the lack of expandable list item ID's on submenu items.
     private ContextMenuInfo savedMenuInfo = null;
@@ -319,6 +323,19 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         menu.setHeaderTitle("Programme Menu");
+        ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)menuInfo;
+        int groupId = getProgrammeGroupId(info);
+        TvProgramme prog = programmeForMenuItem(info, groupId);
+        if (prog != null) {
+            if (prog.getBookmark() != null)
+                menu.add(ITEM_EDIT_BOOKMARK, 0, 0, "Edit Bookmark");
+            else
+                menu.add(ITEM_ADD_BOOKMARK, 0, 0, "Add Bookmark");
+            if (prog.getBookmarkMatch() == TvBookmarkMatch.TickMatch)
+                menu.add(ITEM_UNTICK, 0, 0, "Untick Show");
+            else
+                menu.add(ITEM_TICK, 0, 0, "Tick Show");
+        }
         SubMenu searchMenu = menu.addSubMenu("Web Search");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_GOOGLE, 0, "Google");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_IMDB, 0, "IMDb");
@@ -332,23 +349,55 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         savedMenuInfo = null;
     }
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)item.getMenuInfo();
-        if (info == null)
-            info = (ExpandableListContextMenuInfo)savedMenuInfo;
+    private int getProgrammeGroupId(ExpandableListContextMenuInfo menuInfo) {
+        ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)menuInfo;
         int type = ExpandableListView.getPackedPositionType(info.packedPosition);
         int groupId = -1;
         if (type == ExpandableListView.PACKED_POSITION_TYPE_CHILD ||
                 type == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
             groupId = ExpandableListView.getPackedPositionGroup(info.packedPosition);
         }
-        if (groupId == -1)
-            return false;
+        return groupId;
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)item.getMenuInfo();
+        if (info == null)
+            info = (ExpandableListContextMenuInfo)savedMenuInfo;
+        int groupId = getProgrammeGroupId(info);
         TvProgramme prog = programmeForMenuItem(info, groupId);
         if (prog == null)
             return false;
-        if (item.getGroupId() == ITEM_WEB_SEARCH) {
+        TvProgrammeListAdapter adapter = adapterForMenuItem(info);
+        switch (item.getGroupId()) {
+        case ITEM_ADD_BOOKMARK:
+            TvBookmark bookmark = new TvBookmark();
+            bookmark.setTitle(prog.getTitle());
+            bookmark.setChannelId(prog.getChannel().getId());
+            bookmark.setDayOfWeek(prog.getStart().get(Calendar.DAY_OF_WEEK));
+            bookmark.setStartTime(TvBookmark.getTimeOfDay(prog.getStart()));
+            bookmark.setStopTime(TvBookmark.getTimeOfDay(prog.getStop()));
+            // TODO
+            prog.setBookmark(bookmark, TvBookmarkMatch.FullMatch);
+            adapter.updateProgramme(groupId);
+            break;
+        case ITEM_EDIT_BOOKMARK:
+            // TODO
+            prog.setBookmark(prog.getBookmark(), TvBookmarkMatch.TitleMatch);
+            adapter.updateProgramme(groupId);
+            break;
+        case ITEM_TICK:
+            // TODO
+            prog.setBookmark(null, TvBookmarkMatch.TickMatch);
+            adapter.updateProgramme(groupId);
+            break;
+        case ITEM_UNTICK:
+            // TODO
+            prog.setBookmark(null, TvBookmarkMatch.NoMatch);
+            adapter.updateProgramme(groupId);
+            break;
+        case ITEM_WEB_SEARCH:
             switch (item.getItemId()) {
             case ITEM_WEB_SEARCH_GOOGLE:
                 webSearch(prog, "http://www.google.com/search?q=");
@@ -363,17 +412,26 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
                 webSearch(prog, "http://en.wikipedia.org/wiki/Special:Search?search=");
                 break;
             }
+            break;
         }
         return false;
     }
     
-    private TvProgramme programmeForMenuItem(ExpandableListContextMenuInfo info, int groupId) {
+    private TvProgrammeListAdapter adapterForMenuItem(ExpandableListContextMenuInfo info) {
         ViewParent view = info.targetView.getParent();
         while (view != null && !(view instanceof ExpandableListView))
             view = view.getParent();
         if (view == null)
             return null;
-        TvProgrammeListAdapter adapter = (TvProgrammeListAdapter)(((ExpandableListView)view).getExpandableListAdapter());
+        return (TvProgrammeListAdapter)(((ExpandableListView)view).getExpandableListAdapter());
+    }
+
+    private TvProgramme programmeForMenuItem(ExpandableListContextMenuInfo info, int groupId) {
+        if (groupId == -1)
+            return null;
+        TvProgrammeListAdapter adapter = adapterForMenuItem(info);
+        if (adapter == null)
+            return null;
         return adapter.getProgrammes().get(groupId);
     }
 
