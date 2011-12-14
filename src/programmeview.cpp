@@ -122,7 +122,7 @@ void ProgrammeView::setProgrammes(const QDate &date, const QList<TvProgramme *> 
         ColumnInfo *column = new ColumnInfo();
         for (int index = 0; index < programmes.size(); ++index) {
             ProgInfo info(programmes.at(index));
-            info.dayNumber = date.daysTo(info.prog->start().date());
+            info.dayNumber = qMax(date.daysTo(info.prog->start().date()), 0);
             column->programmes.append(info);
         }
         writeColumn(column, 0);
@@ -158,7 +158,7 @@ void ProgrammeView::setMultiChannelProgrammes(const QDate &date, const QList<TvP
         ColumnInfo *column = new ColumnInfo();
         for (int index = start; index < end; ++index) {
             ProgInfo info(programmes.at(index));
-            info.dayNumber = date.daysTo(info.prog->start().date());
+            info.dayNumber = qMax(date.daysTo(info.prog->start().date()), 0);
             column->programmes.append(info);
         }
         writeColumn(column, m_columns.size());
