@@ -197,8 +197,7 @@ TvBookmark::Match TvBookmarkList::match
         const TvTick *tick = tickit.value();
         if (tick->match(programme)) {
             *bookmark = 0;
-            result = TvBookmark::TickMatch;
-            break;
+            return TvBookmark::TickMatch;
         }
         ++tickit;
     }
