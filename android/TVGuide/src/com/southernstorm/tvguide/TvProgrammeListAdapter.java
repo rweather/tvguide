@@ -31,6 +31,7 @@ import android.widget.TextView;
 
 public class TvProgrammeListAdapter implements ExpandableListAdapter {
 
+    private Context context;
     private List<TvProgramme> programmes;
     private List<DataSetObserver> observers;
     private LayoutInflater inflater;
@@ -43,6 +44,7 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
     private static final List<TvProgramme> emptyProgrammes = new ArrayList<TvProgramme>();
 
     public TvProgrammeListAdapter(Context context) {
+        this.context = context;
         programmes = emptyProgrammes;
         observers = new ArrayList<DataSetObserver>();
         inflater = LayoutInflater.from(context);
@@ -232,9 +234,9 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
                 view.time.setBackgroundResource(timeColorNight);
             view.time.setText(Utils.formatTimeProgrammeList(timeval));
         }
-        view.short_desc.setText(prog.getShortDescription());
+        view.short_desc.setText(prog.getShortDescription(context));
         if (isExpanded)
-            view.long_desc.setText(prog.getLongDescription());
+            view.long_desc.setText(prog.getLongDescription(context));
         return convertView;
     }
 

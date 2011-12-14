@@ -20,9 +20,12 @@ package com.southernstorm.tvguide;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.ImageSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
@@ -34,8 +37,10 @@ public class RichTextFormatter {
         int color;
         int start;
         int end;
+        int resourceId;
     };
 
+    private Context context;
     private StringBuilder builder;
     private List<Style> styles;
     private int textStyle;
@@ -47,7 +52,8 @@ public class RichTextFormatter {
     private static final int STRIKE_THROUGH = 0x00010000;
     private static final int UNDERLINE      = 0x00020000;
 
-    public RichTextFormatter() {
+    public RichTextFormatter(Context context) {
+        this.context = context;
         this.builder = new StringBuilder();
         this.styles = new ArrayList<Style>();
         this.textStyle = 0;
@@ -173,6 +179,25 @@ public class RichTextFormatter {
             this.color = color;
         }
     }
+    
+    /**
+     * Adds an image resource to the output at this position.
+     * 
+     * @param resourceId the identifier of the image resource
+     */
+    public void addImage(int resourceId) {
+        flushStyle();
+        builder.append(' ');
+        int length = builder.length();
+        Style style = new Style();
+        style.textStyle = 0;
+        style.color = 0;
+        style.start = startSpan;
+        style.end = length;
+        style.resourceId = resourceId;
+        styles.add(style);
+        startSpan = length;
+    }
 
     /**
      * Converts this formatter to a SpannableString suitable for
@@ -184,6 +209,12 @@ public class RichTextFormatter {
         flushStyle();
         SpannableString str = new SpannableString(builder.toString());
         for (Style style: styles) {
+            if (style.resourceId != 0) {
+                Drawable drawable = context.getResources().getDrawable(style.resourceId);
+                drawable.setBounds(0, 0, 16, 16);
+                str.setSpan(new ImageSpan(drawable, ImageSpan.ALIGN_BASELINE), style.start, style.end, 0);
+                continue;
+            }
             int textStyle = style.textStyle;
             if ((textStyle & 0xFFFF) != 0)
                 str.setSpan(new StyleSpan(textStyle & 0xFFFF), style.start, style.end, 0);
@@ -205,6 +236,7 @@ public class RichTextFormatter {
             style.color = color;
             style.start = startSpan;
             style.end = length;
+            style.resourceId = 0;
             styles.add(style);
             startSpan = length;
         }

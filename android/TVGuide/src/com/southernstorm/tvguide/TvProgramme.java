@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import android.content.Context;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -285,10 +287,11 @@ public class TvProgramme {
     /**
      * Returns the short description of the programme to display in two lines.
      * 
+     * @param context the application context for resolving images
      * @return the short description as a formatted SpannableString
      */
-    public SpannableString getShortDescription() {
-        RichTextFormatter formatter = new RichTextFormatter();
+    public SpannableString getShortDescription(Context context) {
+        RichTextFormatter formatter = new RichTextFormatter(context);
         formatter.setColor(TITLE_COLOR);
         if (isMovie)
             formatter.append("MOVIE: ");
@@ -356,10 +359,11 @@ public class TvProgramme {
     /**
      * Returns the long description of the programme to display when the item is expanded.
      * 
+     * @param context the application context for resolving images
      * @return the long description as a formatted SpannableString
      */
-    public SpannableString getLongDescription() {
-        RichTextFormatter formatter = new RichTextFormatter();
+    public SpannableString getLongDescription(Context context) {
+        RichTextFormatter formatter = new RichTextFormatter(context);
         
         // Add the full programme description.
         formatter.setColor(DETAILS_COLOR);
