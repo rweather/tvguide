@@ -41,6 +41,7 @@ public class TvProgramme {
         presenters = new ArrayList<String>();
         categories = new ArrayList<String>();
         otherCredits = new TreeMap<String, List<String>>();
+        match = TvBookmarkMatch.NoMatch;
     }
 
     public TvChannel getChannel() { return channel; }
@@ -98,6 +99,45 @@ public class TvProgramme {
             return (stop.getTimeInMillis() - start.getTimeInMillis()) / (1000 * 60);
         else
             return 0;
+    }
+
+    /**
+     * Gets the bookmark that this programme has matched against.
+     * 
+     * @return the bookmark, null for no match
+     */
+    public TvBookmark getBookmark() {
+        return bookmark;
+    }
+    
+    /**
+     * Gets the type of match that occurred for this programme's bookmark.
+     * 
+     * @return the type of match
+     */
+    public TvBookmarkMatch getBookmarkMatch() {
+        return match;
+    }
+    
+    /**
+     * Sets the bookmark and type of match for this programme.
+     * 
+     * @param bookmark the bookmark
+     * @param match the type of match
+     */
+    public void setBookmark(TvBookmark bookmark, TvBookmarkMatch match) {
+        this.bookmark = bookmark;
+        this.match = match;
+    }
+    
+    /**
+     * Gets the match type to display.  This may be slightly different than the
+     * actual match based on the programmes before and after this one.
+     * 
+     * @return the type of match to display the programme with
+     */
+    private TvBookmarkMatch getDisplayMatch() {
+        return match;
     }
 
     /**
@@ -292,10 +332,34 @@ public class TvProgramme {
      */
     public SpannableString getShortDescription(Context context) {
         RichTextFormatter formatter = new RichTextFormatter(context);
-        formatter.setColor(TITLE_COLOR);
+        TvBookmarkMatch match = getDisplayMatch();
+        if (match == TvBookmarkMatch.TickMatch)
+            formatter.addImage(R.drawable.tick);
+        else if (bookmark != null && !bookmark.isOnAir() && match != TvBookmarkMatch.ShouldMatch)
+            formatter.addImage(R.drawable.ledred);
+        switch (match) {
+        case NoMatch:
+        case ShouldMatch:
+        case TickMatch:
+            formatter.setColor(TITLE_COLOR);
+            break;
+        case FullMatch:
+            formatter.setColor(bookmark.getColor());
+            formatter.setBold(true);
+            break;
+        case Overrun:
+        case Underrun:
+            formatter.setColor(bookmark.getColor()); // TODO: make the color lighter
+            formatter.setBold(true);
+            break;
+        case TitleMatch:
+            formatter.setColor(bookmark.getColor());
+            break;
+        }
         if (isMovie)
             formatter.append("MOVIE: ");
         formatter.append(title);
+        formatter.setBold(false);
         formatter.setColor(DETAILS_COLOR);
         if (date != null && !date.equals("0"))
             formatter.append(" (" + date + ")");
@@ -352,6 +416,20 @@ public class TvProgramme {
             formatter.append("Premiere");
             formatter.setColor(DETAILS_COLOR);
             formatter.setBold(false);
+        }
+        if (match == TvBookmarkMatch.ShouldMatch) {
+            // Show the title of the programme that was expected in this timeslot.
+            String title = bookmark.getTitle();
+            String seasons = bookmark.getSeasons();
+            String years = bookmark.getYears();
+            if (seasons != null)
+                title += ", Season " + seasons;
+            if (years != null)
+                title += ", " + years;
+            formatter.nl();
+            formatter.setStrikeThrough(true);
+            formatter.append(title);
+            formatter.setStrikeThrough(false);
         }
         return formatter.toSpannableString();
     }
@@ -525,4 +603,6 @@ public class TvProgramme {
     private boolean isPremiere;
     private boolean isRepeat;
     private boolean isMovie;
+    private TvBookmark bookmark;
+    private TvBookmarkMatch match;
 }
