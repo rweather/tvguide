@@ -87,6 +87,8 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         super.onStart();
         channelCache.registerReceivers();
         
+        TvBookmarkManager.getInstance().addContext(this);
+        
         // Unpack the channel and date from the intent.
         Intent intent = getIntent();
         int year = intent.getIntExtra("date_year", 2000);
@@ -182,6 +184,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             programmeListViews[day] = null;
             programmeListAdapters[day] = null;
         }
+        TvBookmarkManager.getInstance().removeContext(this);
         super.onStop();
     }
 
@@ -378,6 +381,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             bookmark.setDayOfWeek(prog.getStart().get(Calendar.DAY_OF_WEEK));
             bookmark.setStartTime(TvBookmark.getTimeOfDay(prog.getStart()));
             bookmark.setStopTime(TvBookmark.getTimeOfDay(prog.getStop()));
+            TvBookmarkManager.getInstance().addBookmark(bookmark);
             // TODO
             prog.setBookmark(bookmark, TvBookmarkMatch.FullMatch);
             adapter.updateProgramme(groupId);
@@ -388,13 +392,20 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             adapter.updateProgramme(groupId);
             break;
         case ITEM_TICK:
-            // TODO
-            prog.setBookmark(null, TvBookmarkMatch.TickMatch);
-            adapter.updateProgramme(groupId);
-            break;
         case ITEM_UNTICK:
-            // TODO
-            prog.setBookmark(null, TvBookmarkMatch.NoMatch);
+            TvTick tick = new TvTick();
+            tick.setTitle(prog.getTitle());
+            tick.setChannelId(prog.getChannel().getId());
+            tick.setStartTime(prog.getStart());
+            tick.setTimestamp(new GregorianCalendar());
+            if (item.getGroupId() == ITEM_TICK) {
+                TvBookmarkManager.getInstance().addTick(tick);
+                prog.setBookmark(null, TvBookmarkMatch.TickMatch);
+            } else {
+                // TODO: rescan bookmarks in case the programme was bookmarked
+                TvBookmarkManager.getInstance().removeTick(tick);
+                prog.setBookmark(null, TvBookmarkMatch.NoMatch);
+            }
             adapter.updateProgramme(groupId);
             break;
         case ITEM_WEB_SEARCH:

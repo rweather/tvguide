@@ -188,4 +188,32 @@ public class Utils {
         serializer.startTag(null, name);
         serializer.endTag(null, name);
     }
+    
+    /**
+     * Null-safe version of string equality.
+     * 
+     * @param s1 the first string
+     * @param s2 the second string
+     * @return true if equal, false if not
+     */
+    public static boolean stringEquals(String s1, String s2) {
+        if (s1 == null || s2 == null)
+            return s1 == s2;
+        else
+            return s1.equals(s2);
+    }
+    
+    /**
+     * Null-safe version of date equality.
+     * 
+     * @param c1 the first date
+     * @param c2 the second date
+     * @return true if equal, false if not
+     */
+    public static boolean dateEquals(Calendar c1, Calendar c2) {
+        if (c1 == null || c2 == null)
+            return c1 == c2;
+        else
+            return c1.equals(c2);
+    }
 }

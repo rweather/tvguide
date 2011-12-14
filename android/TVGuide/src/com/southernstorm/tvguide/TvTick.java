@@ -183,4 +183,14 @@ public class TvTick {
         Utils.writeContents(serializer, "timestamp", Utils.formatDateTime(timestamp));
         serializer.endTag(null, "tick");
     }
+    
+    public boolean equals(TvTick tick) {
+        if (!Utils.stringEquals(title, tick.getTitle()))
+            return false;
+        if (!Utils.stringEquals(channelId, tick.getChannelId()))
+            return false;
+        if (!Utils.dateEquals(startTime, tick.getStartTime()))
+            return false;
+        return true;
+    }
 }
