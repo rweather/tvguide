@@ -139,7 +139,7 @@ public class Utils {
         appendField(builder, date.get(Calendar.YEAR), 4);
         appendField(builder, date.get(Calendar.MONTH) + 1, 2);
         appendField(builder, date.get(Calendar.DAY_OF_MONTH), 2);
-        appendField(builder, date.get(Calendar.HOUR), 2);
+        appendField(builder, date.get(Calendar.HOUR_OF_DAY), 2);
         appendField(builder, date.get(Calendar.MINUTE), 2);
         appendField(builder, date.get(Calendar.SECOND), 2);
         return builder.toString();

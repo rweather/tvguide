@@ -694,6 +694,7 @@ public class TvBookmark {
         serializer.startTag(null, "bookmark");
         Utils.writeContents(serializer, "title", title);
         Utils.writeContents(serializer, "channel-id", channelId);
+        Utils.writeContents(serializer, "days", Integer.toString(dayOfWeekMask));
         Utils.writeContents(serializer, "start-time", formatTime(startTime));
         Utils.writeContents(serializer, "stop-time", formatTime(stopTime));
         if (anyTime)
@@ -727,6 +728,7 @@ public class TvBookmark {
                     minute = value;
                 else
                     second = value;
+                value = 0;
                 ++field;
             }
         }

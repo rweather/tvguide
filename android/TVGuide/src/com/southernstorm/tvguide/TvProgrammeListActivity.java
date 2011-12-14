@@ -50,7 +50,7 @@ import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.TabHost.TabContentFactory;
 
-public class TvProgrammeListActivity extends TabActivity implements TvNetworkListener {
+public class TvProgrammeListActivity extends TabActivity implements TvNetworkListener, TvBookmarkChangedListener {
 
     private static final int NUM_DAYS = 5;
     
@@ -88,6 +88,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         channelCache.registerReceivers();
         
         TvBookmarkManager.getInstance().addContext(this);
+        TvBookmarkManager.getInstance().addChangedListener(this);
         
         // Unpack the channel and date from the intent.
         Intent intent = getIntent();
@@ -185,6 +186,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             programmeListAdapters[day] = null;
         }
         TvBookmarkManager.getInstance().removeContext(this);
+        TvBookmarkManager.getInstance().removeChangedListener(this);
         super.onStop();
     }
 
@@ -301,8 +303,11 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         }
         for (int day = 0; day < NUM_DAYS; ++day) {
             TvProgrammeListAdapter adapter = programmeListAdapters[day];
-            if (adapter != null && adapter.isChannelCovered(channel) && adapter.isDateCovered(date))
-                adapter.setProgrammes(channel.programmesForDay(adapter.getPrimaryDate()));
+            if (adapter != null && adapter.isChannelCovered(channel) && adapter.isDateCovered(date)) {
+                List<TvProgramme> programmes = channel.programmesForDay(adapter.getPrimaryDate());
+                TvBookmarkManager.getInstance().matchProgrammes(programmes);
+                adapter.setProgrammes(programmes);
+            }
         }
     }
 
@@ -372,7 +377,6 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         TvProgramme prog = programmeForMenuItem(info, groupId);
         if (prog == null)
             return false;
-        TvProgrammeListAdapter adapter = adapterForMenuItem(info);
         switch (item.getGroupId()) {
         case ITEM_ADD_BOOKMARK:
             TvBookmark bookmark = new TvBookmark();
@@ -382,14 +386,9 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             bookmark.setStartTime(TvBookmark.getTimeOfDay(prog.getStart()));
             bookmark.setStopTime(TvBookmark.getTimeOfDay(prog.getStop()));
             TvBookmarkManager.getInstance().addBookmark(bookmark);
-            // TODO
-            prog.setBookmark(bookmark, TvBookmarkMatch.FullMatch);
-            adapter.updateProgramme(groupId);
             break;
         case ITEM_EDIT_BOOKMARK:
             // TODO
-            prog.setBookmark(prog.getBookmark(), TvBookmarkMatch.TitleMatch);
-            adapter.updateProgramme(groupId);
             break;
         case ITEM_TICK:
         case ITEM_UNTICK:
@@ -398,15 +397,10 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             tick.setChannelId(prog.getChannel().getId());
             tick.setStartTime(prog.getStart());
             tick.setTimestamp(new GregorianCalendar());
-            if (item.getGroupId() == ITEM_TICK) {
+            if (item.getGroupId() == ITEM_TICK)
                 TvBookmarkManager.getInstance().addTick(tick);
-                prog.setBookmark(null, TvBookmarkMatch.TickMatch);
-            } else {
-                // TODO: rescan bookmarks in case the programme was bookmarked
+            else
                 TvBookmarkManager.getInstance().removeTick(tick);
-                prog.setBookmark(null, TvBookmarkMatch.NoMatch);
-            }
-            adapter.updateProgramme(groupId);
             break;
         case ITEM_WEB_SEARCH:
             switch (item.getItemId()) {
@@ -460,6 +454,16 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             startActivity(intent);
         } catch (UnsupportedEncodingException e) {
             // Ignore - shouldn't happen.
+        }
+    }
+    
+    public void bookmarksChanged() {
+        for (int day = 0; day < NUM_DAYS; ++day) {
+            TvProgrammeListAdapter adapter = programmeListAdapters[day];
+            if (adapter != null) {
+                TvBookmarkManager.getInstance().matchProgrammes(adapter.getProgrammes());
+                adapter.updateAllProgrammes();
+            }
         }
     }
 }

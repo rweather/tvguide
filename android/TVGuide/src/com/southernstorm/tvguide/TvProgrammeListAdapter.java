@@ -177,13 +177,9 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
     }
 
     /**
-     * Updates the view for a specific programme in this list because something has
-     * changed on that programme only.
-     * 
-     * @param index the index of the programme that has changed
+     * Updates all programmes in the view.
      */
-    public void updateProgramme(int index) {
-        // TODO: make this more efficient by updating in-place
+    public void updateAllProgrammes() {
         for (DataSetObserver observer: observers)
             observer.onChanged();
     }

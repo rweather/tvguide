@@ -23,6 +23,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -44,6 +46,7 @@ public class TvBookmarkManager {
     private List<Context> contexts;
     private BookmarkMediaHandler mediaHandler;
     private boolean isLoaded;
+    private List<TvBookmarkChangedListener> listeners;
     
     private class BookmarkMediaHandler extends ExternalMediaHandler {
 
@@ -63,6 +66,7 @@ public class TvBookmarkManager {
         contexts = new ArrayList<Context>();
         mediaHandler = null;
         isLoaded = false;
+        listeners = new ArrayList<TvBookmarkChangedListener>();
     }
 
     /**
@@ -118,6 +122,11 @@ public class TvBookmarkManager {
             context = contexts.get(0);
             mediaHandler = new BookmarkMediaHandler(context);
             mediaHandler.registerReceivers();
+        }
+        if (mediaHandler == null) {
+            // No more contexts, so mark the data to be reloaded the next time
+            // we have a context just in case the SD card contents was changed.
+            isLoaded = false;
         }
     }
 
@@ -204,6 +213,7 @@ public class TvBookmarkManager {
         File file = getBookmarksFile();
         if (!file.exists())
             return;
+        Calendar today = new GregorianCalendar();
         try {
             FileInputStream fileStream = new FileInputStream(file);
             try {
@@ -224,7 +234,9 @@ public class TvBookmarkManager {
                         // Parse the contents of a <tick> element.
                         TvTick tick = new TvTick();
                         tick.loadFromXml(parser);
-                        ticks.add(tick);
+                        long diff = (today.getTimeInMillis() - tick.getTimestamp().getTimeInMillis());
+                        if (diff < 30 * 24 * 60 * 60 * 1000) // ticks expire after 30 days
+                            ticks.add(tick);
                         eventType = parser.getEventType();
                     } else {
                         // Skip unknown element.
@@ -262,6 +274,7 @@ public class TvBookmarkManager {
             fileStream.close();
         } catch (IOException e) {
         }
+        notifyChanged();
     }
 
     /**
@@ -277,6 +290,74 @@ public class TvBookmarkManager {
             bookmarks.clear();
             ticks.clear();
         }
-        // TODO: notify interested parties that matched bookmarks need to be refreshed
+        notifyChanged();
+    }
+    
+    private void notifyChanged() {
+        for (TvBookmarkChangedListener listener: listeners)
+            listener.bookmarksChanged();
+    }
+
+    public void addChangedListener(TvBookmarkChangedListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeChangedListener(TvBookmarkChangedListener listener) {
+        listeners.remove(listener);
+    }
+    
+    /**
+     * Match a programme against the bookmarks and ticks in this manager.
+     * 
+     * @param prog the programme
+     */
+    public void matchProgramme(TvProgramme prog) {
+        TvBookmarkMatch result = TvBookmarkMatch.NoMatch;
+        TvBookmark bookmark = null;
+        
+        // Check the list of ticked programmes first as ticking takes
+        // precedence over bookmark matching.
+        // TODO: tick indexing
+        for (TvTick tick: ticks) {
+            if (tick.match(prog)) {
+                prog.setBookmark(null, TvBookmarkMatch.TickMatch);
+                return;
+            }
+        }
+        
+        // Look for a bookmark match.
+        // TODO: bookmark indexing
+        List<TvBookmark> candidates = bookmarks;
+        for (TvBookmark bm: candidates) {
+            TvBookmarkMatch match = bm.match(prog);
+            if (match != TvBookmarkMatch.NoMatch) {
+                if (match == TvBookmarkMatch.ShouldMatch) {
+                    if (result != TvBookmarkMatch.TitleMatch) {
+                        bookmark = bm;
+                        result = TvBookmarkMatch.ShouldMatch;
+                    }
+                } else if (match != TvBookmarkMatch.TitleMatch) {
+                    bookmark = bm;
+                    result = match;
+                    break;
+                } else {
+                    bookmark = bm;
+                    result = TvBookmarkMatch.TitleMatch;
+                }
+            }
+        }
+
+        // Update the programme's bookmark details.
+        prog.setBookmark(bookmark, result);
+    }
+    
+    /**
+     * Match all programmes in a list against the bookmarks and ticks in this manager.
+     * 
+     * @param programmes the list of programmes
+     */
+    public void matchProgrammes(List<TvProgramme> programmes) {
+        for (TvProgramme prog: programmes)
+            matchProgramme(prog);
     }
 }
