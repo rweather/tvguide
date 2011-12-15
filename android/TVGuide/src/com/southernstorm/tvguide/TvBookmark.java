@@ -64,6 +64,8 @@ public class TvBookmark {
     private int color;
     private List<Range> seasons;
     private List<Range> years;
+    private long internalId;
+    private static long nextInternalId = 0;
 
     /**
      * Constructs a new bookmark with default parameters.
@@ -77,8 +79,13 @@ public class TvBookmark {
         anyTime = false;
         onAir = true;
         color = 0xFFFF0000;
+        internalId = nextInternalId++;
     }
 
+    public long getInternalId() {
+        return internalId;
+    }
+    
     /**
      * Gets the title of the programme to match with this bookmark.
      * 
@@ -175,16 +182,16 @@ public class TvBookmark {
     }
 
     /**
-     * Gets the human-readable name of the day of week mask.
+     * Gets the human-readable name of a day of week mask.
      * 
+     * @param mask the day of week mask
      * @param longForm true to use long-form day names (e.g. Monday), false for short-form (e.g. Mon)
      * @return the name
      */
-    public String getDayOfWeekMaskName(boolean longForm) {
+    public static String getDayOfWeekMaskName(int mask, boolean longForm) {
         String name = "";
         int day = 1;
         int endDay;
-        int mask = dayOfWeekMask;
         if (mask == ANY_DAY_MASK)
             return "Any day";
         while (day <= 7) {
@@ -226,6 +233,16 @@ public class TvBookmark {
             return "No day";
         else
             return name;
+    }
+    
+    /**
+     * Gets the human-readable name of the day of week mask.
+     * 
+     * @param longForm true to use long-form day names (e.g. Monday), false for short-form (e.g. Mon)
+     * @return the name
+     */
+    public String getDayOfWeekMaskName(boolean longForm) {
+        return getDayOfWeekMaskName(dayOfWeekMask, longForm);
     }
     
     /**

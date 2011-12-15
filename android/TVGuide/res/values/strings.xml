@@ -3,4 +3,19 @@
     <string name="app_name">Southern Storm TV</string>
     <string name="app_version">0.1.5</string>
     <string name="user_agent">qtvguide_android/0.1.5</string>
+
+    <string name="edit_bookmark_window_title">Edit Bookmark</string>
+    <string name="edit_bookmark_title">Title</string>
+    <string name="edit_bookmark_channel">Channel</string>
+    <string name="edit_bookmark_day">Day</string>
+    <string name="edit_bookmark_color">Color</string>
+    <string name="edit_bookmark_start_time">Start</string>
+    <string name="edit_bookmark_stop_time">Stop</string>
+    <string name="edit_bookmark_any_time">Any time</string>
+    <string name="edit_bookmark_on_air">On Air</string>
+    <string name="edit_bookmark_off_air">Off Air</string>
+    <string name="edit_bookmark_season">Season</string>
+    <string name="edit_bookmark_year">Year</string>
+    <string name="edit_bookmark_save">Save</string>
+    <string name="edit_bookmark_cancel">Cancel</string>
 </resources>

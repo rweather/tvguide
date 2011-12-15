@@ -26,8 +26,11 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.TabActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -64,6 +67,9 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private LayoutInflater inflater;
     private boolean landscape;
 
+    private static final int DIALOG_PICK_COLOR = 1;
+    private static final int DIALOG_EDIT_BOOKMARK = 2;
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -386,9 +392,10 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             bookmark.setStartTime(TvBookmark.getTimeOfDay(prog.getStart()));
             bookmark.setStopTime(TvBookmark.getTimeOfDay(prog.getStop()));
             TvBookmarkManager.getInstance().addBookmark(bookmark);
+            showBookmarkDialog(DIALOG_PICK_COLOR, bookmark);
             break;
         case ITEM_EDIT_BOOKMARK:
-            // TODO
+            showBookmarkDialog(DIALOG_EDIT_BOOKMARK, prog.getBookmark());
             break;
         case ITEM_TICK:
         case ITEM_UNTICK:
@@ -465,5 +472,45 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
                 adapter.updateAllProgrammes();
             }
         }
+    }
+    
+    private void showBookmarkDialog(int id, TvBookmark bookmark) {
+        Bundle bundle = new Bundle();
+        bundle.putLong("bookmark_id", bookmark.getInternalId());
+        removeDialog(id); // Don't reuse previous dialog as the bundle will be different.
+        showDialog(id, bundle);
+    }
+
+    private static final int[] colorValues = {0xFFFF0000, 0xFF00AA00, 0xFF0000FF, 0xFFFFAA00, 0xFFFF007F}; 
+
+    @Override
+    public Dialog onCreateDialog(int id, Bundle bundle) {
+        long bookmarkId = bundle.getLong("bookmark_id", -1L);
+        final TvBookmark bookmark = TvBookmarkManager.getInstance().findBookmarkById(bookmarkId);
+        switch (id) {
+        case DIALOG_PICK_COLOR:
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Pick a color");
+            builder.setAdapter(new EditBookmarkColorAdapter(this), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    bookmark.setColor(colorValues[item]);
+                    TvBookmarkManager.getInstance().updateBookmark(bookmark);
+                    dialog.dismiss();
+                }
+            });
+            return builder.create();
+        case DIALOG_EDIT_BOOKMARK:
+            EditBookmarkDialog dialog = new EditBookmarkDialog(this);
+            dialog.copyFromBookmark(bookmark);
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                public void onDismiss(DialogInterface dialog) {
+                    ((EditBookmarkDialog)dialog).copyToBookmark(bookmark);
+                    TvBookmarkManager.getInstance().updateBookmark(bookmark);
+                }
+            });
+            return dialog;
+        default: break;
+        }
+        return null;
     }
 }

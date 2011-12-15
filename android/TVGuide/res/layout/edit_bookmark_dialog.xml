@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <TableLayout android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_title" />
+            <EditText android:id="@+id/edit_bookmark_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </TableRow>
+
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_channel" />
+            <Spinner android:id="@+id/edit_bookmark_channel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:prompt="@string/edit_bookmark_channel" />
+        </TableRow>
+        
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_day" />
+            <Spinner android:id="@+id/edit_bookmark_day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:prompt="@string/edit_bookmark_day" />
+        </TableRow>
+        
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_color" />
+            <Spinner android:id="@+id/edit_bookmark_color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:prompt="@string/edit_bookmark_color" />
+        </TableRow>
+
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_start_time" />
+            <TimePicker android:id="@+id/edit_bookmark_start_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+        
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_stop_time" />
+            <TimePicker android:id="@+id/edit_bookmark_stop_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+        
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+            <CheckBox android:id="@+id/edit_bookmark_any_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_any_time" />
+        </TableRow>
+
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_season" />
+            <EditText android:id="@+id/edit_bookmark_season"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:digits="0123456789,+-" />
+        </TableRow>
+
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/edit_bookmark_year" />
+            <EditText android:id="@+id/edit_bookmark_year"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number"
+                android:digits="0123456789,+-" />
+        </TableRow>
+        
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+            <RadioGroup android:id="@+id/edit_bookmark_currently"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+                <RadioButton android:id="@+id/edit_bookmark_on_air"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit_bookmark_on_air" />
+                <RadioButton android:id="@+id/edit_bookmark_off_air"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/edit_bookmark_off_air" />
+            </RadioGroup>
+        </TableRow>
+        
+        <TableRow>
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="" />
+            <LinearLayout android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" >
+	            <Button android:id="@+id/edit_bookmark_save"
+	                android:layout_width="100dp"
+	                android:layout_height="wrap_content"
+	                android:text="@string/edit_bookmark_save" />
+	            <Button android:id="@+id/edit_bookmark_cancel"
+	                android:layout_width="100dp"
+	                android:layout_height="wrap_content"
+	                android:text="@string/edit_bookmark_cancel" />
+            </LinearLayout>
+    </TableRow>
+
+    </TableLayout>
+    
+</ScrollView>

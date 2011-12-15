@@ -1,3 +1,20 @@
+/*
+ * Copyright (C) 2011  Southern Storm Software, Pty Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.southernstorm.tvguide;
 
 import java.io.IOException;
@@ -20,9 +37,10 @@ import android.view.ViewGroup;
 
 import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
-public class TvChannelListAdapter implements ListAdapter {
+public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter {
 
     private Context context;
     private List<TvChannel> channels;
@@ -52,6 +70,21 @@ public class TvChannelListAdapter implements ListAdapter {
         }
     }
 
+    public void addAnyChannel() {
+        TvChannel channel = new TvChannel();
+        channel.setName("Any channel");
+        channel.setId("");
+        channels.add(0, channel);
+    }
+    
+    public int addOtherChannel(String channelId) {
+        TvChannel channel = new TvChannel();
+        channel.setName(channelId);
+        channel.setId(channelId);
+        channels.add(channel);
+        return channels.size() - 1;
+    }
+
     public int getCount() {
         return channels.size();
     }
@@ -70,6 +103,16 @@ public class TvChannelListAdapter implements ListAdapter {
 
     public TvChannel getChannel(int position) {
         return channels.get(position);
+    }
+    
+    public int getPositionForChannel(String channelId) {
+        if (channelId == null)
+            channelId = "";
+        for (int index = 0; index < channels.size(); ++index) {
+            if (channels.get(index).getId().equals(channelId))
+                return index;
+        }
+        return -1;
     }
     
     private class ViewDetails {
@@ -98,6 +141,10 @@ public class TvChannelListAdapter implements ListAdapter {
         	numbers = "";
         view.numbers.setText(numbers);
         return convertView;
+    }
+
+    public View getDropDownView(int position, View convertView, ViewGroup parent) {
+        return getView(position, convertView, parent);
     }
 
     public int getViewTypeCount() {

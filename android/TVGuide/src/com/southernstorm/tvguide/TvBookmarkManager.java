@@ -166,6 +166,30 @@ public class TvBookmarkManager {
     }
 
     /**
+     * Notify the manager that a specific bookmark in the list has been updated.
+     * 
+     * @param bookmark the bookmark
+     */
+    public void updateBookmark(TvBookmark bookmark) {
+        save();
+    }
+    
+    /**
+     * Finds a bookmark by its internal identifier.
+     * 
+     * @param id the bookmark's internal identifier
+     * @return the bookmark object, or null if not found
+     */
+    public TvBookmark findBookmarkById(long id) {
+        for (int index = 0; index < bookmarks.size(); ++index) {
+            TvBookmark bookmark = bookmarks.get(index);
+            if (bookmark.getInternalId() == id)
+                return bookmark;
+        }
+        return null;
+    }
+    
+    /**
      * Gets the list of ticks that are active on this manager.
      * 
      * @return the tick list
