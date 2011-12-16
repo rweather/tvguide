@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Southern Storm TV</string>
-    <string name="app_version">0.1.5</string>
-    <string name="user_agent">qtvguide_android/0.1.5</string>
+    <string name="app_version">0.1.6</string>
+    <string name="user_agent">qtvguide_android/0.1.6</string>
 
     <string name="edit_bookmark_window_title">Edit Bookmark</string>
     <string name="edit_bookmark_title">Title</string>
