@@ -1,5 +1,11 @@
 ## Change log
 
+### 0.1.5
+
+* Fix a crash that sometimes happened for bookmarked shows
+  that cross the midnight boundary.
+* Tick marks should take precedence over bookmarks.
+
 ### 0.1.4
 
 * Save the selected channels/groups across runs.
