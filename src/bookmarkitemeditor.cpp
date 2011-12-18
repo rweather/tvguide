@@ -61,7 +61,12 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     seasonEdit->setEnabled(false);
     yearEdit->setEnabled(false);
 
-    connect(colorSelect, SIGNAL(clicked()), this, SLOT(changeColor()));
+    connect(redButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
+    connect(greenButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
+    connect(blueButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
+    connect(orangeButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
+    connect(pinkButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
+
     connect(otherDay, SIGNAL(clicked()), this, SLOT(selectOtherDay()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
@@ -149,12 +154,41 @@ void BookmarkItemEditor::setDayOfWeek(int value, int mask)
     }
 }
 
+static int colorDiff(const QColor &color, int r, int g, int b)
+{
+    int diff = (color.red() - r) * (color.red() - r);
+    diff += (color.green() - g) * (color.green() - g);
+    diff += (color.blue() - b) * (color.blue() - b);
+    return diff;
+}
+
 void BookmarkItemEditor::setColor(const QColor &color)
 {
-    m_color = color;
-    QPixmap pixmap(16, 16);
-    pixmap.fill(color);
-    colorSelect->setIcon(QIcon(pixmap));
+    static int const colors[] = {
+        0xFF, 0x00, 0x00,
+        0x00, 0xAA, 0x00,
+        0x00, 0x00, 0xFF,
+        0xFF, 0xAA, 0x00,
+        0xFF, 0x00, 0x7F
+    };
+    QRadioButton *buttons[] = {
+        redButton,
+        greenButton,
+        blueButton,
+        orangeButton,
+        pinkButton
+    };
+    int closest = 0;
+    int closestDiff = colorDiff(color, colors[0], colors[1], colors[2]);
+    for (int index = 1; index < 5; ++index) {
+        int diff = colorDiff(color, colors[index * 3], colors[index * 3 + 1], colors[index * 3 + 2]);
+        if (diff < closestDiff) {
+            closestDiff = diff;
+            closest = index;
+        }
+    }
+    buttons[closest]->setChecked(true);
+    m_color = QColor::fromRgb(colors[closest * 3], colors[closest * 3 + 1], colors[closest * 3 + 2]);
 }
 
 void BookmarkItemEditor::copyFromBookmark(const TvBookmark *bookmark)
@@ -195,10 +229,16 @@ void BookmarkItemEditor::copyToBookmark(TvBookmark *bookmark)
 
 void BookmarkItemEditor::changeColor()
 {
-    QColor color = QColorDialog::getColor
-        (m_color, this, tr("Bookmark highlight color"));
-    if (color.isValid())
-        setColor(color);
+    if (redButton->isChecked())
+        m_color = QColor::fromRgb(0xFF, 0x00, 0x00);
+    else if (greenButton->isChecked())
+        m_color = QColor::fromRgb(0x00, 0xAA, 0x00);
+    else if (blueButton->isChecked())
+        m_color = QColor::fromRgb(0x00, 0x00, 0xFF);
+    else if (orangeButton->isChecked())
+        m_color = QColor::fromRgb(0xFF, 0xAA, 0x00);
+    else if (pinkButton->isChecked())
+        m_color = QColor::fromRgb(0xFF, 0x00, 0x7F);
 }
 
 void BookmarkItemEditor::updateOk()

@@ -22,5 +22,11 @@
     <file>images/zoom-in.png</file>
     <file>images/zoom-out.png</file>
     <file>images/tvlogo72x72.png</file>
+
+    <file>images/colors/color_blue.png</file>
+    <file>images/colors/color_green.png</file>
+    <file>images/colors/color_orange.png</file>
+    <file>images/colors/color_red.png</file>
+    <file>images/colors/color_pink.png</file>
 </qresource>
 </RCC>
