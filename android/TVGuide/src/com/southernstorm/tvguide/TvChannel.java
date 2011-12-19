@@ -36,6 +36,7 @@ public class TvChannel implements Comparable<TvChannel> {
 
     public static final int NO_NUMBER = 0x7FFFFFFF;
     private String id;
+    private String commonId;
     private String name;
     private String numbers;
     private int primaryChannelNumber;
@@ -43,16 +44,24 @@ public class TvChannel implements Comparable<TvChannel> {
     private boolean convertTimezone;
     private ArrayList<String> baseUrls;
     private Map< Calendar, List<TvProgramme> > programmes;
+    private ArrayList<String> otherChannelsList;
 
     public TvChannel() {
         this.primaryChannelNumber = TvChannel.NO_NUMBER;
         this.iconResource = 0;
         this.baseUrls = new ArrayList<String>();
         this.programmes = new TreeMap< Calendar, List<TvProgramme> >();
+        this.otherChannelsList = new ArrayList<String>();
     }
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+
+    public String getCommonId() { return commonId; }
+    public void setCommonId(String id) { this.commonId = id; }
+
+    public List<String> getOtherChannelsList() { return otherChannelsList; }
+    public void setOtherChannelsList(ArrayList<String> list) { this.otherChannelsList = list; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -207,12 +216,14 @@ public class TvChannel implements Comparable<TvChannel> {
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
         bundle.putString("id", id);
+        bundle.putString("commonId", commonId);
         bundle.putString("name", name);
         bundle.putString("numbers", numbers);
         bundle.putInt("primaryChannelNumber", primaryChannelNumber);
         bundle.putInt("iconResource", iconResource);
         bundle.putBoolean("convertTimezone", convertTimezone);
         bundle.putStringArrayList("baseUrls", baseUrls);
+        bundle.putStringArrayList("otherChannelsList", otherChannelsList);
         return bundle;
     }
     
@@ -225,12 +236,29 @@ public class TvChannel implements Comparable<TvChannel> {
     public static TvChannel fromBundle(Bundle bundle) {
         TvChannel channel = new TvChannel();
         channel.setId(bundle.getString("id"));
+        channel.setCommonId(bundle.getString("commonId"));
         channel.setName(bundle.getString("name"));
         channel.setNumbers(bundle.getString("numbers"));
         channel.setPrimaryChannelNumber(bundle.getInt("primaryChannelNumber"));
         channel.setIconResource(bundle.getInt("iconResource"));
         channel.setConvertTimezone(bundle.getBoolean("convertTimezone"));
         channel.setBaseUrls(bundle.getStringArrayList("baseUrls"));
+        channel.setOtherChannelsList(bundle.getStringArrayList("otherChannelsList"));
         return channel;
+    }
+    
+    /**
+     * Determine if this channel has a specific identifier, or if this channel
+     * has the same common identifier as another channel with the specific identifier.
+     * 
+     * @param id the channel identifier to check
+     * @return true if the same channel, false if not
+     */
+    public boolean isSameChannel(String id) {
+        if (this.id != null && this.id.equals(id))
+            return true;
+        if (this.commonId == null)
+            return false;
+        return otherChannelsList.contains(id);
     }
 }

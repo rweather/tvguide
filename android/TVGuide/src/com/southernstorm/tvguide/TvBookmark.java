@@ -525,12 +525,12 @@ public class TvBookmark implements Comparable<TvBookmark> {
         if (title == null)
             return TvBookmarkMatch.NoMatch;
         if (!title.equalsIgnoreCase(programme.getTitle())) {
-            if (channelId != null && !channelId.equals(programme.getChannel().getId()))
+            if (channelId != null && !programme.getChannel().isSameChannel(channelId))
                 return TvBookmarkMatch.NoMatch;
             should = true;
             result = TvBookmarkMatch.ShouldMatch;
         } else {
-            if (channelId != null && !channelId.equals(programme.getChannel().getId()))
+            if (channelId != null && !programme.getChannel().isSameChannel(channelId))
                 return TvBookmarkMatch.TitleMatch;
         }
     

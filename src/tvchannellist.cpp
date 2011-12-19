@@ -222,6 +222,8 @@ void TvChannelList::loadOzTivoChannelData
     // Will leave the XML stream positioned on </channel>.
     Q_ASSERT(reader->isStartElement());
     Q_ASSERT(reader->name() == QLatin1String("channel"));
+    QString commonId = reader->attributes().value(QLatin1String("common-id")).toString();
+    channel->setCommonId(commonId);
     while (!reader->hasError()) {
         QXmlStreamReader::TokenType token = reader->readNext();
         if (token == QXmlStreamReader::StartElement) {

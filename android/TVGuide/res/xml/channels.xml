@@ -175,62 +175,62 @@
     <number system="digital">44</number>
   </channel>
 
-  <channel id="7CEN">
+  <channel id="7CEN" common-id="Seven">
     <display-name lang="en">Seven Central</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
   </channel>
 
-  <channel id="7TWO-ACT" region="act">
+  <channel id="7TWO-ACT" region="act" common-id="7TWO">
     <display-name lang="en">7TWO ACT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
     <number system="digital">62</number>
   </channel>
 
-  <channel id="7TWO-NSW" region="nsw">
+  <channel id="7TWO-NSW" region="nsw" common-id="7TWO">
     <display-name lang="en">7TWO NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
     <number system="digital">62</number>
   </channel>
 
-  <channel id="7TWO-NT" region="nt">
+  <channel id="7TWO-NT" region="nt" common-id="7TWO">
     <display-name lang="en">7TWO NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
     <number system="digital">62</number>
   </channel>
 
-  <channel id="7TWO-Qld" region="qld">
+  <channel id="7TWO-Qld" region="qld" common-id="7TWO">
     <display-name lang="en">7TWO Queensland</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
     <number system="digital">62</number>
   </channel>
 
-  <channel id="7TWO-SA" region="sa">
+  <channel id="7TWO-SA" region="sa" common-id="7TWO">
     <display-name lang="en">7TWO South Aus</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
     <number system="digital">62</number>
   </channel>
 
-  <channel id="7TWO-Tas" region="tas">
+  <channel id="7TWO-Tas" region="tas" common-id="7TWO">
     <display-name lang="en">7TWO Tasmania</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
     <number system="digital">62</number>
   </channel>
 
-  <channel id="7TWO-Vic" region="vic">
+  <channel id="7TWO-Vic" region="vic" common-id="7TWO">
     <display-name lang="en">7TWO Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
     <number system="digital">62</number>
   </channel>
 
-  <channel id="7TWO-WA" region="wa">
+  <channel id="7TWO-WA" region="wa" common-id="7TWO">
     <display-name lang="en">7TWO West Aus</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven-two.png"/>
     <number system="digital">72</number>
@@ -258,7 +258,7 @@
     <todo/>
   </channel>
 
-  <channel id="ABC-Can" region="canberra">
+  <channel id="ABC-Can" region="canberra" common-id="ABC">
     <display-name lang="en">ABC Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -266,7 +266,7 @@
     <number system="foxtel">102</number>
   </channel>
 
-  <channel id="ABC-NSW" region="nsw">
+  <channel id="ABC-NSW" region="nsw" common-id="ABC">
     <display-name lang="en">ABC NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -274,7 +274,7 @@
     <number system="foxtel">102</number>
   </channel>
 
-  <channel id="ABC-NT" region="nt">
+  <channel id="ABC-NT" region="nt" common-id="ABC">
     <display-name lang="en">ABC NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -289,7 +289,7 @@
     <number system="foxtel">202</number>
   </channel>
 
-  <channel id="ABC-Qld" region="qld">
+  <channel id="ABC-Qld" region="qld" common-id="ABC">
     <display-name lang="en">ABC Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -297,7 +297,7 @@
     <number system="foxtel">102</number>
   </channel>
 
-  <channel id="ABC-SA" region="sa">
+  <channel id="ABC-SA" region="sa" common-id="ABC">
     <display-name lang="en">ABC SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -305,7 +305,7 @@
     <number system="foxtel">102</number>
   </channel>
 
-  <channel id="ABC-Tas" region="tas">
+  <channel id="ABC-Tas" region="tas" common-id="ABC">
     <display-name lang="en">ABC Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -313,7 +313,7 @@
     <number system="foxtel">102</number>
   </channel>
 
-  <channel id="ABC-Vic" region="vic">
+  <channel id="ABC-Vic" region="vic" common-id="ABC">
     <display-name lang="en">ABC Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -321,7 +321,7 @@
     <number system="foxtel">102</number>
   </channel>
 
-  <channel id="ABC-WA" region="wa">
+  <channel id="ABC-WA" region="wa" common-id="ABC">
     <display-name lang="en">ABC WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc.png"/>
     <number system="digital">2</number>
@@ -909,7 +909,7 @@
     <number system="foxtel">516</number>
   </channel>
 
-  <channel id="GEM-ACT" region="act">
+  <channel id="GEM-ACT" region="act" common-id="GEM">
     <display-name lang="en">GEM ACT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -917,7 +917,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-NSW" region="nsw">
+  <channel id="GEM-NSW" region="nsw" common-id="GEM">
     <display-name lang="en">GEM NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -925,7 +925,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-Qld" region="qld">
+  <channel id="GEM-Qld" region="qld" common-id="GEM">
     <display-name lang="en">GEM Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -933,7 +933,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-SA" region="nt-or-sa">
+  <channel id="GEM-SA" region="nt-or-sa" common-id="GEM">
     <display-name lang="en">GEM SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -941,7 +941,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-Tas" region="tas">
+  <channel id="GEM-Tas" region="tas" common-id="GEM">
     <display-name lang="en">GEM Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -949,7 +949,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-Vic" region="vic">
+  <channel id="GEM-Vic" region="vic" common-id="GEM">
     <display-name lang="en">GEM Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -957,7 +957,7 @@
     <number system="foxtel">209</number>
   </channel>
 
-  <channel id="GEM-WA" region="wa">
+  <channel id="GEM-WA" region="wa" common-id="GEM">
     <display-name lang="en">GEM WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/gem.png"/>
     <number system="digital">90</number>
@@ -1182,14 +1182,14 @@
     <todo/>
   </channel>
 
-  <channel id="NBN" region="regional-nsw">
+  <channel id="NBN" region="regional-nsw" common-id="Nine">
     <display-name lang="en">NBN NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nbn.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="NBN-GC" region="goldcoast">
+  <channel id="NBN-GC" region="goldcoast" common-id="Nine">
     <display-name lang="en">NBN Gold Coast</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nbn.png"/>
     <number system="digital">8</number>
@@ -1234,42 +1234,42 @@
     <number system="foxtel">180</number>
   </channel>
 
-  <channel id="Nine-Mel" region="melbourne">
+  <channel id="Nine-Mel" region="melbourne" common-id="Nine">
     <display-name lang="en">Nine Melbourne</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-NT" region="nt">
+  <channel id="Nine-NT" region="nt" common-id="Nine">
     <display-name lang="en">Nine NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-Qld" region="brisbane">
+  <channel id="Nine-Qld" region="brisbane" common-id="Nine">
     <display-name lang="en">Nine Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-SA" region="sa">
+  <channel id="Nine-SA" region="sa" common-id="Nine">
     <display-name lang="en">Nine SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-Syd" region="sydney">
+  <channel id="Nine-Syd" region="sydney" common-id="Nine">
     <display-name lang="en">Nine Sydney</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
     <number system="foxtel">100</number>
   </channel>
 
-  <channel id="Nine-WA" region="wa">
+  <channel id="Nine-WA" region="wa" common-id="Nine">
     <display-name lang="en">Nine WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/nine.png"/>
     <number system="digital">9</number>
@@ -1291,7 +1291,7 @@
     <todo/>
   </channel>
 
-  <channel id="One-Dar" region="nt">
+  <channel id="One-Dar" region="nt" common-id="One">
     <display-name lang="en">One Darwin</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1299,7 +1299,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-NSW" region="act-or-nsw">
+  <channel id="One-NSW" region="act-or-nsw" common-id="One">
     <display-name lang="en">One NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1307,7 +1307,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Newc" region="newcastle">
+  <channel id="One-Newc" region="newcastle" common-id="One">
     <display-name lang="en">One SC Newcastle</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1315,7 +1315,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Qld" region="qld">
+  <channel id="One-Qld" region="qld" common-id="One">
     <display-name lang="en">One QLD</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1323,7 +1323,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-SA" region="sa">
+  <channel id="One-SA" region="sa" common-id="One">
     <display-name lang="en">One SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1331,7 +1331,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Tas" region="tas">
+  <channel id="One-Tas" region="tas" common-id="One">
     <display-name lang="en">One Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1339,7 +1339,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-Vic" region="vic">
+  <channel id="One-Vic" region="vic" common-id="One">
     <display-name lang="en">One Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1347,7 +1347,7 @@
     <number system="foxtel">210</number>
   </channel>
 
-  <channel id="One-WA" region="wa">
+  <channel id="One-WA" region="wa" common-id="One">
     <display-name lang="en">One WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/one.png"/>
     <number system="digital">1</number>
@@ -1366,31 +1366,31 @@
     <todo/>
   </channel>
 
-  <channel id="Prime-Can" region="canberra">
+  <channel id="Prime-Can" region="canberra" common-id="Seven">
     <display-name lang="en">Prime Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="Prime-GC" region="goldcoast">
+  <channel id="Prime-GC" region="goldcoast" common-id="Seven">
     <display-name lang="en">Prime Gold Coast</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="Prime-Vic" region="regional-vic">
+  <channel id="Prime-Vic" region="regional-vic" common-id="Seven">
     <display-name lang="en">Prime Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="PrimeN" region="regional-nsw">
+  <channel id="PrimeN" region="regional-nsw" common-id="Seven">
     <display-name lang="en">Prime North</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
   </channel>
 
-  <channel id="PrimeS" region="regional-nsw">
+  <channel id="PrimeS" region="regional-nsw" common-id="Seven">
     <display-name lang="en">Prime South</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/prime.png"/>
     <number system="digital">6</number>
@@ -1424,7 +1424,7 @@
     <todo/>
   </channel>
 
-  <channel id="SBS-Can" region="canberra">
+  <channel id="SBS-Can" region="canberra" common-id="SBS">
     <display-name lang="en">SBS Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1438,7 +1438,7 @@
     <todo/>
   </channel>
 
-  <channel id="SBS-NSW" region="nsw">
+  <channel id="SBS-NSW" region="nsw" common-id="SBS">
     <display-name lang="en">SBS NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1447,7 +1447,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-NT" region="nt">
+  <channel id="SBS-NT" region="nt" common-id="SBS">
     <display-name lang="en">SBS NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1456,7 +1456,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-Qld" region="qld">
+  <channel id="SBS-Qld" region="qld" common-id="SBS">
     <display-name lang="en">SBS Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1465,7 +1465,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-SA" region="sa">
+  <channel id="SBS-SA" region="sa" common-id="SBS">
     <display-name lang="en">SBS SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1474,7 +1474,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-Tas" region="tas">
+  <channel id="SBS-Tas" region="tas" common-id="SBS">
     <display-name lang="en">SBS Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1483,7 +1483,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-Vic" region="vic">
+  <channel id="SBS-Vic" region="vic" common-id="SBS">
     <display-name lang="en">SBS Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1492,7 +1492,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBS-WA" region="wa">
+  <channel id="SBS-WA" region="wa" common-id="SBS">
     <display-name lang="en">SBS WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1501,7 +1501,7 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBSHD-Vic" region="vic">
+  <channel id="SBSHD-Vic" region="vic" common-id="SBS">
     <display-name lang="en">SBS HD Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs.png"/>
     <number system="digital">3</number>
@@ -1510,56 +1510,56 @@
     <number system="foxtel">228</number>
   </channel>
 
-  <channel id="SBSTWO-NSW" region="act-or-nsw">
+  <channel id="SBSTWO-NSW" region="act-or-nsw" common-id="SBSTWO">
     <display-name lang="en">SBS Two NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-NT" region="nt">
+  <channel id="SBSTWO-NT" region="nt" common-id="SBSTWO">
     <display-name lang="en">SBS TWO NT</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-Qld" region="qld">
+  <channel id="SBSTWO-Qld" region="qld" common-id="SBSTWO">
     <display-name lang="en">SBS TWO QLD</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-SA" region="sa">
+  <channel id="SBSTWO-SA" region="sa" common-id="SBSTWO">
     <display-name lang="en">SBS TWO SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-Tas" region="tas">
+  <channel id="SBSTWO-Tas" region="tas" common-id="SBSTWO">
     <display-name lang="en">SBS TWO Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-Vic" region="vic">
+  <channel id="SBSTWO-Vic" region="vic" common-id="SBSTWO">
     <display-name lang="en">SBS TWO Vic</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SBSTWO-WA" region="wa">
+  <channel id="SBSTWO-WA" region="wa" common-id="SBSTWO">
     <display-name lang="en">SBS TWO WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/sbs-two.png"/>
     <number system="digital">32</number>
     <number system="foxtel">179</number>
   </channel>
 
-  <channel id="SC-Tas" region="tas">
+  <channel id="SC-Tas" region="tas" common-id="Seven">
     <display-name lang="en">Southern Cross Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-television.png"/>
     <number system="digital">6</number>
@@ -1568,25 +1568,25 @@
     <number system="digital">70</number>
   </channel>
 
-  <channel id="SC10-GC" region="goldcoast">
+  <channel id="SC10-GC" region="goldcoast" common-id="Ten">
     <display-name lang="en">Southern Cross Ten Gold Coast</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
   </channel>
 
-  <channel id="SC10-NSW" region="regional-nsw">
+  <channel id="SC10-NSW" region="regional-nsw" common-id="Ten">
     <display-name lang="en">Southern Cross Ten NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
   </channel>
 
-  <channel id="SC10-Qld" region="regional-qld">
+  <channel id="SC10-Qld" region="regional-qld" common-id="Ten">
     <display-name lang="en">Southern Cross Ten Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
   </channel>
 
-  <channel id="SC10-Vic" region="regional-vic">
+  <channel id="SC10-Vic" region="regional-vic" common-id="Ten">
     <display-name lang="en">Southern Cross Ten Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/southern-cross-ten.png"/>
     <number system="digital">5</number>
@@ -1730,49 +1730,49 @@
     <todo/>
   </channel>
 
-  <channel id="Seven-Bris" region="brisbane">
+  <channel id="Seven-Bris" region="brisbane" common-id="Seven">
     <display-name lang="en">Seven Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Dar" region="nt">
+  <channel id="Seven-Dar" region="nt" common-id="Seven">
     <display-name lang="en">Seven Darwin</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Mel" region="melbourne">
+  <channel id="Seven-Mel" region="melbourne" common-id="Seven">
     <display-name lang="en">Seven Melbourne</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Qld" region="regional-qld">
+  <channel id="Seven-Qld" region="regional-qld" common-id="Seven">
     <display-name lang="en">Seven Regional Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-SA" region="sa">
+  <channel id="Seven-SA" region="sa" common-id="Seven">
     <display-name lang="en">Seven SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-Syd" region="sydney">
+  <channel id="Seven-Syd" region="sydney" common-id="Seven">
     <display-name lang="en">Seven Sydney</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
     <number system="foxtel">107</number>
   </channel>
 
-  <channel id="Seven-WA" region="wa">
+  <channel id="Seven-WA" region="wa" common-id="Seven">
     <display-name lang="en">Seven WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
     <number system="digital">7</number>
@@ -1867,49 +1867,49 @@
     <number system="foxtel">603</number>
   </channel>
 
-  <channel id="Ten-Can" region="canberra">
+  <channel id="Ten-Can" region="canberra" common-id="Ten">
     <display-name lang="en">Ten Capital Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-Dar" region="nt">
+  <channel id="Ten-Dar" region="nt" common-id="Ten">
     <display-name lang="en">Ten Darwin</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-NSW" region="sydney">
+  <channel id="Ten-NSW" region="sydney" common-id="Ten">
     <display-name lang="en">Ten NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-Qld" region="brisbane">
+  <channel id="Ten-Qld" region="brisbane" common-id="Ten">
     <display-name lang="en">Ten Brisbane</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-SA" region="sa">
+  <channel id="Ten-SA" region="sa" common-id="Ten">
     <display-name lang="en">Ten SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-Vic" region="melbourne">
+  <channel id="Ten-Vic" region="melbourne" common-id="Ten">
     <display-name lang="en">Ten Melbourne</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
     <number system="foxtel">110</number>
   </channel>
 
-  <channel id="Ten-WA" region="wa">
+  <channel id="Ten-WA" region="wa" common-id="Ten">
     <display-name lang="en">Ten WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/ten.png"/>
     <number system="digital">10</number>
@@ -1975,56 +1975,56 @@
     <todo/>
   </channel>
 
-  <channel id="WIN-Can" region="canberra">
+  <channel id="WIN-Can" region="canberra" common-id="Nine">
     <display-name lang="en">WIN Canberra</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Grif" region="griffith">
+  <channel id="WIN-Grif" region="griffith" common-id="Nine">
     <display-name lang="en">WIN Griffith</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-NSW" region="regional-nsw">
+  <channel id="WIN-NSW" region="regional-nsw" common-id="Nine">
     <display-name lang="en">WIN NSW</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Qld" region="regional-qld">
+  <channel id="WIN-Qld" region="regional-qld" common-id="Nine">
     <display-name lang="en">WIN Qld</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Tas" region="tas">
+  <channel id="WIN-Tas" region="tas" common-id="Nine">
     <display-name lang="en">WIN Tas</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-Vic" region="regional-vic">
+  <channel id="WIN-Vic" region="regional-vic" common-id="Nine">
     <display-name lang="en">WIN Victoria</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN-WA" region="regional-wa">
+  <channel id="WIN-WA" region="regional-wa" common-id="Nine">
     <display-name lang="en">WIN WA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>
     <number system="digital">80</number>
   </channel>
 
-  <channel id="WIN7-SA" region="sa">
+  <channel id="WIN7-SA" region="sa" common-id="Nine">
     <display-name lang="en">WIN-7 SA</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/win.png"/>
     <number system="digital">8</number>

@@ -517,3 +517,17 @@ int TvChannel::compare(const TvChannel *other) const
     }
     return name().compare(other->name(), Qt::CaseInsensitive);
 }
+
+// Determine if this channel object is the same as a specific id,
+// including taking the common id into account.
+bool TvChannel::isSameChannel(const QString &id) const
+{
+    if (m_id == id)
+        return true;
+    if (m_commonId.isEmpty())
+        return false;
+    TvChannel *other = m_channelList->channel(id);
+    if (other && other->commonId() == m_commonId)
+        return true;
+    return false;
+}

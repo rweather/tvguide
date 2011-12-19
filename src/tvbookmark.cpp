@@ -279,13 +279,13 @@ TvBookmark::Match TvBookmark::match
         if (!(options & NonMatching))
             return NoMatch;
         if (!m_channelId.isEmpty() &&
-                m_channelId != programme->channel()->id())
+                !programme->channel()->isSameChannel(m_channelId))
             return NoMatch;
         should = true;
         result = ShouldMatch;
     } else {
         if (!m_channelId.isEmpty() &&
-                m_channelId != programme->channel()->id())
+                !programme->channel()->isSameChannel(m_channelId))
             result = TitleMatch;
     }
 

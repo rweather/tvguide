@@ -47,7 +47,8 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter {
     private List<DataSetObserver> observers;
     private LayoutInflater inflater;
     private String region;
-    private Map< String, List<String> > regionTree = new TreeMap< String, List<String> >();
+    private Map< String, List<String> > regionTree;
+    private Map< String, ArrayList<String> > commonIds;
     
     public TvChannelListAdapter(Context context) {
         this.context = context;
@@ -184,6 +185,7 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter {
             return;
         XmlResourceParser parser = context.getResources().getXml(R.xml.channels);
         regionTree = new TreeMap< String, List<String> >();
+        commonIds = new TreeMap< String, ArrayList<String> >();
         String id = null;
         String parent;
         try {
@@ -222,11 +224,27 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter {
         parser.close();
         Collections.sort(channels);
         regionTree = null;
+        commonIds = null;
     }
     
     private TvChannel loadChannel(XmlPullParser parser) throws XmlPullParserException, IOException {
         TvChannel channel = new TvChannel();
         channel.setId(parser.getAttributeValue(null, "id"));
+        String commonId = parser.getAttributeValue(null, "common-id");
+        channel.setCommonId(commonId);
+        if (commonId != null) {
+            // Keep track of all channels with the same common identifier in a shared list.
+            // We use this to migrate bookmarks across regions.
+            ArrayList<String> list = commonIds.get(commonId);
+            if (list != null) {
+                list.add(channel.getId());
+            } else {
+                list = new ArrayList<String>();
+                list.add(channel.getId());
+                commonIds.put(commonId, list);
+            }
+            channel.setOtherChannelsList(list);
+        }
         String region = parser.getAttributeValue(null, "region");
         if (region == null || !regionMatch(region))
             return null;

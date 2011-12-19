@@ -40,6 +40,9 @@ public:
     QString id() const { return m_id; }
     void setId(const QString &id) { m_id = id; }
 
+    QString commonId() const { return m_commonId; }
+    void setCommonId(const QString &commonId) { m_commonId = commonId; }
+
     bool isHidden() const { return m_hidden; }
     void setHidden(bool value) { m_hidden = value; }
 
@@ -89,9 +92,12 @@ public:
 
     int compare(const TvChannel *other) const;
 
+    bool isSameChannel(const QString &id) const;
+
 private:
     TvChannelList *m_channelList;
     QString m_id;
+    QString m_commonId;
     QString m_name;
     QString m_iconUrl;
     QString m_iconFile;
