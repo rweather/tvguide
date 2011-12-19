@@ -26,13 +26,15 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.content.Context;
 import android.graphics.Color;
+import android.text.SpannableString;
 import android.text.format.DateUtils;
 
 /**
  * Bookmark object.
  */
-public class TvBookmark {
+public class TvBookmark implements Comparable<TvBookmark> {
 
     /** Day of week mask value that matches any day of the week */
     public static final int ANY_DAY_MASK = 0xFE;
@@ -178,7 +180,7 @@ public class TvBookmark {
             day = Calendar.SUNDAY;
         else
             day = day + 1;
-        return DateUtils.getDayOfWeekString(day, DateUtils.LENGTH_SHORT);
+        return DateUtils.getDayOfWeekString(day, DateUtils.LENGTH_MEDIUM);
     }
 
     /**
@@ -195,7 +197,11 @@ public class TvBookmark {
         if (mask == ANY_DAY_MASK)
             return "Any day";
         while (day <= 7) {
-            if ((mask & (1 << day)) != 0) {
+            if (mask == (1 << day)) {
+                // Single day - use the long form name, even if short specified.
+                name += longDayName(day);
+                ++day;
+            } else if ((mask & (1 << day)) != 0) {
                 if (name.length() > 0) {
                     if (longForm)
                         name += " and ";
@@ -774,5 +780,73 @@ public class TvBookmark {
             result += (char)('0' + (second % 10));
         }
         return result;
+    }
+
+    private int compareTimes(int t1, int t2, TvBookmark other) {
+        if (this.anyTime) {
+            if (other.getAnyTime())
+                return 0;
+            else
+                return -1;
+        } else if (other.getAnyTime()) {
+            return 1;
+        } else if (t1 < t2) {
+            return -1;
+        } else if (t1 > t2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public int compareTo(TvBookmark other) {
+        // Compare on title, then day, then time, then channel.
+        int cmp = Utils.stringCompareIgnoreCase(this.title, other.getTitle());
+        if (cmp != 0)
+            return cmp;
+        if (this.dayOfWeekMask < other.getDayOfWeekMask())
+            return -1;
+        else if (this.dayOfWeekMask > other.getDayOfWeekMask())
+            return 1;
+        cmp = compareTimes(this.startTime, other.getStartTime(), other);
+        if (cmp != 0)
+            return cmp;
+        cmp = compareTimes(this.stopTime, other.getStopTime(), other);
+        if (cmp != 0)
+            return cmp;
+        return Utils.stringCompareIgnoreCase(this.channelId, other.getChannelId());
+    }
+    /**
+     * Returns the formatted description of the bookmark to display in list views.
+     * 
+     * @param context the application context for resolving images
+     * @return the description as a formatted SpannableString
+     */
+    public SpannableString getFormattedDescription(Context context) {
+        RichTextFormatter formatter = new RichTextFormatter(context);
+        formatter.setColor(color);
+        formatter.append(title);
+        if (seasons != null) {
+            formatter.append(", Season ");
+            formatter.append(getSeasons());
+        }
+        if (years != null) {
+            formatter.append(", ");
+            formatter.append(getYears());
+        }
+        formatter.nl();
+        formatter.setColor(0xFF000000);
+        formatter.append(getDayOfWeekMaskName(false));
+        formatter.append(", ");
+        formatter.append(Utils.formatTime(startTime));
+        formatter.append(" to ");
+        formatter.append(Utils.formatTime(stopTime));
+        if (channelId != null) {
+            formatter.append(", ");
+            formatter.append(channelId);    // TODO: use the real channel name
+        } else {
+            formatter.append(", Any channel");
+        }
+        return formatter.toSpannableString();
     }
 }

@@ -22,5 +22,10 @@
                   android:label="@string/app_name">
         </activity>
 
-        </application>
+        <activity android:name="TvBookmarkListActivity"
+                  android:configChanges="orientation"
+                  android:label="@string/organize_bookmarks">
+        </activity>
+
+    </application>
 </manifest>

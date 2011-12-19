@@ -50,6 +50,27 @@ public class Utils {
     }
 
     /**
+     * Format a time value, including the AM/PM indicator.
+     * 
+     * @param time the time to format, as the number of seconds since midnight
+     * @return the formatted time
+     */
+    public static String formatTime(int time) {
+        // TODO: 24 hour clock support
+        int hour = time / (60 * 60);
+        int minute = (time / 60) % 60;
+        String ampm = (hour < 12 ? " AM" : " PM");
+        if (hour == 0)
+            hour = 12;
+        else if (hour > 12)
+            hour -= 12;
+        if (minute < 10)
+            return hour + ":0" + minute + ampm;
+        else
+            return hour + ":" + minute + ampm;
+    }
+
+    /**
      * Format a time value for the programme list.
      * 
      * @param time the time to format
@@ -201,6 +222,22 @@ public class Utils {
             return s1 == s2;
         else
             return s1.equals(s2);
+    }
+    
+    /**
+     * Null-safe version of string comparison.
+     * 
+     * @param s1 the first string
+     * @param s2 the second string
+     * @return the comparison result
+     */
+    public static int stringCompareIgnoreCase(String s1, String s2) {
+        if (s1 == null)
+            return (s2 == null ? 0 : -1);
+        else if (s2 == null)
+            return 1;
+        else
+            return s1.compareToIgnoreCase(s2);
     }
     
     /**

@@ -122,10 +122,12 @@ public class TVGuideActivity extends Activity {
     }
     
     private static final int ITEM_CHANGE_REGION = 1;
+    private static final int ITEM_ORGANIZE_BOOKMARKS = 2;
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(ITEM_CHANGE_REGION, 0, 0, "Change Region");
+        menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -133,6 +135,10 @@ public class TVGuideActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getGroupId() == ITEM_CHANGE_REGION) {
             channelListView.setAdapter(regionListAdapter);
+            return true;
+        } else if (item.getGroupId() == ITEM_ORGANIZE_BOOKMARKS) {
+            Intent intent = new Intent(this, TvBookmarkListActivity.class);
+            startActivity(intent);
             return true;
         }
         return super.onOptionsItemSelected(item);

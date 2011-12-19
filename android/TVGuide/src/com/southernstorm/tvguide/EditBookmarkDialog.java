@@ -140,22 +140,81 @@ public class EditBookmarkDialog extends Dialog {
         cancelSet = flag;
     }
     
-    public void copyToBookmark(TvBookmark bookmark) {
+    public boolean copyToBookmark(TvBookmark bookmark) {
         if (cancelSet)
-            return;
-        bookmark.setTitle(title.getText().toString());
+            return false;
+        boolean changed = false;
+        String str = title.getText().toString();
+        if (str != null && str.length() == 0)
+            str = null;
+        if (!Utils.stringEquals(bookmark.getTitle(), str)) {
+            bookmark.setTitle(title.getText().toString());
+            System.out.println("title changed");
+            changed = true;
+        }
         TvChannel channel = channelAdapter.getChannel(this.channel.getSelectedItemPosition());
-        if (channel == null || channel.getId().equals(""))
-            bookmark.setChannelId(null);
+        String id;
+        if (channel == null || channel.getId().length() == 0)
+            id = null;
         else
-            bookmark.setChannelId(channel.getId());
-        bookmark.setDayOfWeekMask(dayOfWeekAdapter.getMaskForPosition(dayOfWeek.getSelectedItemPosition()));
-        bookmark.setColor(colorAdapter.getColorForPosition(color.getSelectedItemPosition()));
-        bookmark.setStartTime(startTime.getCurrentHour() * 60 * 60 + startTime.getCurrentMinute() * 60);
-        bookmark.setStopTime(stopTime.getCurrentHour() * 60 * 60 + stopTime.getCurrentMinute() * 60);
-        bookmark.setAnyTime(anyTime.isChecked());
-        bookmark.setSeasons(season.getText().toString());
-        bookmark.setYears(year.getText().toString());
-        bookmark.setOnAir(onAir.isChecked());
+            id = channel.getId();
+        if (!Utils.stringEquals(bookmark.getChannelId(), id)) {
+            bookmark.setChannelId(id);
+            System.out.println("channel changed");
+            changed = true;
+        }
+        int mask = dayOfWeekAdapter.getMaskForPosition(dayOfWeek.getSelectedItemPosition());
+        if (mask != bookmark.getDayOfWeekMask()) {
+            bookmark.setDayOfWeekMask(mask);
+            System.out.println("mask changed");
+            changed = true;
+        }
+        int colorValue = colorAdapter.getColorForPosition(color.getSelectedItemPosition());
+        if (colorValue != bookmark.getColor()) {
+            bookmark.setColor(colorValue);
+            System.out.println("color changed");
+            changed = true;
+        }
+        int time = startTime.getCurrentHour() * 60 * 60 + startTime.getCurrentMinute() * 60;
+        if (time != bookmark.getStartTime()) {
+            bookmark.setStartTime(time);
+            System.out.println("start time changed");
+            changed = true;
+        }
+        time = stopTime.getCurrentHour() * 60 * 60 + stopTime.getCurrentMinute() * 60;
+        if (time != bookmark.getStopTime()) {
+            bookmark.setStopTime(time);
+            System.out.println("stop time changed");
+            changed = true;
+        }
+        if (anyTime.isChecked() != bookmark.getAnyTime()) {
+            bookmark.setAnyTime(anyTime.isChecked());
+            System.out.println("any time changed");
+            changed = true;
+        }
+        String prev = bookmark.getSeasons();
+        str = season.getText().toString();
+        if (str != null && str.length() == 0)
+            str = null;
+        if (!Utils.stringEquals(prev, str)) {
+            bookmark.setSeasons(str);
+            System.out.println("seasons changed");
+            changed = true;
+        }
+        prev = bookmark.getYears();
+        str = year.getText().toString();
+        if (str != null && str.length() == 0)
+            str = null;
+        if (!Utils.stringEquals(prev, str)) {
+            bookmark.setYears(str);
+            System.out.println("years changed");
+            changed = true;
+        }
+        if (onAir.isChecked() != bookmark.isOnAir()) {
+            bookmark.setOnAir(onAir.isChecked());
+            System.out.println("on-air changed");
+            changed = true;
+        }
+        return changed;
     }
 }

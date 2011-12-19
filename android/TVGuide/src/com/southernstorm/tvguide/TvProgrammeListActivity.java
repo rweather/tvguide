@@ -51,6 +51,7 @@ import android.widget.ExpandableListView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.TabHost.TabContentFactory;
 
 public class TvProgrammeListActivity extends TabActivity implements TvNetworkListener, TvBookmarkChangedListener {
@@ -330,6 +331,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private static final int ITEM_EDIT_BOOKMARK = 11;
     private static final int ITEM_TICK = 12;
     private static final int ITEM_UNTICK = 13;
+    private static final int ITEM_ORGANIZE_BOOKMARKS = 14;
     
     // Workaround for the lack of expandable list item ID's on submenu items.
     private ContextMenuInfo savedMenuInfo = null;
@@ -495,6 +497,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
                 public void onClick(DialogInterface dialog, int item) {
                     bookmark.setColor(colorValues[item]);
                     TvBookmarkManager.getInstance().updateBookmark(bookmark);
+                    toast("Bookmark added");
                     dialog.dismiss();
                 }
             });
@@ -504,13 +507,36 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             dialog.copyFromBookmark(bookmark);
             dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 public void onDismiss(DialogInterface dialog) {
-                    ((EditBookmarkDialog)dialog).copyToBookmark(bookmark);
-                    TvBookmarkManager.getInstance().updateBookmark(bookmark);
+                    if (((EditBookmarkDialog)dialog).copyToBookmark(bookmark)) {
+                        TvBookmarkManager.getInstance().updateBookmark(bookmark);
+                        toast("Bookmark saved");
+                    }
                 }
             });
             return dialog;
         default: break;
         }
         return null;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks");
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getGroupId() == ITEM_ORGANIZE_BOOKMARKS) {
+            Intent intent = new Intent(this, TvBookmarkListActivity.class);
+            startActivity(intent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    
+    private void toast(String message) {
+        Toast toast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        toast.show();
     }
 }
