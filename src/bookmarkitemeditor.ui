@@ -279,7 +279,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QRadioButton" name="pinkButton">
+        <widget class="QRadioButton" name="purpleButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -291,7 +291,7 @@
          </property>
          <property name="icon">
           <iconset resource="tvguide.qrc">
-           <normaloff>:/images/colors/color_pink.png</normaloff>:/images/colors/color_pink.png</iconset>
+           <normaloff>:/images/colors/color_purple.png</normaloff>:/images/colors/color_purple.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -430,7 +430,7 @@
   <tabstop>greenButton</tabstop>
   <tabstop>blueButton</tabstop>
   <tabstop>orangeButton</tabstop>
-  <tabstop>pinkButton</tabstop>
+  <tabstop>purpleButton</tabstop>
   <tabstop>seasonEnable</tabstop>
   <tabstop>seasonEdit</tabstop>
   <tabstop>yearEnable</tabstop>

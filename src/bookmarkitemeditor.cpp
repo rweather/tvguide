@@ -65,7 +65,7 @@ BookmarkItemEditor::BookmarkItemEditor(TvChannelList *channelList, QWidget *pare
     connect(greenButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
     connect(blueButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
     connect(orangeButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
-    connect(pinkButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
+    connect(purpleButton, SIGNAL(toggled(bool)), this, SLOT(changeColor()));
 
     connect(otherDay, SIGNAL(clicked()), this, SLOT(selectOtherDay()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
@@ -176,7 +176,7 @@ void BookmarkItemEditor::setColor(const QColor &color)
         greenButton,
         blueButton,
         orangeButton,
-        pinkButton
+        purpleButton
     };
     int closest = 0;
     int closestDiff = colorDiff(color, colors[0], colors[1], colors[2]);
@@ -237,7 +237,7 @@ void BookmarkItemEditor::changeColor()
         m_color = QColor::fromRgb(0x00, 0x00, 0xFF);
     else if (orangeButton->isChecked())
         m_color = QColor::fromRgb(0xFF, 0xAA, 0x00);
-    else if (pinkButton->isChecked())
+    else if (purpleButton->isChecked())
         m_color = QColor::fromRgb(0xFF, 0x00, 0x7F);
 }
 

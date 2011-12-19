@@ -44,8 +44,8 @@ public class EditBookmarkColorAdapter implements ListAdapter, SpinnerAdapter {
         colorNames.add("Orange");
         
         colorValues.add(0xFFFF007F);
-        colorResources.add(R.drawable.color_pink);
-        colorNames.add("Pink");
+        colorResources.add(R.drawable.color_purple);
+        colorNames.add("Purple");
     }
 
     private static long colorDistance(int c1, int c2) {
