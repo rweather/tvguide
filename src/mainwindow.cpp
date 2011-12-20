@@ -440,7 +440,38 @@ void MainWindow::exportBookmarks()
 
 void MainWindow::importBookmarks()
 {
-    // TODO
+    QString filename = QFileDialog::getOpenFileName
+        (this, tr("Import Bookmarks"), QString(),
+         tr("TV Bookmarks (*.tvb)"));
+    if (filename.isEmpty())
+        return;
+    switch (m_channelList->bookmarkList()->importBookmarks(filename)) {
+    case TvBookmarkList::Import_OK:
+        if (QMessageBox::question
+                (this, tr("Import Bookmarks"),
+                 tr("New bookmarks have been imported.  Do you wish to "
+                    "edit the bookmark list now?"),
+                 QMessageBox::Yes | QMessageBox::No,
+                 QMessageBox::Yes) == QMessageBox::Yes)
+            organizeBookmarks();
+        break;
+    case TvBookmarkList::Import_NothingNew:
+        QMessageBox::information
+            (this, tr("Import Bookmarks"),
+             tr("No new bookmarks found for importing."));
+        break;
+    case TvBookmarkList::Import_CannotOpen:
+    case TvBookmarkList::Import_BadFormat:
+        QMessageBox::critical
+            (this, tr("Import Bookmarks"),
+             tr("Could not import the bookmarks from %1.").arg(filename));
+        break;
+    case TvBookmarkList::Import_WrongService:
+        QMessageBox::critical
+            (this, tr("Import Bookmarks"),
+             tr("Bookmarks are not applicable to the current guide service."));
+        break;
+    }
 }
 
 void MainWindow::tickShow()

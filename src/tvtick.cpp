@@ -54,7 +54,29 @@ void TvTick::save(QSettings *settings)
 
 void TvTick::loadXml(QXmlStreamReader *reader)
 {
-    Q_UNUSED(reader);
+    Q_ASSERT(reader->isStartElement());
+    Q_ASSERT(reader->name() == QLatin1String("tick"));
+    while (!reader->hasError()) {
+        QXmlStreamReader::TokenType token = reader->readNext();
+        if (token == QXmlStreamReader::StartElement) {
+            if (reader->name() == QLatin1String("title")) {
+                m_title = reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements);
+            } else if (reader->name() == QLatin1String("channel-id")) {
+                m_channelId = reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements);
+            } else if (reader->name() == QLatin1String("start-time")) {
+                m_start = TvChannel::stringToDateTime(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("timestamp")) {
+                m_timestamp = TvChannel::stringToDateTime(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements));
+            }
+        } else if (token == QXmlStreamReader::EndElement) {
+            if (reader->name() == QLatin1String("tick"))
+                break;
+        }
+    }
 }
 
 void TvTick::saveXml(QXmlStreamWriter *writer)

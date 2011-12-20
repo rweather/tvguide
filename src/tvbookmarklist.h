@@ -56,7 +56,17 @@ public:
         (const TvProgramme *programme, TvBookmark **bookmark,
          TvBookmark::MatchOptions options) const;
 
+    enum ImportResult
+    {
+        Import_OK,
+        Import_NothingNew,
+        Import_CannotOpen,
+        Import_BadFormat,
+        Import_WrongService
+    };
+
     void exportBookmarks(const QString &filename);
+    ImportResult importBookmarks(const QString &filename);
 
 Q_SIGNALS:
     void bookmarksChanged();
@@ -73,6 +83,9 @@ private:
     QMultiMap<QString, TvTick *> m_ticks;
 
     void adjustTimeIndex(TvBookmark *bookmark, bool add);
+    bool importBookmark(TvBookmark *bookmark);
+    bool importTick(TvTick *tick);
+    QString convertChannelId(const QString &id);
 };
 
 #endif

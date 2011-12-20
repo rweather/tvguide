@@ -446,9 +446,79 @@ void TvBookmark::save(QSettings *settings)
     settings->setValue(QLatin1String("onair"), m_onair);
 }
 
+static QTime parseTime(const QString & str) {
+    if (str.isEmpty())
+        return QTime(12, 0);
+    int hour = 0;
+    int minute = 0;
+    int second = 0;
+    int field = 0;
+    int value = 0;
+    for (int index = 0; index < str.length(); ++index) {
+        int ch = str.at(index).unicode();
+        if (ch >= '0' && ch <= '9') {
+            value = value * 10 + ch - '0';
+        } else if (ch == ':') {
+            if (field == 0)
+                hour = value;
+            else if (field == 1)
+                minute = value;
+            else
+                second = value;
+            value = 0;
+            ++field;
+        }
+    }
+    if (field == 0)
+        hour = value;
+    else if (field == 1)
+        minute = value;
+    else
+        second = value;
+    return QTime(hour, minute, second);
+}
+
 void TvBookmark::loadXml(QXmlStreamReader *reader)
 {
-    Q_UNUSED(reader);
+    Q_ASSERT(reader->isStartElement());
+    Q_ASSERT(reader->name() == QLatin1String("bookmark"));
+    while (!reader->hasError()) {
+        QXmlStreamReader::TokenType token = reader->readNext();
+        if (token == QXmlStreamReader::StartElement) {
+            if (reader->name() == QLatin1String("title")) {
+                m_title = reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements);
+            } else if (reader->name() == QLatin1String("channel-id")) {
+                m_channelId = reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements);
+            } else if (reader->name() == QLatin1String("days")) {
+                setDayOfWeekMask(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements).toInt());
+            } else if (reader->name() == QLatin1String("start-time")) {
+                m_startTime = parseTime(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("stop-time")) {
+                m_stopTime = parseTime(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("any-time")) {
+                m_anyTime = true;
+            } else if (reader->name() == QLatin1String("off-air")) {
+                m_onair = false;
+            } else if (reader->name() == QLatin1String("color")) {
+                m_color = QColor(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("seasons")) {
+                setSeasons(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements));
+            } else if (reader->name() == QLatin1String("years")) {
+                setYears(reader->readElementText
+                    (QXmlStreamReader::IncludeChildElements));
+            }
+        } else if (token == QXmlStreamReader::EndElement) {
+            if (reader->name() == QLatin1String("bookmark"))
+                break;
+        }
+    }
 }
 
 void TvBookmark::saveXml(QXmlStreamWriter *writer)

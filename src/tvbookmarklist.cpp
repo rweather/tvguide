@@ -250,6 +250,51 @@ void TvBookmarkList::exportBookmarks(const QString &filename)
     file.close();
 }
 
+TvBookmarkList::ImportResult TvBookmarkList::importBookmarks(const QString &filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly))
+        return Import_CannotOpen;
+    QXmlStreamReader reader(&file);
+    bool newBookmarks = false;
+    bool newTicks = false;
+    while (!reader.hasError() && !reader.atEnd()) {
+        QXmlStreamReader::TokenType tokenType = reader.readNext();
+        if (tokenType == QXmlStreamReader::StartElement) {
+            if (reader.name() == QLatin1String("bookmarks")) {
+                QString service = reader.attributes().value(QLatin1String("service")).toString();
+                QString expected = m_channelList->startUrl().toString();
+                if (service != expected)
+                    return Import_WrongService;
+            } else if (reader.name() == QLatin1String("bookmark")) {
+                TvBookmark *bookmark = new TvBookmark();
+                bookmark->loadXml(&reader);
+                if (importBookmark(bookmark))
+                    newBookmarks = true;
+                else
+                    delete bookmark;
+            } else if (reader.name() == QLatin1String("tick")) {
+                TvTick *tick = new TvTick();
+                tick->loadXml(&reader);
+                if (importTick(tick))
+                    newTicks = true;
+                else
+                    delete tick;
+            }
+        }
+    }
+    if (newBookmarks)
+        emit bookmarksChanged();
+    if (newTicks)
+        emit ticksChanged();
+    if (reader.hasError())
+        return Import_BadFormat;
+    else if (!newBookmarks && !newTicks)
+        return Import_NothingNew;
+    else
+        return Import_OK;
+}
+
 // The time index is used to map a specific day and time to a bookmark
 // that will probably match that timeslot.  This is used for quickly
 // looking up failed matches where the title is different.  The key
@@ -282,4 +327,83 @@ void TvBookmarkList::adjustTimeIndex(TvBookmark *bookmark, bool add)
                 m_timeIndex[key].removeOne(bookmark);
         }
     }
+}
+
+bool TvBookmarkList::importBookmark(TvBookmark *bookmark)
+{
+    // Search for an existing bookmark with the same parameters.
+    QList<TvBookmark *> list;
+    QHash< QString, QList<TvBookmark *> >::ConstIterator it;
+    it = m_titleIndex.constFind(bookmark->title().toLower());
+    if (it != m_titleIndex.constEnd()) {
+        list = it.value();
+        for (int index = 0; index < list.size(); ++index) {
+            // Everything except the color, channel id, and on-air flag needs
+            // to be the same for the two bookmarks to be considered identical.
+            // The channel id must be the same or a regional variant.
+            TvBookmark *oldBookmark = list.at(index);
+            if (oldBookmark->channelId() != bookmark->channelId()) {
+                TvChannel *channel = m_channelList->channel(oldBookmark->channelId());
+                if (!channel)
+                    continue;
+                if (!channel->isSameChannel(bookmark->channelId()))
+                    continue;
+            }
+            if (oldBookmark->dayOfWeekMask() != bookmark->dayOfWeekMask())
+                continue;
+            if (oldBookmark->startTime() != bookmark->startTime())
+                continue;
+            if (oldBookmark->stopTime() != bookmark->stopTime())
+                continue;
+            if (oldBookmark->anyTime() != bookmark->anyTime())
+                continue;
+            if (oldBookmark->seasonList() != bookmark->seasonList())
+                continue;
+            if (oldBookmark->yearList() != bookmark->yearList())
+                continue;
+            return false;
+        }
+    }
+
+    // Add the new bookmark.
+    bookmark->setChannelId(convertChannelId(bookmark->channelId()));
+    addBookmark(bookmark, false);
+    return true;
+}
+
+bool TvBookmarkList::importTick(TvTick *tick)
+{
+    QMultiMap<QString, TvTick *>::ConstIterator tickit;
+    tickit = m_ticks.constFind(tick->title());
+    while (tickit != m_ticks.constEnd()) {
+        const TvTick *oldTick = tickit.value();
+        if (tick->channelId() == oldTick->channelId() &&
+                tick->start() == oldTick->start()) {
+            // We alread have this tick object.
+            return false;
+        }
+        ++tickit;
+    }
+    tick->setChannelId(convertChannelId(tick->channelId()));
+    m_ticks.insert(tick->title(), tick);
+    return true;
+}
+
+// If the incoming channel id is in a different region, then convert
+// it into its equivalent in the current region, if possible.
+QString TvBookmarkList::convertChannelId(const QString &id)
+{
+    QString channelId(id);
+    TvChannel *channel = m_channelList->channel(channelId);
+    if (channel && channel->isHidden() && !channel->commonId().isEmpty()) {
+        QList<TvChannel *> active = m_channelList->activeChannels();
+        for (int index = 0; index < active.size(); ++index) {
+            TvChannel *other = active.at(index);
+            if (other->commonId() == channel->commonId() && !other->isHidden()) {
+                channelId = other->id();
+                break;
+            }
+        }
+    }
+    return channelId;
 }
