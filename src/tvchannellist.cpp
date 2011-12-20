@@ -37,6 +37,7 @@ TvChannelList::TvChannelList(QObject *parent)
     , m_requestsToDo(0)
     , m_requestsDone(0)
     , m_reply(0)
+    , m_bookmarkList(this)
 {
     QString cacheDir = QDir::homePath() +
                        QLatin1String("/.qtvguide/cache");

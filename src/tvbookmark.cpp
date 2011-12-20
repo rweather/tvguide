@@ -446,6 +446,32 @@ void TvBookmark::save(QSettings *settings)
     settings->setValue(QLatin1String("onair"), m_onair);
 }
 
+void TvBookmark::loadXml(QXmlStreamReader *reader)
+{
+    Q_UNUSED(reader);
+}
+
+void TvBookmark::saveXml(QXmlStreamWriter *writer)
+{
+    writer->writeStartElement(QLatin1String("bookmark"));
+    writer->writeTextElement(QLatin1String("title"), m_title);
+    if (!m_channelId.isEmpty())
+        writer->writeTextElement(QLatin1String("channel-id"), m_channelId);
+    writer->writeTextElement(QLatin1String("days"), QString::number(dayOfWeekMask()));
+    writer->writeTextElement(QLatin1String("start-time"), m_startTime.toString(QLatin1String("HH:mm")));
+    writer->writeTextElement(QLatin1String("stop-time"), m_stopTime.toString(QLatin1String("HH:mm")));
+    if (m_anyTime)
+        writer->writeEmptyElement(QLatin1String("any-time"));
+    if (!m_onair)
+        writer->writeEmptyElement(QLatin1String("off-air"));
+    writer->writeTextElement(QLatin1String("color"), m_color.name());
+    if (!m_seasons.isEmpty())
+        writer->writeTextElement(QLatin1String("seasons"), seasons());
+    if (!m_years.isEmpty())
+        writer->writeTextElement(QLatin1String("years"), years());
+    writer->writeEndElement();
+}
+
 void TvBookmark::addProgramme(TvProgramme *programme)
 {
     for (int index = 0; index < m_matchingProgrammes.size(); ++index) {

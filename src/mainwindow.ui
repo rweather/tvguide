@@ -26,7 +26,7 @@
      <x>0</x>
      <y>0</y>
      <width>969</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -84,6 +84,9 @@
     </property>
     <addaction name="actionAddBookmark"/>
     <addaction name="actionOrganizeBookmarks"/>
+    <addaction name="separator"/>
+    <addaction name="actionExportBookmarks"/>
+    <addaction name="actionImportBookmarks"/>
     <addaction name="separator"/>
     <addaction name="action7DayOutlook"/>
     <addaction name="separator"/>
@@ -514,6 +517,16 @@
   <action name="actionChannelGroups">
    <property name="text">
     <string>Channel &amp;Groups ...</string>
+   </property>
+  </action>
+  <action name="actionExportBookmarks">
+   <property name="text">
+    <string>&amp;Export...</string>
+   </property>
+  </action>
+  <action name="actionImportBookmarks">
+   <property name="text">
+    <string>&amp;Import ...</string>
    </property>
   </action>
  </widget>

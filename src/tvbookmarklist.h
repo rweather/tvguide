@@ -26,11 +26,13 @@
 #include <QtCore/qpair.h>
 #include <QtCore/qsettings.h>
 
+class TvChannelList;
+
 class TvBookmarkList : public QObject
 {
     Q_OBJECT
 public:
-    TvBookmarkList(QObject *parent = 0);
+    TvBookmarkList(TvChannelList *channelList, QObject *parent = 0);
     ~TvBookmarkList();
 
     void clearBookmarks();
@@ -54,6 +56,8 @@ public:
         (const TvProgramme *programme, TvBookmark **bookmark,
          TvBookmark::MatchOptions options) const;
 
+    void exportBookmarks(const QString &filename);
+
 Q_SIGNALS:
     void bookmarksChanged();
     void ticksChanged();
@@ -62,6 +66,7 @@ private:
     static const int TimeSlotsPerDay = 24 * 2;
     static const int TimeSlots = 7 * TimeSlotsPerDay;
 
+    TvChannelList *m_channelList;
     QList<TvBookmark *> m_bookmarks;
     QHash< QString, QList<TvBookmark *> > m_titleIndex;
     QList<TvBookmark *> m_timeIndex[TimeSlots];

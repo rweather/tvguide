@@ -128,7 +128,7 @@ public class TvTick {
     public boolean match(TvProgramme programme) {
         if (!startTime.equals(programme.getStart()))
             return false;
-        if (!channelId.equals(programme.getChannel().getId()))
+        if (!programme.getChannel().isSameChannel(channelId))
             return false;
         return title.equals(programme.getTitle());
     }

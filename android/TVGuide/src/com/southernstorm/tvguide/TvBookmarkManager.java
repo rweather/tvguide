@@ -225,7 +225,7 @@ public class TvBookmarkManager {
     }
 
     private File getBookmarksFile() {
-        return new File(mediaHandler.getFilesDir(), "bookmarks.xml");
+        return new File(mediaHandler.getFilesDir(), "bookmarks.tvb");
     }
 
     /**
@@ -235,8 +235,11 @@ public class TvBookmarkManager {
         bookmarks.clear();
         ticks.clear();
         File file = getBookmarksFile();
-        if (!file.exists())
+        if (!file.exists()) {
+            // The file doesn't exist on the SD card - create it for the first time.
+            save();
             return;
+        }
         Calendar today = new GregorianCalendar();
         try {
             FileInputStream fileStream = new FileInputStream(file);
@@ -289,6 +292,7 @@ public class TvBookmarkManager {
             serializer.startDocument(null, Boolean.valueOf(true));
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startTag(null, "bookmarks");
+            serializer.attribute(null, "service", "http://xml.oztivo.net/xmltv/datalist.xml.gz"); // TODO
             for (TvBookmark bookmark: bookmarks)
                 bookmark.saveToXml(serializer);
             for (TvTick tick: ticks)

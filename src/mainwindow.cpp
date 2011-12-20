@@ -34,6 +34,7 @@
 #include <QtGui/qevent.h>
 #include <QtGui/qtoolbutton.h>
 #include <QtGui/qtexttable.h>
+#include <QtGui/qfiledialog.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -134,6 +135,10 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(addBookmark()));
     connect(actionOrganizeBookmarks, SIGNAL(triggered()),
             this, SLOT(organizeBookmarks()));
+    connect(actionExportBookmarks, SIGNAL(triggered()),
+            this, SLOT(exportBookmarks()));
+    connect(actionImportBookmarks, SIGNAL(triggered()),
+            this, SLOT(importBookmarks()));
     connect(action7DayOutlook, SIGNAL(toggled(bool)),
             this, SLOT(sevenDayOutlookChanged()));
     connect(actionShowPartialMatches, SIGNAL(toggled(bool)),
@@ -421,6 +426,21 @@ void MainWindow::organizeBookmarks()
 {
     BookmarkListEditor dialog(m_channelList, this);
     dialog.exec();
+}
+
+void MainWindow::exportBookmarks()
+{
+    QString filename = QFileDialog::getSaveFileName
+        (this, tr("Export Bookmarks"), QString(),
+         tr("TV Bookmarks (*.tvb)"));
+    if (filename.isEmpty())
+        return;
+    m_channelList->bookmarkList()->exportBookmarks(filename);
+}
+
+void MainWindow::importBookmarks()
+{
+    // TODO
 }
 
 void MainWindow::tickShow()

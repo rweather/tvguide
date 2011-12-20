@@ -708,6 +708,26 @@ public class TvBookmark implements Comparable<TvBookmark> {
     }
 
     /**
+     * Formats a color value as #RRGGBB.
+     * 
+     * @param color the color value
+     * @return the formatted version of the color
+     */
+    private static String formatColor(int color) {
+        String result = "#";
+        int shift = 24;
+        while (shift > 0) {
+            shift -= 4;
+            int value = (color >> shift) & 0x0F;
+            if (value >= 10)
+                result += (char)('a' + value - 10);
+            else
+                result += (char)('0' + value);
+        }
+        return result;
+    }
+
+    /**
      * Saves this bookmark to an XML stream.
      * 
      * @param serializer the serializer for the XML stream
@@ -724,7 +744,7 @@ public class TvBookmark implements Comparable<TvBookmark> {
             Utils.writeEmptyTag(serializer, "any-time");
         if (!onAir)
             Utils.writeEmptyTag(serializer, "off-air");
-        Utils.writeContents(serializer, "color", "#" + Integer.toHexString(color));
+        Utils.writeContents(serializer, "color", formatColor(color));
         if (seasons != null)
             Utils.writeContents(serializer, "seasons", getSeasons());
         if (years != null)

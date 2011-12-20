@@ -62,6 +62,8 @@ private Q_SLOTS:
     void editChannelGroups();
     void addBookmark();
     void organizeBookmarks();
+    void exportBookmarks();
+    void importBookmarks();
     void tickShow();
 
     void selectService();

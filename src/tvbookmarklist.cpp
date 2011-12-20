@@ -18,9 +18,13 @@
 #include "tvbookmarklist.h"
 #include "tvprogramme.h"
 #include "tvchannel.h"
+#include "tvchannellist.h"
+#include <QtCore/qfile.h>
+#include <QtCore/qxmlstream.h>
 
-TvBookmarkList::TvBookmarkList(QObject *parent)
+TvBookmarkList::TvBookmarkList(TvChannelList *channelList, QObject *parent)
     : QObject(parent)
+    , m_channelList(channelList)
 {
 }
 
@@ -224,6 +228,26 @@ TvBookmark::Match TvBookmarkList::match
         ++it;
     }
     return result;
+}
+
+void TvBookmarkList::exportBookmarks(const QString &filename)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return;
+    QXmlStreamWriter writer(&file);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument(QLatin1String("1.0"), true);
+    writer.writeStartElement(QLatin1String("bookmarks"));
+    writer.writeAttribute(QLatin1String("service"), m_channelList->startUrl().toString());
+    for (int index = 0; index < m_bookmarks.size(); ++index)
+        m_bookmarks.at(index)->saveXml(&writer);
+    QMultiMap<QString, TvTick *>::ConstIterator it;
+    for (it = m_ticks.constBegin(); it != m_ticks.constEnd(); ++it)
+        it.value()->saveXml(&writer);
+    writer.writeEndElement();
+    writer.writeEndDocument();
+    file.close();
 }
 
 // The time index is used to map a specific day and time to a bookmark

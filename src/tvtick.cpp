@@ -31,7 +31,7 @@ bool TvTick::match(const TvProgramme *programme) const
 {
     if (programme->start() != m_start)
         return false;
-    if (programme->channel()->id() != m_channelId)
+    if (!programme->channel()->isSameChannel(m_channelId))
         return false;
     return programme->title() == m_title;
 }
@@ -50,4 +50,19 @@ void TvTick::save(QSettings *settings)
     settings->setValue(QLatin1String("channelId"), m_channelId);
     settings->setValue(QLatin1String("start"), m_start.toString(Qt::ISODate));
     settings->setValue(QLatin1String("timestamp"), m_timestamp.toString(Qt::ISODate));
+}
+
+void TvTick::loadXml(QXmlStreamReader *reader)
+{
+    Q_UNUSED(reader);
+}
+
+void TvTick::saveXml(QXmlStreamWriter *writer)
+{
+    writer->writeStartElement(QLatin1String("tick"));
+    writer->writeTextElement(QLatin1String("title"), m_title);
+    writer->writeTextElement(QLatin1String("channel-id"), m_channelId);
+    writer->writeTextElement(QLatin1String("start-time"), m_start.toString(QLatin1String("yyyyMMddhhmmss")));
+    writer->writeTextElement(QLatin1String("timestamp"), m_timestamp.toString(QLatin1String("yyyyMMddhhmmss")));
+    writer->writeEndElement();
 }

@@ -21,6 +21,7 @@
 #include <QtCore/qstring.h>
 #include <QtCore/qdatetime.h>
 #include <QtCore/qsettings.h>
+#include <QtCore/qxmlstream.h>
 
 class TvProgramme;
 
@@ -46,6 +47,9 @@ public:
 
     void load(QSettings *settings);
     void save(QSettings *settings);
+
+    void loadXml(QXmlStreamReader *reader);
+    void saveXml(QXmlStreamWriter *writer);
 
 private:
     QString m_title;
