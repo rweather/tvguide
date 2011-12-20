@@ -120,6 +120,13 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
 
         // Create the tabs for the next 5 days.
         TabHost tabHost = getTabHost();
+        if (tabHost.getTabWidget().getTabCount() > 0) {
+            // Activity has been resumed - reuse current tabs.  Since the activity was
+            // probably stopped due to "Organize Bookmarks" being displayed, refresh
+            // the bookmark matches in the existing tabs when we resume.
+            bookmarksChanged();
+            return;
+        }
         tabHost.clearAllTabs();
         for (day = 0; day < 5; ++day) {
             Calendar tabDate = (Calendar)date.clone(); 
@@ -186,11 +193,6 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         if (progressDialog != null) {
             progressDialog.dismiss();
             progressDialog = null;
-        }
-        for (int day = 0; day < NUM_DAYS; ++day) {
-            tabViews[day] = null;
-            programmeListViews[day] = null;
-            programmeListAdapters[day] = null;
         }
         TvBookmarkManager.getInstance().removeContext(this);
         TvBookmarkManager.getInstance().removeChangedListener(this);
