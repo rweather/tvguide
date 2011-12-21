@@ -206,6 +206,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(advancedSearchChanged()));
     connect(andButton, SIGNAL(toggled(bool)),
             this, SLOT(advancedSearchChanged()));
+    connect(moviesOnly, SIGNAL(toggled(bool)),
+            this, SLOT(advancedSearchChanged()));
 
     connect(categoryChoose, SIGNAL(clicked()),
             this, SLOT(selectSearchCategory()));
@@ -684,6 +686,7 @@ void MainWindow::advancedSearchChanged()
     filter->setDescription(descriptionEdit->text());
     filter->setCredit(creditEdit->text());
     filter->setCategory(categoryEdit->text());
+    filter->setMoviesOnly(moviesOnly->isChecked());
     if (andButton->isChecked())
         filter->setCombineMode(TvProgrammeFilter::CombineAnd);
     else

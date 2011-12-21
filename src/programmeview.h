@@ -164,7 +164,7 @@ private:
     Selection programmeAtPosition(const QPoint &pos) const;
 
     void applyFilter();
-    bool hasFilter() const { return !m_filter.isEmpty() || m_advancedFilter != 0; }
+    bool hasFilter() const { return !m_filter.isEmpty() || (m_advancedFilter != 0 && !m_advancedFilter->isDefault()); }
 
     bool hasCollisions(const ColumnInfo *column, const TvProgramme *prog, int offset) const;
 };

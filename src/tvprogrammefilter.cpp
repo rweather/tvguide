@@ -45,6 +45,10 @@ bool TvProgrammeFilter::match(const TvProgramme *prog) const
         matchCategory = prog->containsSearchString(m_category, TvProgramme::SearchCategories);
         haveCriteria = true;
     }
+    if (m_moviesOnly) {
+        if (!prog->isMovie())
+            return false;
+    }
     if (!haveCriteria)
         return true;        // No criteria always means "match all".
     if (m_combineMode == CombineAnd) {
@@ -60,4 +64,14 @@ bool TvProgrammeFilter::match(const TvProgramme *prog) const
                matchCredit ||
                matchCategory;
     }
+}
+
+bool TvProgrammeFilter::isDefault() const
+{
+    return m_title.isEmpty() &&
+           m_episodeName.isEmpty() &&
+           m_description.isEmpty() &&
+           m_credit.isEmpty() &&
+           m_category.isEmpty() &&
+           !m_moviesOnly;
 }

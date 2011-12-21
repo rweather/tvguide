@@ -26,7 +26,7 @@
      <x>0</x>
      <y>0</y>
      <width>969</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -236,6 +236,13 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="moviesOnly">
+           <property name="text">
+            <string>Movies Only</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>

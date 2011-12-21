@@ -29,7 +29,7 @@ public:
         CombineOr
     };
 
-    TvProgrammeFilter() : m_combineMode(CombineAnd) {}
+    TvProgrammeFilter() : m_combineMode(CombineAnd), m_moviesOnly(false) {}
     ~TvProgrammeFilter() {}
 
     QString title() const { return m_title; }
@@ -50,7 +50,12 @@ public:
     CombineMode combineMode() const { return m_combineMode; }
     void setCombineMode(CombineMode combineMode) { m_combineMode = combineMode; }
 
+    bool moviesOnly() const { return m_moviesOnly; }
+    void setMoviesOnly(bool moviesOnly) { m_moviesOnly = moviesOnly; }
+
     bool match(const TvProgramme *prog) const;
+
+    bool isDefault() const;
 
 private:
     QString m_title;
@@ -59,6 +64,7 @@ private:
     QString m_credit;
     QString m_category;
     CombineMode m_combineMode;
+    bool m_moviesOnly;
 };
 
 #endif
