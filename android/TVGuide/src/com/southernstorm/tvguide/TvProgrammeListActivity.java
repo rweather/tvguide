@@ -67,6 +67,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private TvChannel channel;
     private LayoutInflater inflater;
     private boolean landscape;
+    private TvScrollTime scrollTime;
 
     private static final int DIALOG_PICK_COLOR = 1;
     private static final int DIALOG_EDIT_BOOKMARK = 2;
@@ -87,6 +88,8 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         tabViews = new View[NUM_DAYS];
         programmeListViews = new ExpandableListView[NUM_DAYS];
         programmeListAdapters = new TvProgrammeListAdapter[NUM_DAYS];
+        
+        scrollTime = TvScrollTime.NOW;
     }
 
     @Override
@@ -96,7 +99,12 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         
         TvBookmarkManager.getInstance().addContext(this);
         TvBookmarkManager.getInstance().addChangedListener(this);
-        
+
+        // Load preferences.
+        SharedPreferences prefs = getPreferences(0);
+        String scrollTime = prefs.getString("scrollTime", "NOW");
+        this.scrollTime = TvScrollTime.valueOf(scrollTime);
+
         // Unpack the channel and date from the intent.
         Intent intent = getIntent();
         int year = intent.getIntExtra("date_year", 2000);
@@ -310,12 +318,14 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             stream.close();
         } catch (IOException e) {
         }
+        int time = scrollTime.toTime();
         for (int day = 0; day < NUM_DAYS; ++day) {
             TvProgrammeListAdapter adapter = programmeListAdapters[day];
             if (adapter != null && adapter.isChannelCovered(channel) && adapter.isDateCovered(date)) {
                 List<TvProgramme> programmes = channel.programmesForDay(adapter.getPrimaryDate());
                 TvBookmarkManager.getInstance().matchProgrammes(programmes);
                 adapter.setProgrammes(programmes);
+                programmeListViews[day].setSelectionFromTop(adapter.getPositionForTime(time), 20);
             }
         }
     }
@@ -334,6 +344,11 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private static final int ITEM_TICK = 12;
     private static final int ITEM_UNTICK = 13;
     private static final int ITEM_ORGANIZE_BOOKMARKS = 14;
+    private static final int ITEM_SCROLL_TO_NOW = 15;
+    private static final int ITEM_SCROLL_TO_MORNING = 16;
+    private static final int ITEM_SCROLL_TO_AFTERNOON = 17;
+    private static final int ITEM_SCROLL_TO_NIGHT = 18;
+    private static final int ITEM_SCROLL_TO_LATE_NIGHT = 19;
     
     // Workaround for the lack of expandable list item ID's on submenu items.
     private ContextMenuInfo savedMenuInfo = null;
@@ -524,17 +539,52 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks");
+        menu.add(ITEM_SCROLL_TO_NOW, 0, 0, "Now");
+        menu.add(ITEM_SCROLL_TO_MORNING, 0, 0, "Morning");
+        menu.add(ITEM_SCROLL_TO_AFTERNOON, 0, 0, "Afternoon");
+        menu.add(ITEM_SCROLL_TO_NIGHT, 0, 0, "Night");
+        menu.add(ITEM_SCROLL_TO_LATE_NIGHT, 0, 0, "Late Night");
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getGroupId() == ITEM_ORGANIZE_BOOKMARKS) {
+        switch (item.getGroupId()) {
+        case ITEM_ORGANIZE_BOOKMARKS:
             Intent intent = new Intent(this, TvBookmarkListActivity.class);
             startActivity(intent);
             return true;
+        case ITEM_SCROLL_TO_NOW:
+            setScrollTime(TvScrollTime.NOW);
+            return true;
+        case ITEM_SCROLL_TO_MORNING:
+            setScrollTime(TvScrollTime.MORNING);
+            return true;
+        case ITEM_SCROLL_TO_AFTERNOON:
+            setScrollTime(TvScrollTime.AFTERNOON);
+            return true;
+        case ITEM_SCROLL_TO_NIGHT:
+            setScrollTime(TvScrollTime.NIGHT);
+            return true;
+        case ITEM_SCROLL_TO_LATE_NIGHT:
+            setScrollTime(TvScrollTime.LATE_NIGHT);
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setScrollTime(TvScrollTime scrollTime) {
+        this.scrollTime = scrollTime;
+        int day = getTabHost().getCurrentTab();
+        if (day >= 0 && day < NUM_DAYS) {
+            ExpandableListView view = programmeListViews[day];
+            TvProgrammeListAdapter adapter = programmeListAdapters[day];
+            if (view != null && adapter != null)
+                view.setSelectionFromTop(adapter.getPositionForTime(scrollTime.toTime()), 20);
+        }
+        SharedPreferences.Editor editor = getPreferences(0).edit();
+        editor.putString("scrollTime", scrollTime.toString());
+        editor.commit();
     }
     
     private void toast(String message) {

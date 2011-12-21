@@ -271,4 +271,40 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
 
     public void onGroupCollapsed(int position) {}
     public void onGroupExpanded(int position) {}
+
+    private static int getStartTime(TvProgramme prog, int position) {
+        int hour = prog.getStart().get(Calendar.HOUR_OF_DAY);
+        int minute = prog.getStart().get(Calendar.MINUTE);
+        int second = prog.getStart().get(Calendar.SECOND);
+        if (hour < 6 && position != 0)
+            hour += 24;
+        return hour * 60 * 60 + minute * 60 + second;
+    }
+
+    /**
+     * Gets the start time of the programme at a specific position in the list.
+     * 
+     * @param position the position of the programme
+     * @return the start time, seconds since midnight (>= 24 hours for "next day")
+     */
+    public int getTimeForPosition(int position) {
+        if (position < 0 || position >= programmes.size())
+            return 0;
+        return getStartTime(programmes.get(position), position);
+    }
+    
+    /**
+     * Gets the position within the list that contains a specific start time.
+     * 
+     * @param time the start time, seconds since midnight (>= 24 hours for "next day")
+     * @return the position
+     */
+    public int getPositionForTime(int time) {
+        for (int index = 0; index < programmes.size(); ++index) {
+            int t = getStartTime(programmes.get(index), index);
+            if (t > time)
+                return Math.max(0,  index - 1);
+        }
+        return Math.max(0, programmes.size() - 1);
+    }
 }
