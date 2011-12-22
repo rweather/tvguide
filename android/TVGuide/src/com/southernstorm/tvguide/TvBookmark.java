@@ -127,6 +127,18 @@ public class TvBookmark implements Comparable<TvBookmark> {
     }
 
     /**
+     * Gets the channel object for this bookmark's channel id.
+     * 
+     * @return the channel object, or null if not found
+     */
+    public TvChannel getChannel() {
+        if (channelId != null)
+            return TvChannelCache.getInstance().getChannel(channelId);
+        else
+            return null;
+    }
+    
+    /**
      * Gets the mask to use for testing if a day matches this bookmark.
      * 
      * @return the current day mask
@@ -858,15 +870,25 @@ public class TvBookmark implements Comparable<TvBookmark> {
         formatter.setColor(0xFF000000);
         formatter.append(getDayOfWeekMaskName(false));
         formatter.append(", ");
-        formatter.append(Utils.formatTime(startTime));
-        formatter.append(" to ");
-        formatter.append(Utils.formatTime(stopTime));
+        if (anyTime) {
+            formatter.append("Any time");
+        } else {
+            formatter.append(Utils.formatTime(startTime));
+            formatter.append(" to ");
+            formatter.append(Utils.formatTime(stopTime));
+        }
         if (channelId != null) {
             formatter.append(", ");
-            formatter.append(channelId);    // TODO: use the real channel name
+            TvChannel channel = getChannel();
+            if (channel != null)
+                formatter.append(channel.getName());
+            else
+                formatter.append(channelId);
         } else {
             formatter.append(", Any channel");
         }
+        if (!onAir)
+            formatter.append(", Off Air");
         return formatter.toSpannableString();
     }
 }

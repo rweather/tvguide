@@ -147,6 +147,23 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
     
     /**
+     * Gets the channel with a specific identifier.
+     * 
+     * @param id the identifier
+     * @return the channel, or null if not found
+     */
+    public TvChannel getChannel(String id) {
+        if (id == null || id.length() == 0)
+            return null;
+        for (int index = 0; index < channels.size(); ++index) {
+            TvChannel channel = channels.get(index);
+            if (channel.getId().equals(id))
+                return channel;
+        }
+        return null;
+    }
+    
+    /**
      * Gets the name of the service to cache channel data underneath.
      *
      * @return the service name, or the empty string if no service
