@@ -77,6 +77,8 @@ public class TvProgramme {
     public String getEpisodeNumber() { return episodeNumber; }
     public int getSeason() { return season; }
     
+    public boolean isMovie() { return m_isMovie; }
+    
     public int getYear() {
         if (date == null || date.length() == 0) {
             return 0;
@@ -181,7 +183,7 @@ public class TvProgramme {
                             if (ch == 'M') {
                                 if (category.equalsIgnoreCase("Movie") ||
                                         category.equalsIgnoreCase("Movies"))
-                                    isMovie = true;
+                                    m_isMovie = true;
                             }
                         }
                     } else if (name.equals("credits")) {
@@ -356,7 +358,7 @@ public class TvProgramme {
             formatter.setColor(bookmark.getColor());
             break;
         }
-        if (isMovie)
+        if (m_isMovie)
             formatter.append("MOVIE: ");
         formatter.append(title);
         formatter.setBold(false);
@@ -383,7 +385,7 @@ public class TvProgramme {
             category = cat;
             break;
         }
-        if (!isMovie && category != null) {
+        if (!m_isMovie && category != null) {
             formatter.append(", ");
             formatter.append(category);
         }
@@ -397,7 +399,7 @@ public class TvProgramme {
             formatter.append(")");
         }
         formatter.setItalic(false);
-        if (isMovie) {
+        if (m_isMovie) {
             // Add the category and first actor name to the second line for movies
             // because there usually will be no episode name.
             String actor = (actors.size() > 0 ? actors.get(0) : null);
@@ -602,7 +604,7 @@ public class TvProgramme {
     private String aspectRatio;
     private boolean isPremiere;
     private boolean isRepeat;
-    private boolean isMovie;
+    private boolean m_isMovie;
     private TvBookmark bookmark;
     private TvBookmarkMatch match;
 }

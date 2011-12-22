@@ -346,6 +346,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private static final int ITEM_SCROLL_TO_AFTERNOON = 17;
     private static final int ITEM_SCROLL_TO_NIGHT = 18;
     private static final int ITEM_SCROLL_TO_LATE_NIGHT = 19;
+    private static final int ITEM_ADD_REMINDER = 20;
     
     // Workaround for the lack of expandable list item ID's on submenu items.
     private ContextMenuInfo savedMenuInfo = null;
@@ -371,6 +372,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_IMDB, 0, "IMDb");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_EPGUIDES, 0, "epguides");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_WIKIPEDIA, 0, "Wikipedia");
+        menu.add(ITEM_ADD_REMINDER, 0, 0, "Add Reminder");
         savedMenuInfo = menuInfo;
     }
     
@@ -379,6 +381,21 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         savedMenuInfo = null;
     }
 
+    /*
+    private static String weeklyRule(int weekday) {
+        switch (weekday) {
+        case Calendar.MONDAY:       return ";BYDAY=MO";
+        case Calendar.TUESDAY:      return ";BYDAY=TU";
+        case Calendar.WEDNESDAY:    return ";BYDAY=WE";
+        case Calendar.THURSDAY:     return ";BYDAY=TH";
+        case Calendar.FRIDAY:       return ";BYDAY=FR";
+        case Calendar.SATURDAY:     return ";BYDAY=SA";
+        case Calendar.SUNDAY:       return ";BYDAY=SU";
+        default:                    return "";
+        }
+    }
+    */
+    
     private int getProgrammeGroupId(ExpandableListContextMenuInfo menuInfo) {
         ExpandableListContextMenuInfo info = (ExpandableListContextMenuInfo)menuInfo;
         int type = ExpandableListView.getPackedPositionType(info.packedPosition);
@@ -440,6 +457,21 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
                 webSearch(prog, "http://en.wikipedia.org/wiki/Special:Search?search=");
                 break;
             }
+            break;
+        case ITEM_ADD_REMINDER:
+            // Send a new event to the device's calendar application.
+            Intent intent = new Intent(Intent.ACTION_EDIT);
+            intent.setType("vnd.android.cursor.item/event");
+            intent.putExtra("beginTime", prog.getStart().getTimeInMillis());
+            intent.putExtra("allDay", false);
+            //if (!prog.isMovie())    // Movies are typically one-off, so no weekly rule for them.
+            //    intent.putExtra("rrule", "FREQ=WEEKLY" + weeklyRule(prog.getStart().get(Calendar.DAY_OF_WEEK)));
+            intent.putExtra("endTime", prog.getStop().getTimeInMillis());
+            if (prog.isMovie())
+                intent.putExtra("title", "MOVIE: " + prog.getTitle());
+            else
+                intent.putExtra("title", prog.getTitle());
+            startActivity(intent);
             break;
         }
         return false;
