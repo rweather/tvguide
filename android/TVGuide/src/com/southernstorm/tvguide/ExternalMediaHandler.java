@@ -18,6 +18,8 @@
 package com.southernstorm.tvguide;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,41 +35,73 @@ import android.os.Environment;
  */
 public abstract class ExternalMediaHandler {
 
-    private Context context;
+    private class ContextInfo {
+        public Context context;
+        public BroadcastReceiver receiver;
+    }
+    
+    private List<ContextInfo> contexts;
     private boolean mounted;
     private boolean readOnly;
     private boolean useInternal;
-    private BroadcastReceiver receiver;
+    private boolean firstCheck;
 
     /**
-     * Constructs a new external media handler for a context.
-     *
-     * @param context the application's main context
+     * Constructs a new external media handler.  Should be followed by a call
+     * to addContext() to associate the handler with an activity.
      */
-    protected ExternalMediaHandler(Context context) {
-        this.context = context;
-        checkMountState();
+    protected ExternalMediaHandler() {
+        this.contexts = new ArrayList<ContextInfo>();
+        this.firstCheck = true;
     }
 
-    public void registerReceivers() {
+    /**
+     * Adds an activity's context to this media handler.
+     * 
+     * @param context the context to add
+     */
+    public void addContext(Context context) {
+        for (int index = 0; index < contexts.size(); ++index) {
+            if (contexts.get(index).context == context)
+                return;
+        }
+        ContextInfo info = new ContextInfo();
+        info.context = context;
+        contexts.add(info);
+        registerReceivers(info);
+        if (contexts.size() == 1)
+            updateMountState();
+    }
+    
+    /**
+     * Removes an activity's context from this media handler.
+     * 
+     * @param context the context to add
+     */
+    public void removeContext(Context context) {
+        for (int index = 0; index < contexts.size(); ++index) {
+            ContextInfo info = contexts.get(index);
+            if (info.context == context) {
+                contexts.remove(index);
+                unregisterReceivers(info);
+                break;
+            }
+        }
+    }
+    
+    private void registerReceivers(ContextInfo info) {
         // Listen for events indicating that the SD card has been
         // mounted or unmounted.
         IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
         filter.addDataScheme("file");
-        if (receiver == null) {
-            receiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    boolean oldMounted = mounted;
-                    boolean oldReadOnly = readOnly;
-                    boolean oldUseInternal = useInternal;
-                    checkMountState();
-                    if (oldMounted != mounted || oldReadOnly != readOnly ||
-                            oldUseInternal != useInternal)
-                        mediaUsableChanged();
-                }
-            };
-        }
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                updateMountState();
+            }
+        };
+        info.receiver = receiver;
+        Context context = info.context;
         context.registerReceiver(receiver, filter);
         filter = new IntentFilter(Intent.ACTION_MEDIA_BAD_REMOVAL);
         filter.addDataScheme("file");
@@ -95,8 +129,19 @@ public abstract class ExternalMediaHandler {
         context.registerReceiver(receiver, filter);
     }
 
-    public void unregisterReceivers() {
-        context.unregisterReceiver(receiver);
+    private void unregisterReceivers(ContextInfo info) {
+        info.context.unregisterReceiver(info.receiver);
+    }
+
+    private void updateMountState() {
+        boolean oldMounted = mounted;
+        boolean oldReadOnly = readOnly;
+        boolean oldUseInternal = useInternal;
+        checkMountState();
+        if (firstCheck || oldMounted != mounted || oldReadOnly != readOnly ||
+                oldUseInternal != useInternal)
+            mediaUsableChanged();
+        firstCheck = false;
     }
 
     private void checkMountState() {
@@ -123,12 +168,16 @@ public abstract class ExternalMediaHandler {
     }
 
     /**
-     * Returns the context associated with this external media handler.
+     * Returns the first activity context associated with this external
+     * media handler, or null if no activities are using this handler at present.
      *
      * @return the context
      */
     public Context getContext() {
-        return context;
+        if (contexts.size() > 0)
+            return contexts.get(0).context;
+        else
+            return null;
     }
 
     /**
@@ -138,7 +187,7 @@ public abstract class ExternalMediaHandler {
      * @return true if the media is mounted and writable, false otherwise.
      */
     public boolean isMediaUsable() {
-        return mounted && !readOnly;
+        return !contexts.isEmpty() && mounted && !readOnly;
     }
 
     /**
@@ -156,9 +205,9 @@ public abstract class ExternalMediaHandler {
         if (!isMediaUsable())
             return null;
         else if (useInternal)
-            return context.getCacheDir();
+            return getContext().getCacheDir();
         else
-            return context.getExternalCacheDir();
+            return getContext().getExternalCacheDir();
     }
 
     /**
@@ -171,8 +220,8 @@ public abstract class ExternalMediaHandler {
         if (!isMediaUsable())
             return null;
         else if (useInternal)
-            return context.getFilesDir();
+            return getContext().getFilesDir();
         else
-            return context.getExternalFilesDir(null);
+            return getContext().getExternalFilesDir(null);
     }
 }

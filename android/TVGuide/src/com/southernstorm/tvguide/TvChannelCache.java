@@ -28,6 +28,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -41,7 +42,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 /**
@@ -53,17 +53,26 @@ public class TvChannelCache extends ExternalMediaHandler {
     private File httpCacheDir;
     private Random rand;
     private boolean debug;
-    private TvNetworkListener listener;
+    private List<TvNetworkListener> listeners;
+    private static TvChannelCache instance = null;
 
-    public TvChannelCache(Context context, TvNetworkListener listener) {
-        super(context);
+    private TvChannelCache() {
         this.serviceName = "";
         this.rand = new Random(System.currentTimeMillis());
-        this.listener = listener;
+        this.listeners = new ArrayList<TvNetworkListener>();
     }
 
     void setDebug(boolean value) {
         debug = value;
+    }
+
+    public static TvChannelCache getInstance() {
+        if (instance == null) {
+            instance = new TvChannelCache();
+            instance.setServiceName("OzTivo");
+            instance.setDebug(true);    // FIXME: remove before releasing
+        }
+        return instance;
     }
 
     /**
@@ -533,7 +542,8 @@ public class TvChannelCache extends ExternalMediaHandler {
                 currentRequestPrimaryDate = null;
                 if (requestsActive) {
                     requestsActive = false;
-                    listener.endNetworkRequests();
+                    for (TvNetworkListener listener: listeners)
+                        listener.endNetworkRequests();
                 }
                 break;
             }
@@ -541,7 +551,8 @@ public class TvChannelCache extends ExternalMediaHandler {
             info.next = null;
             if (hasChannelData(info.channel, info.date)) {
                 // A previous request on the queue already fetched this data.
-                listener.dataAvailable(info.channel, info.date, info.primaryDate);
+                for (TvNetworkListener listener: listeners)
+                    listener.dataAvailable(info.channel, info.date, info.primaryDate);
                 continue;
             }
             currentRequestChannel = info.channel;
@@ -550,16 +561,27 @@ public class TvChannelCache extends ExternalMediaHandler {
             if (debug)
                 System.out.println("fetching " + info.uri.toString());
             requestsActive = true;
-            listener.setCurrentNetworkRequest(info.channel, info.date, info.primaryDate);
+            for (TvNetworkListener listener: listeners)
+                listener.setCurrentNetworkRequest(info.channel, info.date, info.primaryDate);
             new DownloadAsyncTask().execute(info);
             break;
         }
     }
 
     private void reportRequestResult(RequestInfo info) {
-        if (info.success)
-            listener.dataAvailable(info.channel, info.date, currentRequestPrimaryDate);
-        else
-            listener.requestFailed(info.channel, info.date, currentRequestPrimaryDate);
+        for (TvNetworkListener listener: listeners) {
+            if (info.success)
+                listener.dataAvailable(info.channel, info.date, currentRequestPrimaryDate);
+            else
+                listener.requestFailed(info.channel, info.date, currentRequestPrimaryDate);
+        }
+    }
+
+    public void addNetworkListener(TvNetworkListener listener) {
+        listeners.add(listener);
+    }
+    
+    public void removeNetworkListener(TvNetworkListener listener) {
+        listeners.remove(listener);
     }
 }

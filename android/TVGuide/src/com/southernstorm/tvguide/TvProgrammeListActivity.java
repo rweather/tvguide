@@ -61,7 +61,6 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     private View[] tabViews;
     private ExpandableListView[] programmeListViews;
     private TvProgrammeListAdapter[] programmeListAdapters;
-    private TvChannelCache channelCache;
     private ProgressDialog progressDialog;
     private Calendar date;
     private TvChannel channel;
@@ -80,11 +79,6 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
        
         inflater = LayoutInflater.from(this);
 
-        channelCache = new TvChannelCache(this, this);
-        channelCache.setServiceName("OzTivo");
-        channelCache.setDebug(true);
-        channelCache.expire();
-        
         tabViews = new View[NUM_DAYS];
         programmeListViews = new ExpandableListView[NUM_DAYS];
         programmeListAdapters = new TvProgrammeListAdapter[NUM_DAYS];
@@ -95,7 +89,9 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     @Override
     protected void onStart() {
         super.onStart();
-        channelCache.registerReceivers();
+        TvChannelCache.getInstance().addContext(this);
+        TvChannelCache.getInstance().addNetworkListener(this);
+        TvChannelCache.getInstance().expire();
         
         TvBookmarkManager.getInstance().addContext(this);
         TvBookmarkManager.getInstance().addChangedListener(this);
@@ -197,7 +193,8 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
 
     @Override
     protected void onStop() {
-        channelCache.unregisterReceivers();
+        TvChannelCache.getInstance().removeContext(this);
+        TvChannelCache.getInstance().removeNetworkListener(this);
         if (progressDialog != null) {
             progressDialog.dismiss();
             progressDialog = null;
@@ -299,15 +296,15 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     }
 
     private void fetch(TvChannel channel, Calendar date, Calendar primaryDate) {
-        InputStream stream = channelCache.openChannelData(channel, date);
+        InputStream stream = TvChannelCache.getInstance().openChannelData(channel, date);
         if (stream != null)
             parseProgrammes(channel, date, stream);
         else
-            channelCache.fetch(channel, date, primaryDate);
+            TvChannelCache.getInstance().fetch(channel, date, primaryDate);
     }
     
     public void dataAvailable(TvChannel channel, Calendar date, Calendar primaryDate) {
-        InputStream stream = channelCache.openChannelData(channel, date);
+        InputStream stream = TvChannelCache.getInstance().openChannelData(channel, date);
         if (stream != null)
             parseProgrammes(channel, date, stream);
     }

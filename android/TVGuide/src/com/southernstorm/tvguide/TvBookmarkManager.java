@@ -38,33 +38,17 @@ import android.util.Xml;
 /**
  * This class manages the global list of bookmarks and ticks in the TV guide.
  */
-public class TvBookmarkManager {
+public class TvBookmarkManager extends ExternalMediaHandler {
 
     private static TvBookmarkManager instance = null;
     private List<TvBookmark> bookmarks;
     private List<TvTick> ticks;
-    private List<Context> contexts;
-    private BookmarkMediaHandler mediaHandler;
     private boolean isLoaded;
     private List<TvBookmarkChangedListener> listeners;
     
-    private class BookmarkMediaHandler extends ExternalMediaHandler {
-
-        protected BookmarkMediaHandler(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void mediaUsableChanged() {
-            mediaChanged();
-        }
-    }
-
     private TvBookmarkManager() {
         bookmarks = new ArrayList<TvBookmark>();
         ticks = new ArrayList<TvTick>();
-        contexts = new ArrayList<Context>();
-        mediaHandler = null;
         isLoaded = false;
         listeners = new ArrayList<TvBookmarkChangedListener>();
     }
@@ -80,50 +64,19 @@ public class TvBookmarkManager {
         return instance;
     }
 
-    /**
-     * Adds a context to this manager, for saving bookmarks when they change.
-     * If this is the first context that was added, the bookmarks will be loaded.
-     * 
-     * @param context the context to add
-     */
+    @Override
     public void addContext(Context context) {
-        for (int index = 0; index < contexts.size(); ++index) {
-            if (contexts.get(index) == context)
-                return;
-        }
-        contexts.add(context);
-        if (mediaHandler == null) {
-            mediaHandler = new BookmarkMediaHandler(context);
-            mediaHandler.registerReceivers();
-        }
-        if (!isLoaded && mediaHandler.isMediaUsable()) {
+        super.addContext(context);
+        if (!isLoaded && isMediaUsable()) {
             isLoaded = true;
             load();
         }
     }
 
-    /**
-     * Removes a context from this manager.
-     * 
-     * @param context the context to remove
-     */
+    @Override
     public void removeContext(Context context) {
-        if (mediaHandler != null && mediaHandler.getContext() == context) {
-            mediaHandler.unregisterReceivers();
-            mediaHandler = null;
-        }
-        for (int index = 0; index < contexts.size(); ++index) {
-            if (contexts.get(index) == context) {
-                contexts.remove(index);
-                break;
-            }
-        }
-        if (mediaHandler == null && contexts.size() > 0) {
-            context = contexts.get(0);
-            mediaHandler = new BookmarkMediaHandler(context);
-            mediaHandler.registerReceivers();
-        }
-        if (mediaHandler == null) {
+        super.removeContext(context);
+        if (getContext() == null) {
             // No more contexts, so mark the data to be reloaded the next time
             // we have a context just in case the SD card contents was changed.
             isLoaded = false;
@@ -225,7 +178,7 @@ public class TvBookmarkManager {
     }
 
     private File getBookmarksFile() {
-        return new File(mediaHandler.getFilesDir(), "bookmarks.tvb");
+        return new File(getFilesDir(), "bookmarks.tvb");
     }
 
     /**
@@ -282,7 +235,7 @@ public class TvBookmarkManager {
      * Saves the bookmarks to external SD card storage.
      */
     private void save() {
-        if (mediaHandler == null || !mediaHandler.isMediaUsable())
+        if (!isMediaUsable())
             return;
         File file = getBookmarksFile();
         try {
@@ -305,12 +258,9 @@ public class TvBookmarkManager {
         notifyChanged();
     }
 
-    /**
-     * Reload the bookmarks if the SD card media has been re-inserted,
-     * or invalidate the bookmarks if the SD card media has been removed.
-     */
-    private void mediaChanged() {
-        if (mediaHandler.isMediaUsable()) {
+    @Override
+    protected void mediaUsableChanged() {
+        if (isMediaUsable()) {
             isLoaded = true;
             load();
         } else {
