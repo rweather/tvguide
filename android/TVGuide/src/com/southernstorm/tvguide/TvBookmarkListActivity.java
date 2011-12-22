@@ -45,6 +45,7 @@ public class TvBookmarkListActivity extends Activity {
     protected void onStart() {
         super.onStart();
         
+        TvChannelCache.getInstance().addContext(this);
         TvBookmarkManager.getInstance().addContext(this);
         
         bookmarkListAdapter.attach();
@@ -52,6 +53,7 @@ public class TvBookmarkListActivity extends Activity {
 
     @Override
     protected void onStop() {
+        TvChannelCache.getInstance().removeContext(this);
         TvBookmarkManager.getInstance().removeContext(this);
         bookmarkListAdapter.detach();
         super.onStop();

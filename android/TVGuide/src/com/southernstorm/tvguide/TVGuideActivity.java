@@ -64,12 +64,9 @@ public class TVGuideActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        channelListAdapter.attach();
+        TvChannelCache.getInstance().addContext(this);
 
-        SharedPreferences prefs = getPreferences(0);
-        String region = prefs.getString("region", "");
-        if (region != null && !region.equals(""))
-            channelListAdapter.setRegion(region);
-        
         // If no region selected yet, then populate the initial channel list with regions.
         if (channelListAdapter.getCount() == 0)
             channelListView.setAdapter(regionListAdapter);
@@ -79,6 +76,8 @@ public class TVGuideActivity extends Activity {
 
     @Override
     protected void onStop() {
+        TvChannelCache.getInstance().removeContext(this);
+        channelListAdapter.detach();
         super.onStop();
     }
 
@@ -113,7 +112,7 @@ public class TVGuideActivity extends Activity {
      * @param regionId the region identifier
      */
     private void selectRegion(String regionId) {
-        channelListAdapter.setRegion(regionId);
+        TvChannelCache.getInstance().setRegion(regionId);
         channelListView.setAdapter(channelListAdapter);
 
         SharedPreferences.Editor editor = getPreferences(0).edit();

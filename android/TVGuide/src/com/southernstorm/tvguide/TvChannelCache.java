@@ -30,9 +30,12 @@ import java.net.URISyntaxException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -41,7 +44,12 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.XmlResourceParser;
 import android.os.AsyncTask;
 
 /**
@@ -53,19 +61,31 @@ public class TvChannelCache extends ExternalMediaHandler {
     private File httpCacheDir;
     private Random rand;
     private boolean debug;
-    private List<TvNetworkListener> listeners;
+    private List<TvChannel> channels;
+    private String region;
+    private Map< String, List<String> > regionTree;
+    private Map< String, ArrayList<String> > commonIds;
+    private List<TvNetworkListener> networkListeners;
+    private List<TvChannelChangedListener> channelListeners;
     private static TvChannelCache instance = null;
 
     private TvChannelCache() {
         this.serviceName = "";
         this.rand = new Random(System.currentTimeMillis());
-        this.listeners = new ArrayList<TvNetworkListener>();
+        this.channels = new ArrayList<TvChannel>();
+        this.networkListeners = new ArrayList<TvNetworkListener>();
+        this.channelListeners = new ArrayList<TvChannelChangedListener>();
     }
 
     void setDebug(boolean value) {
         debug = value;
     }
 
+    /**
+     * Gets the global instance of the channel cache.
+     * 
+     * @return the global instance
+     */
     public static TvChannelCache getInstance() {
         if (instance == null) {
             instance = new TvChannelCache();
@@ -74,7 +94,58 @@ public class TvChannelCache extends ExternalMediaHandler {
         }
         return instance;
     }
+    
+    /**
+     * Gets the current region.
+     * 
+     * @return the region, or null if none set
+     */
+    public String getRegion() {
+        return region;
+    }
 
+    /**
+     * Sets the current region.
+     * 
+     * @param region the region to set
+     */
+    public void setRegion(String region) {
+        if (this.region == null || !this.region.equals(region)) {
+            this.region = region;
+            
+            // Save the region in the settings.
+            SharedPreferences.Editor editor = getContext().getSharedPreferences("TVGuideActivity", 0).edit();
+            editor.putString("region", region);
+            editor.commit();
+
+            // Reload the channel list.
+            loadChannels();
+        }
+    }
+
+    @Override
+    public void addContext(Context context) {
+        super.addContext(context);
+        if (region == null) {
+            // Load the region from the settings for the first time.
+            SharedPreferences prefs = context.getSharedPreferences("TVGuideActivity", 0);
+            region = prefs.getString("region", "");
+            if (region != null && region.equals(""))
+                region = null;
+        }
+        if (channels.size() == 0 && region != null)
+            loadChannels();
+    }
+
+    /**
+     * Gets the list of active channels.
+     * 
+     * @return the channels
+     */
+    public List<TvChannel> getChannels() {
+        return channels;
+    }
+    
     /**
      * Gets the name of the service to cache channel data underneath.
      *
@@ -542,7 +613,7 @@ public class TvChannelCache extends ExternalMediaHandler {
                 currentRequestPrimaryDate = null;
                 if (requestsActive) {
                     requestsActive = false;
-                    for (TvNetworkListener listener: listeners)
+                    for (TvNetworkListener listener: networkListeners)
                         listener.endNetworkRequests();
                 }
                 break;
@@ -551,7 +622,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             info.next = null;
             if (hasChannelData(info.channel, info.date)) {
                 // A previous request on the queue already fetched this data.
-                for (TvNetworkListener listener: listeners)
+                for (TvNetworkListener listener: networkListeners)
                     listener.dataAvailable(info.channel, info.date, info.primaryDate);
                 continue;
             }
@@ -561,7 +632,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             if (debug)
                 System.out.println("fetching " + info.uri.toString());
             requestsActive = true;
-            for (TvNetworkListener listener: listeners)
+            for (TvNetworkListener listener: networkListeners)
                 listener.setCurrentNetworkRequest(info.channel, info.date, info.primaryDate);
             new DownloadAsyncTask().execute(info);
             break;
@@ -569,7 +640,7 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     private void reportRequestResult(RequestInfo info) {
-        for (TvNetworkListener listener: listeners) {
+        for (TvNetworkListener listener: networkListeners) {
             if (info.success)
                 listener.dataAvailable(info.channel, info.date, currentRequestPrimaryDate);
             else
@@ -578,10 +649,152 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     public void addNetworkListener(TvNetworkListener listener) {
-        listeners.add(listener);
+        networkListeners.add(listener);
     }
     
     public void removeNetworkListener(TvNetworkListener listener) {
-        listeners.remove(listener);
+        networkListeners.remove(listener);
+    }
+
+    public void addChannelChangedListener(TvChannelChangedListener listener) {
+        channelListeners.add(listener);
+    }
+    
+    public void removeChannelChangedListener(TvChannelChangedListener listener) {
+        channelListeners.remove(listener);
+    }
+
+    /**
+     * Loads channel information from the channels.xml file embedded in the resources.
+     */
+    private void loadChannels() {
+        if (region == null || getContext() == null)
+            return;
+        channels.clear();
+        XmlResourceParser parser = getContext().getResources().getXml(R.xml.channels);
+        regionTree = new TreeMap< String, List<String> >();
+        commonIds = new TreeMap< String, ArrayList<String> >();
+        String id = null;
+        String parent;
+        try {
+            int eventType = parser.getEventType();
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG) {
+                    String name = parser.getName();
+                    if (name.equals("region")) {
+                        // Parse the contents of a <region> element.
+                        id = parser.getAttributeValue(null, "id");
+                        parent = parser.getAttributeValue(null, "parent");
+                        if (id != null && parent != null) {
+                            if (!regionTree.containsKey(id))
+                                regionTree.put(id, new ArrayList<String>());
+                            regionTree.get(id).add(parent);
+                        }
+                    } else if (name.equals("other-parent")) {
+                        // Secondary parent for the current region.
+                        parent = Utils.getContents(parser, name);
+                        if (!regionTree.containsKey(id))
+                            regionTree.put(id, new ArrayList<String>());
+                        regionTree.get(id).add(parent);
+                    } else if (name.equals("channel")) {
+                        // Parse the contents of a <channel> element.
+                        TvChannel channel = loadChannel(parser);
+                        if (channel != null)
+                            channels.add(channel);
+                    }
+                }
+                eventType = parser.next();
+            }
+        } catch (XmlPullParserException e) {
+            // Ignore - just stop parsing at the first error.
+        } catch (IOException e) {
+        }
+        parser.close();
+        Collections.sort(channels);
+        regionTree = null;
+        commonIds = null;
+        for (TvChannelChangedListener listener: channelListeners)
+            listener.channelsChanged();
+    }
+    
+    private TvChannel loadChannel(XmlPullParser parser) throws XmlPullParserException, IOException {
+        TvChannel channel = new TvChannel();
+        channel.setId(parser.getAttributeValue(null, "id"));
+        String commonId = parser.getAttributeValue(null, "common-id");
+        channel.setCommonId(commonId);
+        if (commonId != null) {
+            // Keep track of all channels with the same common identifier in a shared list.
+            // We use this to migrate bookmarks across regions.
+            ArrayList<String> list = commonIds.get(commonId);
+            if (list != null) {
+                list.add(channel.getId());
+            } else {
+                list = new ArrayList<String>();
+                list.add(channel.getId());
+                commonIds.put(commonId, list);
+            }
+            channel.setOtherChannelsList(list);
+        }
+        String region = parser.getAttributeValue(null, "region");
+        if (region == null || !regionMatch(region))
+            return null;
+        int eventType = parser.next();
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            if (eventType == XmlPullParser.START_TAG) {
+                String name = parser.getName();
+                if (name.equals("display-name")) {
+                    channel.setName(Utils.getContents(parser, name));
+                } else if (name.equals("icon")) {
+                    String src = parser.getAttributeValue(null, "src");
+                    if (src != null) {
+                        int index = src.lastIndexOf('/');
+                        if (index >= 0)
+                            channel.setIconResource(IconFactory.getInstance().getChannelIconResource(src.substring(index + 1)));
+                    }
+                } else if (name.equals("number")) {
+                    String system = parser.getAttributeValue(null, "system");
+                    String currentNumbers = channel.getNumbers();
+                    if (!system.equals("digital")) {
+                        if (currentNumbers == null)
+                            return null;    // Ignore Pay TV only channels for now.
+                    } else {
+                        String number = Utils.getContents(parser, name);
+                        if (currentNumbers == null) {
+                            channel.setNumbers(number);
+                            channel.setPrimaryChannelNumber(Integer.valueOf(number));
+                        } else {
+                            channel.setNumbers(currentNumbers + ", " + number);
+                        }
+                    }
+                }
+            } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals("channel")) {
+                break;
+            }
+            eventType = parser.next();
+        }
+        List<String> baseUrls = new ArrayList<String>();
+        baseUrls.add("http://www.oztivo.net/xmltv/");
+        baseUrls.add("http://xml.oztivo.net/xmltv/");
+        channel.setBaseUrls(baseUrls);
+        return channel;
+    }
+    
+    private boolean regionMatch(String r) {
+        if (r.equals(region))
+            return true;
+        List<String> testRegions = new ArrayList<String>();
+        testRegions.add(region);
+        return regionMatch(r, testRegions);
+    }
+    
+    private boolean regionMatch(String r, List<String> regions) {
+        for (String region: regions) {
+            if (r.equals(region))
+                return true;
+            List<String> testRegions = regionTree.get(region);
+            if (testRegions != null && regionMatch(r, testRegions))
+                return true;
+        }
+        return false;
     }
 }

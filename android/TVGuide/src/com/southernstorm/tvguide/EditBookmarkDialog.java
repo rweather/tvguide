@@ -19,7 +19,6 @@ package com.southernstorm.tvguide;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -75,10 +74,7 @@ public class EditBookmarkDialog extends Dialog {
         cancelButton = (Button)findViewById(R.id.edit_bookmark_cancel);
         
         channelAdapter = new TvChannelListAdapter(context);
-        SharedPreferences prefs = context.getSharedPreferences("TVGuideActivity", 0);
-        String region = prefs.getString("region", "");
-        if (region != null && !region.equals(""))
-            channelAdapter.setRegion(region);
+        channelAdapter.attach();
         channelAdapter.addAnyChannel();
         channel.setAdapter(channelAdapter);
         
@@ -107,6 +103,12 @@ public class EditBookmarkDialog extends Dialog {
                 cancel();
             }
         });
+    }
+    
+    @Override
+    public void dismiss() {
+        channelAdapter.detach();
+        super.dismiss();
     }
     
     public void copyFromBookmark(TvBookmark bookmark) {
