@@ -50,6 +50,8 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.XmlResourceParser;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
 /**
@@ -526,8 +528,8 @@ public class TvChannelCache extends ExternalMediaHandler {
      * @param primaryDate the primary date for multi-day requests
      */
     public void fetch(TvChannel channel, Calendar date, Calendar primaryDate) {
-        // Bail out if the cache is unusable.
-        if (httpCacheDir == null)
+        // Bail out if the cache is unusable or there is no network.
+        if (httpCacheDir == null || !isNetworkingAvailable())
             return;
 
         // Determine the base URL to use.  OzTivo rules specify that a
@@ -595,6 +597,10 @@ public class TvChannelCache extends ExternalMediaHandler {
      * @param file the local file to cache the icon data in
      */
     private void fetchIcon(TvChannel channel, String uri, File file) {
+        // Bail out if the cache is unusable or there is no network.
+        if (iconCacheDir == null || !isNetworkingAvailable())
+            return;
+
         // Parse the URI.
         URI uriObject;
         try {
@@ -877,5 +883,23 @@ public class TvChannelCache extends ExternalMediaHandler {
                 return true;
         }
         return false;
+    }
+    
+    /**
+     * Determine if networking is available at the present time.
+     * 
+     * @return true if networking is available, false if not (e.g. airplane mode).
+     */
+    private boolean isNetworkingAvailable() {
+        Context context = getContext();
+        if (context == null)
+            return false;
+        ConnectivityManager manager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (manager == null)
+            return false;
+        NetworkInfo info = manager.getActiveNetworkInfo();
+        if (info == null)
+            return false;
+        return info.isAvailable() && info.isConnected();
     }
 }
