@@ -22,6 +22,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.drawable.Drawable;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,7 +118,11 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
             convertView.setTag(view);
         }
         TvChannel channel = channels.get(position);
-        view.icon.setImageResource(channel.getIconResource());
+        Drawable drawable = channel.getIconFileDrawable();
+        if (drawable != null)
+            view.icon.setImageDrawable(drawable);
+        else
+            view.icon.setImageResource(channel.getIconResource());
         view.name.setText(channel.getName());
         String numbers = channel.getNumbers();
         if (numbers == null)

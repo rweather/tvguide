@@ -59,6 +59,7 @@ public class TvChannelCache extends ExternalMediaHandler {
 
     private String serviceName;
     private File httpCacheDir;
+    private File iconCacheDir;
     private Random rand;
     private boolean debug;
     private List<TvChannel> channels;
@@ -329,6 +330,10 @@ public class TvChannelCache extends ExternalMediaHandler {
             unloadService();
             return;
         }
+        iconCacheDir = new File(serviceCacheDir, "icons");
+        iconCacheDir.mkdirs();
+        if (!iconCacheDir.exists())
+            iconCacheDir = null;    // We have the http directory, so we can continue.
     }
 
     /**
@@ -337,6 +342,7 @@ public class TvChannelCache extends ExternalMediaHandler {
      */
     private void unloadService() {
         httpCacheDir = null;
+        iconCacheDir = null;
     }
 
     @Override
@@ -474,7 +480,8 @@ public class TvChannelCache extends ExternalMediaHandler {
             if (!info.success) {
                 // Something failed during the request - delete the cache files
                 // before handing the result back to the main thread.
-                info.cacheFile.delete();
+                if (info.cacheFile != null)
+                    info.cacheFile.delete();
                 info.dataFile.delete();
             }
             // TODO: write ETag/Last-Modified data to ".cache" file.
@@ -581,6 +588,39 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     /**
+     * Fetches a channel icon from the network.
+     * 
+     * @param channel the channel
+     * @param uri the URI of the icon's location on the network
+     * @param file the local file to cache the icon data in
+     */
+    private void fetchIcon(TvChannel channel, String uri, File file) {
+        // Parse the URI.
+        URI uriObject;
+        try {
+            uriObject = new URI(uri);
+        } catch (URISyntaxException e) {
+            return;
+        }
+
+        // Create the request info block.  Null date indicates that this is an icon fetch.
+        RequestInfo info = new RequestInfo();
+        info.channel  = channel;
+        info.date = null;
+        info.primaryDate = null;
+        info.uri = uriObject;
+        info.cacheFile = null;
+        info.dataFile = file;
+        info.etag = null;
+        info.lastModified = null;
+        info.userAgent = getContext().getResources().getString(R.string.user_agent);
+        info.success = false;
+
+        // Queue up the request to fetch the data from the network.
+        addRequestToQueue(info);
+    }
+
+    /**
      * Adds a request to the queue of files to be downloaded.
      *
      * @param info the request to be added
@@ -590,7 +630,8 @@ public class TvChannelCache extends ExternalMediaHandler {
         RequestInfo current = requestQueue;
         RequestInfo prev = null;
         while (current != null) {
-            if (current.channel == info.channel && current.date.equals(info.date)) {
+            if (current.channel == info.channel && current.date != null &&
+                    info.date != null && current.date.equals(info.date)) {
                 // Upgrade the existing request to a primary day request if necessary.
                 if (info.primaryDate.equals(info.date))
                     current.primaryDate = current.date;
@@ -599,8 +640,8 @@ public class TvChannelCache extends ExternalMediaHandler {
             prev = current;
             current = current.next;
         }
-        if (currentRequestChannel == info.channel &&
-                currentRequestDate.equals(info.date)) {
+        if (currentRequestChannel == info.channel && info.date != null &&
+                currentRequestDate != null && currentRequestDate.equals(info.date)) {
             if (info.primaryDate.equals(info.date))
                 currentRequestPrimaryDate = currentRequestDate;
             return;
@@ -637,7 +678,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             }
             requestQueue = info.next;
             info.next = null;
-            if (hasChannelData(info.channel, info.date)) {
+            if (info.date != null && hasChannelData(info.channel, info.date)) {
                 // A previous request on the queue already fetched this data.
                 for (TvNetworkListener listener: networkListeners)
                     listener.dataAvailable(info.channel, info.date, info.primaryDate);
@@ -649,8 +690,12 @@ public class TvChannelCache extends ExternalMediaHandler {
             if (debug)
                 System.out.println("fetching " + info.uri.toString());
             requestsActive = true;
-            for (TvNetworkListener listener: networkListeners)
-                listener.setCurrentNetworkRequest(info.channel, info.date, info.primaryDate);
+            for (TvNetworkListener listener: networkListeners) {
+                if (info.date != null)
+                    listener.setCurrentNetworkRequest(info.channel, info.date, info.primaryDate);
+                else
+                    listener.setCurrentNetworkIconRequest(info.channel);
+            }
             new DownloadAsyncTask().execute(info);
             break;
         }
@@ -658,10 +703,17 @@ public class TvChannelCache extends ExternalMediaHandler {
 
     private void reportRequestResult(RequestInfo info) {
         for (TvNetworkListener listener: networkListeners) {
-            if (info.success)
+            if (info.date == null)
+                continue;
+            else if (info.success)
                 listener.dataAvailable(info.channel, info.date, currentRequestPrimaryDate);
             else
                 listener.requestFailed(info.channel, info.date, currentRequestPrimaryDate);
+        }
+        if (info.date == null && info.success) {
+            info.channel.setIconFile(info.dataFile.getPath());
+            for (TvChannelChangedListener channelListener: channelListeners)
+                channelListener.channelsChanged();
         }
     }
 
@@ -765,8 +817,20 @@ public class TvChannelCache extends ExternalMediaHandler {
                     String src = parser.getAttributeValue(null, "src");
                     if (src != null) {
                         int index = src.lastIndexOf('/');
-                        if (index >= 0)
-                            channel.setIconResource(IconFactory.getInstance().getChannelIconResource(src.substring(index + 1)));
+                        if (index >= 0) {
+                            String filename = src.substring(index + 1);
+                            int resource = IconFactory.getInstance().getChannelIconResource(filename);
+                            if (resource != 0) {
+                                channel.setIconResource(resource);
+                            } else if (iconCacheDir != null) {
+                                String iconFile = iconCacheDir + "/" + filename;
+                                File file = new File(iconFile);
+                                if (file.exists())
+                                    channel.setIconFile(iconFile);
+                                else
+                                    fetchIcon(channel, src, file); 
+                            }
+                        }
                     }
                 } else if (name.equals("number")) {
                     String system = parser.getAttributeValue(null, "system");

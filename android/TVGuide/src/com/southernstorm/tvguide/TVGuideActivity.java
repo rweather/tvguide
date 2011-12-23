@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -31,11 +32,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-public class TVGuideActivity extends Activity {
+public class TVGuideActivity extends Activity implements TvNetworkListener {
 
     private ListView channelListView;
     private TvChannelListAdapter channelListAdapter;
     private TvRegionListAdapter regionListAdapter;
+    private ProgressDialog progressDialog;
 
     /** Called when the activity is first created. */
     @Override
@@ -65,6 +67,7 @@ public class TVGuideActivity extends Activity {
     protected void onStart() {
         super.onStart();
         channelListAdapter.attach();
+        TvChannelCache.getInstance().addNetworkListener(this);
         TvChannelCache.getInstance().addContext(this);
 
         // If no region selected yet, then populate the initial channel list with regions.
@@ -77,7 +80,12 @@ public class TVGuideActivity extends Activity {
     @Override
     protected void onStop() {
         TvChannelCache.getInstance().removeContext(this);
+        TvChannelCache.getInstance().removeNetworkListener(this);
         channelListAdapter.detach();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
         super.onStop();
     }
 
@@ -88,6 +96,10 @@ public class TVGuideActivity extends Activity {
 
     @Override
     protected void onPause() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+            progressDialog = null;
+        }
         super.onPause();
     }
 
@@ -141,5 +153,31 @@ public class TVGuideActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate) {
+    }
+
+    public void setCurrentNetworkIconRequest(TvChannel channel) {
+        System.out.println("icon fetch for: " + channel.getName());
+        String message = channel.getName();
+        if (progressDialog == null) {
+            progressDialog = ProgressDialog.show
+                (this, "Fetching channel icon", message, true);
+        } else {
+            progressDialog.setMessage(message);
+            progressDialog.show();
+        }
+    }
+    
+    public void endNetworkRequests() {
+        if (progressDialog != null)
+            progressDialog.hide();
+    }
+
+    public void dataAvailable(TvChannel channel, Calendar date, Calendar primaryDate) {
+    }
+
+    public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate) {
     }
 }

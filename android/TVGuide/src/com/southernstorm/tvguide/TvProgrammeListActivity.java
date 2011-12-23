@@ -89,8 +89,8 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     @Override
     protected void onStart() {
         super.onStart();
-        TvChannelCache.getInstance().addContext(this);
         TvChannelCache.getInstance().addNetworkListener(this);
+        TvChannelCache.getInstance().addContext(this);
         TvChannelCache.getInstance().expire();
         
         TvBookmarkManager.getInstance().addContext(this);
@@ -290,6 +290,17 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         }
     }
 
+    public void setCurrentNetworkIconRequest(TvChannel channel) {
+        String message = channel.getName();
+        if (progressDialog == null) {
+            progressDialog = ProgressDialog.show
+                (this, "Fetching channel icon", message, true);
+        } else {
+            progressDialog.setMessage(message);
+            progressDialog.show();
+        }
+    }
+    
     public void endNetworkRequests() {
         if (progressDialog != null)
             progressDialog.hide();

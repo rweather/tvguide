@@ -31,6 +31,13 @@ public interface TvNetworkListener {
     public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate);
 
     /**
+     * Sets the current network request to an icon fetch for a channel.
+     * 
+     * @param channel the channel whose icon is being fetched
+     */
+    public void setCurrentNetworkIconRequest(TvChannel channel);
+    
+    /**
      * Indicates that there are no more network requests pending.
      */
     public void endNetworkRequests();

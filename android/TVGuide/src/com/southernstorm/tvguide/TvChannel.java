@@ -30,6 +30,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 public class TvChannel implements Comparable<TvChannel> {
@@ -41,6 +42,8 @@ public class TvChannel implements Comparable<TvChannel> {
     private String numbers;
     private int primaryChannelNumber;
     private int iconResource;
+    private String iconFile;
+    private Drawable iconFileDrawable;
     private boolean convertTimezone;
     private ArrayList<String> baseUrls;
     private Map< Calendar, List<TvProgramme> > programmes;
@@ -74,6 +77,18 @@ public class TvChannel implements Comparable<TvChannel> {
     
     public int getIconResource() { return iconResource; }
     public void setIconResource(int id) { this.iconResource = id; }
+
+    public String getIconFile() { return iconFile; }
+    public void setIconFile(String iconFile) { this.iconFile = iconFile; this.iconFileDrawable = null; }
+
+    public Drawable getIconFileDrawable() {
+        if (iconFile == null)
+            return null;
+        else if (iconFileDrawable != null)
+            return iconFileDrawable;
+        iconFileDrawable = Drawable.createFromPath(iconFile);
+        return iconFileDrawable;
+    }
     
     public boolean getConvertTimezone() { return convertTimezone; }
     public void setConvertTimezone(boolean convert) { this.convertTimezone = convert; }
@@ -221,6 +236,7 @@ public class TvChannel implements Comparable<TvChannel> {
         bundle.putString("numbers", numbers);
         bundle.putInt("primaryChannelNumber", primaryChannelNumber);
         bundle.putInt("iconResource", iconResource);
+        bundle.putString("iconFile", iconFile);
         bundle.putBoolean("convertTimezone", convertTimezone);
         bundle.putStringArrayList("baseUrls", baseUrls);
         bundle.putStringArrayList("otherChannelsList", otherChannelsList);
@@ -241,6 +257,7 @@ public class TvChannel implements Comparable<TvChannel> {
         channel.setNumbers(bundle.getString("numbers"));
         channel.setPrimaryChannelNumber(bundle.getInt("primaryChannelNumber"));
         channel.setIconResource(bundle.getInt("iconResource"));
+        channel.setIconFile(bundle.getString("iconFile"));
         channel.setConvertTimezone(bundle.getBoolean("convertTimezone"));
         channel.setBaseUrls(bundle.getStringArrayList("baseUrls"));
         channel.setOtherChannelsList(bundle.getStringArrayList("otherChannelsList"));
