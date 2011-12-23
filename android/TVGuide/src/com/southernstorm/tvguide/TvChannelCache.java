@@ -417,12 +417,33 @@ public class TvChannelCache extends ExternalMediaHandler {
     private Calendar currentRequestPrimaryDate;
     private boolean requestsActive;
 
+    private static Calendar lastRequestTime = null;
+
     /**
      * Background asynchronous task for downloading data from the Internet.
      */
     private class DownloadAsyncTask extends AsyncTask<RequestInfo, Integer, RequestInfo> {
         private boolean fetch(RequestInfo info) {
             try {
+                // OzTivo requires that there be at least 1 second between data requests.
+                // Icons are fetched from elsewhere so we can fetch them immediately.
+                if (info.date != null) {
+                    Calendar currentTime = new GregorianCalendar();
+                    if (lastRequestTime == null) {
+                        lastRequestTime = currentTime;
+                    } else {
+                        long diff = currentTime.getTimeInMillis() - lastRequestTime.getTimeInMillis();
+                        if (diff >= 0 && diff < 1000) {
+                            try {
+                                Thread.sleep(diff);
+                            } catch (InterruptedException e) {
+                            }
+                        }
+                        lastRequestTime = currentTime;
+                    }
+                }
+
+                // Start the request.
                 DefaultHttpClient client = new DefaultHttpClient();
                 HttpGet request = new HttpGet(info.uri);
                 request.setHeader("User-Agent", info.userAgent);
@@ -506,6 +527,29 @@ public class TvChannelCache extends ExternalMediaHandler {
         }
     };
 
+    /**
+     * Fetch bulk data for all channels.
+     * 
+     * @param numDays the number of days to fetch
+     * @return true if data has been scheduled to be fetched, false if nothing needs downloading
+     */
+    public boolean bulkFetch(int numDays) {
+        boolean fetched = false;
+        Calendar today = new GregorianCalendar();
+        for (int index = 0; index < channels.size(); ++index) {
+            TvChannel channel = channels.get(index);
+            for (int day = 0; day < numDays; ++day) {
+                Calendar date = (Calendar)today.clone();
+                date.add(Calendar.DAY_OF_MONTH, day);
+                if (!hasChannelData(channel, date)) {
+                    fetch(channel, date, today);
+                    fetched = true;
+                }
+            }
+        }
+        return fetched;
+    }
+    
     /**
      * Fetches the guide data for a specific date and time.
      * 
@@ -890,7 +934,7 @@ public class TvChannelCache extends ExternalMediaHandler {
      * 
      * @return true if networking is available, false if not (e.g. airplane mode).
      */
-    private boolean isNetworkingAvailable() {
+    public boolean isNetworkingAvailable() {
         Context context = getContext();
         if (context == null)
             return false;

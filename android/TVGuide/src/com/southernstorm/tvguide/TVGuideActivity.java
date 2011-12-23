@@ -21,7 +21,11 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -31,6 +35,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class TVGuideActivity extends Activity implements TvNetworkListener {
 
@@ -148,11 +153,18 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     
     private static final int ITEM_CHANGE_REGION = 1;
     private static final int ITEM_ORGANIZE_BOOKMARKS = 2;
+    private static final int ITEM_BULK_DOWNLOAD = 3;
+    private static final int ITEM_CLEAR_CACHE = 4;
+
+    private static final int DIALOG_BULK_DOWNLOAD = 1;
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(ITEM_CHANGE_REGION, 0, 0, "Change Region");
         menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks");
+        if (TvChannelCache.getInstance().isNetworkingAvailable())
+            menu.add(ITEM_BULK_DOWNLOAD, 0, 0, "Bulk Download");
+        menu.add(ITEM_CLEAR_CACHE, 0, 0, "Clear Cache");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -165,11 +177,48 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
             Intent intent = new Intent(this, TvBookmarkListActivity.class);
             startActivity(intent);
             return true;
+        } else if (item.getGroupId() == ITEM_BULK_DOWNLOAD) {
+            showDialog(DIALOG_BULK_DOWNLOAD);
+        } else if (item.getGroupId() == ITEM_CLEAR_CACHE) {
+            TvChannelCache.getInstance().clear();
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private static final String[] bulkDownloadItems = {"1 day", "2 days", "3 days", "4 days", "5 days"};
+    
+    @Override
+    public Dialog onCreateDialog(int id, Bundle bundle) {
+        switch (id) {
+        case DIALOG_BULK_DOWNLOAD:
+            final Context context = this;
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Bulk Download");
+            builder.setItems(bulkDownloadItems, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    // Extra day for 12:00am to 6:00am
+                    if (!TvChannelCache.getInstance().bulkFetch(item + 2)) {
+                        Toast toast = Toast.makeText(context, "Cache is up to date", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                    dialog.dismiss();
+                }
+            });
+            return builder.create();
+        default: break;
+        }
+        return null;
+    }
+
     public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate) {
+        String message = channel.getName(); // + " " + DateFormat.format("E, MMM dd", primaryDate);
+        if (progressDialog == null) {
+            progressDialog = ProgressDialog.show
+                (this, "Fetching guide data", message, true);
+        } else {
+            progressDialog.setMessage(message);
+            progressDialog.show();
+        }
     }
 
     public void setCurrentNetworkIconRequest(TvChannel channel) {
