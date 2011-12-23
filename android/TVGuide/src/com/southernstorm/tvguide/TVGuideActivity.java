@@ -103,6 +103,20 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         super.onPause();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (channelListView.getAdapter() == regionListAdapter) {
+            // Currently showing the region list.  If we already have a region then
+            // assume that the user is pressing Back from "Change Region" and just
+            // return to the channel list.
+            if (channelListAdapter.getCount() != 0) {
+                channelListView.setAdapter(channelListAdapter);
+                return;
+            }
+        }
+        super.onBackPressed();
+    }
+
     /**
      * Select a specific channel and display the programmes for today.
      * 
