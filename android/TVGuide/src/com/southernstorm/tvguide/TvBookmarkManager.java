@@ -177,8 +177,15 @@ public class TvBookmarkManager extends ExternalMediaHandler {
         }
     }
 
+    /**
+     * Gets the bookmarks file for the current guide service.
+     * 
+     * @return the file object for the bookmarks file
+     */
     private File getBookmarksFile() {
-        return new File(getFilesDir(), "bookmarks.tvb");
+        File bookmarksDir = new File(getFilesDir(), TvChannelCache.getInstance().getServiceName());
+        bookmarksDir.mkdirs();
+        return new File(bookmarksDir, "bookmarks.tvb");
     }
 
     /**
