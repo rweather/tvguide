@@ -35,6 +35,16 @@ import android.os.Bundle;
 
 public class TvChannel implements Comparable<TvChannel> {
 
+    private class DataFor {
+        public Calendar date;
+        public Calendar lastModified;
+        
+        public DataFor(Calendar date, Calendar lastModified) {
+            this.date = date;
+            this.lastModified = lastModified;
+        }
+    }
+    
     public static final int NO_NUMBER = 0x7FFFFFFF;
     private String id;
     private String commonId;
@@ -48,6 +58,7 @@ public class TvChannel implements Comparable<TvChannel> {
     private ArrayList<String> baseUrls;
     private Map< Calendar, List<TvProgramme> > programmes;
     private ArrayList<String> otherChannelsList;
+    private List<DataFor> dataForList;
 
     public TvChannel() {
         this.primaryChannelNumber = TvChannel.NO_NUMBER;
@@ -55,6 +66,7 @@ public class TvChannel implements Comparable<TvChannel> {
         this.baseUrls = new ArrayList<String>();
         this.programmes = new TreeMap< Calendar, List<TvProgramme> >();
         this.otherChannelsList = new ArrayList<String>();
+        this.dataForList = new ArrayList<DataFor>();
     }
 
     public String getId() { return id; }
@@ -81,6 +93,33 @@ public class TvChannel implements Comparable<TvChannel> {
     public String getIconFile() { return iconFile; }
     public void setIconFile(String iconFile) { this.iconFile = iconFile; this.iconFileDrawable = null; }
 
+    public void clearDataFor() { dataForList.clear(); }
+    public void addDataFor(Calendar date, Calendar lastModified) {
+        dataForList.add(new DataFor(date, lastModified));
+    }
+    
+    public boolean hasDataFor() { return !dataForList.isEmpty(); }
+    public boolean hasDataFor(Calendar date) {
+        for (int index = 0; index < dataForList.size(); ++index) {
+            if (dataForList.get(index).date.equals(date))
+                return true;
+        }
+        if (dataForList.isEmpty()) {
+            // We don't know the available dates from the server so return
+            // true to ask the server always.
+            return true;
+        }
+        return false;
+    }
+    
+    public Calendar dayLastModified(Calendar date) {
+        for (int index = 0; index < dataForList.size(); ++index) {
+            if (dataForList.get(index).date.equals(date))
+                return dataForList.get(index).lastModified;
+        }
+        return null;
+    }
+    
     public Drawable getIconFileDrawable() {
         if (iconFile == null)
             return null;

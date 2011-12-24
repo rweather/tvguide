@@ -18,10 +18,12 @@
 package com.southernstorm.tvguide;
 
 import java.io.File;
-import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 
 import java.net.MalformedURLException;
@@ -31,6 +33,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.cookie.DateParseException;
+import org.apache.http.impl.cookie.DateUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -218,6 +223,44 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     /**
+     * Gets the last-modified date for a specific channel and date combination.
+     * 
+     * @param channel the channel
+     * @param date the date
+     * @return the last-modified date, or null if the data is not in the cache
+     */
+    public Calendar channelDataLastModified(TvChannel channel, Calendar date) {
+        File file = dataFile(channel, date, ".cache");
+        if (file == null || !file.exists())
+            return null;
+        try {
+            FileInputStream input = new FileInputStream(file);
+            try {
+                InputStreamReader reader = new InputStreamReader(input, "utf-8");
+                try {
+                    String line;
+                    while ((line = readLine(reader)) != null) {
+                        if (line.startsWith("Last-Modified: ")) {
+                            String lastModified = line.substring(15);
+                            Date parsedDate = DateUtils.parseDate(lastModified);
+                            GregorianCalendar result = new GregorianCalendar();
+                            result.setTime(parsedDate);
+                            return result;
+                        }
+                    }
+                } catch (DateParseException e) {
+                } finally {
+                    reader.close();
+                }
+            } finally {
+                input.close();
+            }
+        } catch (IOException e) {
+        }
+        return null;
+    }
+    
+    /**
      * Determine if data for a specific channel and date is available in the cache
      * 
      * @param channel the channel
@@ -387,6 +430,16 @@ public class TvChannelCache extends ExternalMediaHandler {
         return new File(httpCacheDir, name.toString());
     }
 
+    private static String readLine(InputStreamReader reader) throws IOException {
+        StringBuilder builder = new StringBuilder(1024);
+        int ch;
+        while ((ch = reader.read()) != -1 && ch != '\n')
+            builder.append((char)ch);
+        if (ch == -1 && builder.length() == 0)
+            return null;
+        return builder.toString();
+    }
+    
     private class RequestInfo {
         public TvChannel channel;
         public Calendar date;
@@ -498,7 +551,29 @@ public class TvChannelCache extends ExternalMediaHandler {
 
         protected RequestInfo doInBackground(RequestInfo... requests) {
             RequestInfo info = requests[0];
-            // TODO: read ETag/Last-Modified data from ".cache" file.
+            if (info.cacheFile != null && info.cacheFile.exists()) {
+                // Read ETag/Last-Modified data from the ".cache" file.
+                try {
+                    FileInputStream input = new FileInputStream(info.cacheFile);
+                    try {
+                        InputStreamReader reader = new InputStreamReader(input, "utf-8");
+                        try {
+                            String line;
+                            while ((line = readLine(reader)) != null) {
+                                if (line.startsWith("ETag: "))
+                                    info.etag = line.substring(6);
+                                else if (line.startsWith("Last-Modified: "))
+                                    info.lastModified = line.substring(15);
+                            }
+                        } finally {
+                            reader.close();
+                        }
+                    } finally {
+                        input.close();
+                    }
+                } catch (IOException e) {
+                }
+            }
             info.success = fetch(info);
             if (!info.success) {
                 // Something failed during the request - delete the cache files
@@ -506,8 +581,32 @@ public class TvChannelCache extends ExternalMediaHandler {
                 if (info.cacheFile != null)
                     info.cacheFile.delete();
                 info.dataFile.delete();
+            } else if (info.cacheFile != null) {
+                // Write ETag/Last-Modified data to the ".cache" file.
+                try {
+                    FileOutputStream output = new FileOutputStream(info.cacheFile);
+                    try {
+                        OutputStreamWriter writer = new OutputStreamWriter(output, "utf-8");
+                        try {
+                            if (info.etag != null) { 
+                                writer.write("ETag: ");
+                                writer.write(info.etag);
+                                writer.write("\n");
+                            }
+                            if (info.lastModified != null) {
+                                writer.write("Last-Modified: ");
+                                writer.write(info.lastModified);
+                                writer.write("\n");
+                            }
+                        } finally {
+                            writer.close();
+                        }
+                    } finally {
+                        output.close();
+                    }
+                } catch (IOException e) {
+                }
             }
-            // TODO: write ETag/Last-Modified data to ".cache" file.
             return info;
         }
 
