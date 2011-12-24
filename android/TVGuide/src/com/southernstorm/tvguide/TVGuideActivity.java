@@ -19,6 +19,7 @@ package com.southernstorm.tvguide;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -155,12 +156,17 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     private static final int ITEM_ORGANIZE_BOOKMARKS = 2;
     private static final int ITEM_BULK_DOWNLOAD = 3;
     private static final int ITEM_CLEAR_CACHE = 4;
+    private static final int ITEM_ADD_REMOVE_CHANNELS = 5;
 
     private static final int DIALOG_BULK_DOWNLOAD = 1;
+    private static final int DIALOG_ADD_REMOVE_CHANNELS = 2;
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(ITEM_CHANGE_REGION, 0, 0, "Change Region");
+        if (channelListView.getAdapter() == channelListAdapter) {
+            menu.add(ITEM_CHANGE_REGION, 0, 0, "Change Region");
+            menu.add(ITEM_ADD_REMOVE_CHANNELS, 0, 0, "Add/Remove Channels");
+        }
         menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks");
         if (TvChannelCache.getInstance().isNetworkingAvailable())
             menu.add(ITEM_BULK_DOWNLOAD, 0, 0, "Bulk Download");
@@ -181,6 +187,9 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
             showDialog(DIALOG_BULK_DOWNLOAD);
         } else if (item.getGroupId() == ITEM_CLEAR_CACHE) {
             TvChannelCache.getInstance().clear();
+        } else if (item.getGroupId() == ITEM_ADD_REMOVE_CHANNELS) {
+            removeDialog(DIALOG_ADD_REMOVE_CHANNELS);
+            showDialog(DIALOG_ADD_REMOVE_CHANNELS);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -189,10 +198,11 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     
     @Override
     public Dialog onCreateDialog(int id, Bundle bundle) {
+        AlertDialog.Builder builder;
         switch (id) {
         case DIALOG_BULK_DOWNLOAD:
             final Context context = this;
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder = new AlertDialog.Builder(this);
             builder.setTitle("Bulk Download");
             builder.setItems(bulkDownloadItems, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int item) {
@@ -205,6 +215,40 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
                 }
             });
             return builder.create();
+        case DIALOG_ADD_REMOVE_CHANNELS:
+            builder = new AlertDialog.Builder(this);
+            builder.setTitle("Add/Remove Channels");
+            final List<TvChannel> allChannels = TvChannelCache.getInstance().getAllChannelsInRegion();
+            String[] names = new String [allChannels.size()];
+            boolean[] checked = new boolean [allChannels.size()];
+            for (int index = 0; index < allChannels.size(); ++index) {
+                TvChannel channel = allChannels.get(index);
+                names[index] = channel.getName();
+                if (channel.getNumbers() != null)
+                    names[index] += "\n" + channel.getNumbers();
+                checked[index] = channel.getHiddenState() != TvChannel.HIDDEN;
+            }
+            builder.setMultiChoiceItems(names, checked, new DialogInterface.OnMultiChoiceClickListener() {
+                public void onClick(DialogInterface dialog, int item, boolean isChecked) {
+                    TvChannel channel = allChannels.get(item);
+                    if (isChecked) {
+                        if (channel.getRegion() != null)
+                            channel.setHiddenState(TvChannel.HIDDEN_BY_REGION);
+                        else
+                            channel.setHiddenState(TvChannel.NOT_HIDDEN);
+                    } else {
+                        channel.setHiddenState(TvChannel.HIDDEN);
+                    }
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                public void onDismiss(DialogInterface dialog) {
+                    TvChannelCache.getInstance().saveChannelHiddenStates();
+                    TvChannelCache.getInstance().loadChannels();
+                }
+            });
+            return dialog;
         default: break;
         }
         return null;

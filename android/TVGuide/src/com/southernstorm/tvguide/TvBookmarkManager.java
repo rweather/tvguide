@@ -233,6 +233,8 @@ public class TvBookmarkManager extends ExternalMediaHandler {
             } catch (XmlPullParserException e) {
                 // Ignore - just stop parsing at the first error.
             } catch (IOException e) {
+            } finally {
+                fileStream.close();
             }
         } catch (IOException e) {
         }

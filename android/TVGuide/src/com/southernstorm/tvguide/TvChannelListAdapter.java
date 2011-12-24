@@ -41,7 +41,7 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
     
     public TvChannelListAdapter(Context context) {
         this.channels = new ArrayList<TvChannel>();
-        this.channels.addAll(TvChannelCache.getInstance().getChannels());
+        this.channels.addAll(TvChannelCache.getInstance().getActiveChannels());
         this.observers = new ArrayList<DataSetObserver>();
         this.inflater = LayoutInflater.from(context);
     }
@@ -165,7 +165,7 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
 
     public void channelsChanged() {
         channels.clear();
-        this.channels.addAll(TvChannelCache.getInstance().getChannels());
+        this.channels.addAll(TvChannelCache.getInstance().getActiveChannels());
         for (DataSetObserver observer: observers)
             observer.onChanged();
     }

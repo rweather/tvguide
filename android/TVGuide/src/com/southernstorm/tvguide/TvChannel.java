@@ -17,6 +17,7 @@
 
 package com.southernstorm.tvguide;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 
@@ -49,19 +50,27 @@ public class TvChannel implements Comparable<TvChannel> {
     private String id;
     private String commonId;
     private String name;
+    private String region;
     private String numbers;
     private int primaryChannelNumber;
+    private int hiddenState;
     private int iconResource;
     private String iconFile;
+    private String iconSource;
     private Drawable iconFileDrawable;
     private boolean convertTimezone;
     private ArrayList<String> baseUrls;
     private Map< Calendar, List<TvProgramme> > programmes;
     private ArrayList<String> otherChannelsList;
     private List<DataFor> dataForList;
+    
+    public static final int NOT_HIDDEN = 0;
+    public static final int HIDDEN = 1;
+    public static final int HIDDEN_BY_REGION = 2;
 
     public TvChannel() {
         this.primaryChannelNumber = TvChannel.NO_NUMBER;
+        this.hiddenState = HIDDEN;
         this.iconResource = 0;
         this.baseUrls = new ArrayList<String>();
         this.programmes = new TreeMap< Calendar, List<TvProgramme> >();
@@ -81,11 +90,17 @@ public class TvChannel implements Comparable<TvChannel> {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+    public String getRegion() { return region; }
+    public void setRegion(String region) { this.region = region; }
+    
     public String getNumbers() { return numbers; }
     public void setNumbers(String numbers) { this.numbers = numbers; }
 
     public int getPrimaryChannelNumber() { return primaryChannelNumber; }
     public void setPrimaryChannelNumber(int number) { this.primaryChannelNumber = number; }
+    
+    public int getHiddenState() { return hiddenState; }
+    public void setHiddenState(int hiddenState) { this.hiddenState = hiddenState; }
     
     public int getIconResource() { return iconResource; }
     public void setIconResource(int id) { this.iconResource = id; }
@@ -93,6 +108,9 @@ public class TvChannel implements Comparable<TvChannel> {
     public String getIconFile() { return iconFile; }
     public void setIconFile(String iconFile) { this.iconFile = iconFile; this.iconFileDrawable = null; }
 
+    public String getIconSource() { return iconSource; }
+    public void setIconSource(String iconSource) { this.iconSource = iconSource; }
+    
     public void clearDataFor() { dataForList.clear(); }
     public void addDataFor(Calendar date, Calendar lastModified) {
         dataForList.add(new DataFor(date, lastModified));
@@ -125,8 +143,18 @@ public class TvChannel implements Comparable<TvChannel> {
             return null;
         else if (iconFileDrawable != null)
             return iconFileDrawable;
+        File file = new File(iconFile);
+        if (!file.exists())
+            return null;
         iconFileDrawable = Drawable.createFromPath(iconFile);
         return iconFileDrawable;
+    }
+    
+    public boolean iconNeedsFetching() {
+        if (iconFile == null || iconFileDrawable != null)
+            return false;
+        File file = new File(iconFile);
+        return !file.exists();
     }
     
     public boolean getConvertTimezone() { return convertTimezone; }

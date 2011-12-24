@@ -51,6 +51,8 @@ import org.apache.http.impl.cookie.DateParseException;
 import org.apache.http.impl.cookie.DateUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -58,6 +60,7 @@ import android.content.res.XmlResourceParser;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.util.Xml;
 
 /**
  * Cache management and network fetching for channel data.
@@ -69,18 +72,24 @@ public class TvChannelCache extends ExternalMediaHandler {
     private File iconCacheDir;
     private Random rand;
     private boolean debug;
-    private List<TvChannel> channels;
+    private List<TvChannel> activeChannels;
+    private Map<String, TvChannel> channels;
     private String region;
     private Map< String, List<String> > regionTree;
     private Map< String, ArrayList<String> > commonIds;
     private List<TvNetworkListener> networkListeners;
     private List<TvChannelChangedListener> channelListeners;
+    private boolean embeddedLoaded = false;
+    private boolean sdLoaded = false;
     private static TvChannelCache instance = null;
 
     private TvChannelCache() {
         this.serviceName = "";
         this.rand = new Random(System.currentTimeMillis());
-        this.channels = new ArrayList<TvChannel>();
+        this.activeChannels = new ArrayList<TvChannel>();
+        this.channels = new TreeMap<String, TvChannel>();
+        this.commonIds = new TreeMap< String, ArrayList<String> >();
+        this.regionTree = new TreeMap< String, List<String> >();
         this.networkListeners = new ArrayList<TvNetworkListener>();
         this.channelListeners = new ArrayList<TvChannelChangedListener>();
     }
@@ -150,8 +159,27 @@ public class TvChannelCache extends ExternalMediaHandler {
      * 
      * @return the channels
      */
-    public List<TvChannel> getChannels() {
-        return channels;
+    public List<TvChannel> getActiveChannels() {
+        return activeChannels;
+    }
+    
+    /**
+     * Gets the list of all channels in the current region, hidden or shown.
+     * 
+     * @return the channels
+     */
+    public List<TvChannel> getAllChannelsInRegion() {
+        List<TvChannel> allChannels = new ArrayList<TvChannel>();
+        for (TvChannel channel: channels.values()) {
+            if (channel.getHiddenState() == TvChannel.HIDDEN_BY_REGION) {
+                String region = channel.getRegion();
+                if (region == null || !regionMatch(region))
+                    continue;
+            }
+            allChannels.add(channel);
+        }
+        Collections.sort(allChannels);
+        return allChannels;
     }
     
     /**
@@ -163,12 +191,8 @@ public class TvChannelCache extends ExternalMediaHandler {
     public TvChannel getChannel(String id) {
         if (id == null || id.length() == 0)
             return null;
-        for (int index = 0; index < channels.size(); ++index) {
-            TvChannel channel = channels.get(index);
-            if (channel.getId().equals(id))
-                return channel;
-        }
-        return null;
+        else
+            return channels.get(id);
     }
     
     /**
@@ -379,6 +403,10 @@ public class TvChannelCache extends ExternalMediaHandler {
         iconCacheDir.mkdirs();
         if (!iconCacheDir.exists())
             iconCacheDir = null;    // We have the http directory, so we can continue.
+        
+        // Reload the channel list using the hidden-vs-shown data on the SD card.
+        if (!sdLoaded && !channels.isEmpty())
+            loadChannels();
     }
 
     /**
@@ -388,6 +416,7 @@ public class TvChannelCache extends ExternalMediaHandler {
     private void unloadService() {
         httpCacheDir = null;
         iconCacheDir = null;
+        sdLoaded = false;   // Reload channel hidden-vs-shown list when SD card re-inserted.
     }
 
     @Override
@@ -883,15 +912,71 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     /**
-     * Loads channel information from the channels.xml file embedded in the resources.
+     * Loads or reloads channel information.
      */
-    private void loadChannels() {
-        if (region == null || getContext() == null)
-            return;
-        channels.clear();
-        XmlResourceParser parser = getContext().getResources().getXml(R.xml.channels);
-        regionTree = new TreeMap< String, List<String> >();
-        commonIds = new TreeMap< String, ArrayList<String> >();
+    public void loadChannels() {
+        // Load the channels from the embedded resources first.
+        if (!embeddedLoaded) {
+            if (region == null || getContext() == null)
+                return;
+            XmlResourceParser parser = getContext().getResources().getXml(R.xml.channels);
+            loadChannelsFromXml(parser);
+            parser.close();
+            embeddedLoaded = true;
+        }
+        
+        // Load the hidden-vs-shown state from the SD card.
+        if (!sdLoaded && isMediaUsable()) {
+            File serviceDir = new File(getFilesDir(), serviceName);
+            File file = new File(serviceDir, "channels.xml");
+            if (file.exists()) {
+                try {
+                    FileInputStream fileStream = new FileInputStream(file);
+                    try {
+                        XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                        XmlPullParser parser = factory.newPullParser();
+                        parser.setInput(fileStream, null);
+                        loadChannelsFromXml(parser);
+                    } catch (XmlPullParserException e) {
+                        // Ignore - just stop parsing at the first error.
+                    } finally {
+                        fileStream.close();
+                    }
+                } catch (IOException e) {
+                }
+            }
+            sdLoaded = true;
+        }
+
+        // Rebuild the active channel list.
+        activeChannels.clear();
+        for (TvChannel channel: channels.values()) {
+            if (channel.getHiddenState() == TvChannel.HIDDEN_BY_REGION) {
+                String region = channel.getRegion();
+                if (region == null || !regionMatch(region))
+                    continue;
+            } else if (channel.getHiddenState() == TvChannel.HIDDEN) {
+                continue;
+            }
+            activeChannels.add(channel);
+            if (channel.iconNeedsFetching())
+                fetchIcon(channel, channel.getIconSource(), new File(channel.getIconFile()));
+        }
+        Collections.sort(activeChannels);
+        
+        // Notify interested parties that the active channel list has changed.
+        for (TvChannelChangedListener listener: channelListeners)
+            listener.channelsChanged();
+    }
+
+    /**
+     * Loads channel information from an XML stream.  There may be three types of streams:
+     * 1. channels.xml from the embedded resources; 2. channels.xml from the SD card which
+     * defines which channels are shown and hidden; 3. channel list from the server.
+     * 
+     * @param parser XML stream to load the channels from
+     */
+    private void loadChannelsFromXml(XmlPullParser parser) {
         String id = null;
         String parent;
         try {
@@ -906,19 +991,41 @@ public class TvChannelCache extends ExternalMediaHandler {
                         if (id != null && parent != null) {
                             if (!regionTree.containsKey(id))
                                 regionTree.put(id, new ArrayList<String>());
-                            regionTree.get(id).add(parent);
+                            if (!regionTree.get(id).contains(parent))
+                                regionTree.get(id).add(parent);
                         }
                     } else if (name.equals("other-parent")) {
                         // Secondary parent for the current region.
                         parent = Utils.getContents(parser, name);
                         if (!regionTree.containsKey(id))
                             regionTree.put(id, new ArrayList<String>());
-                        regionTree.get(id).add(parent);
+                        if (!regionTree.get(id).contains(parent))
+                            regionTree.get(id).add(parent);
                     } else if (name.equals("channel")) {
                         // Parse the contents of a <channel> element.
-                        TvChannel channel = loadChannel(parser);
-                        if (channel != null)
-                            channels.add(channel);
+                        id = parser.getAttributeValue(null, "id");
+                        TvChannel channel = channels.get(id);
+                        if (channel == null) {
+                            channel = new TvChannel();
+                            channel.setId(id);
+                            channel.setName(id);
+                        }
+                        String hidden = parser.getAttributeValue(null, "hidden-state");
+                        if (hidden != null) {
+                            if (hidden.equals("hide"))
+                                channel.setHiddenState(TvChannel.HIDDEN);
+                            else if (hidden.equals("show"))
+                                channel.setHiddenState(TvChannel.NOT_HIDDEN);
+                            else if (hidden.equals("by-region"))
+                                channel.setHiddenState(TvChannel.HIDDEN_BY_REGION);
+                        }
+                        String region = parser.getAttributeValue(null, "region");
+                        if (region != null) {
+                            channel.setRegion(region);
+                            channel.setHiddenState(TvChannel.HIDDEN_BY_REGION);
+                        }
+                        loadChannel(channel, parser);
+                        channels.put(id, channel);
                     }
                 }
                 eventType = parser.next();
@@ -927,22 +1034,14 @@ public class TvChannelCache extends ExternalMediaHandler {
             // Ignore - just stop parsing at the first error.
         } catch (IOException e) {
         }
-        parser.close();
-        Collections.sort(channels);
-        regionTree = null;
-        commonIds = null;
-        for (TvChannelChangedListener listener: channelListeners)
-            listener.channelsChanged();
     }
     
-    private TvChannel loadChannel(XmlPullParser parser) throws XmlPullParserException, IOException {
-        TvChannel channel = new TvChannel();
-        channel.setId(parser.getAttributeValue(null, "id"));
+    private void loadChannel(TvChannel channel, XmlPullParser parser) throws XmlPullParserException, IOException {
         String commonId = parser.getAttributeValue(null, "common-id");
-        channel.setCommonId(commonId);
-        if (commonId != null) {
+        if (commonId != null && channel.getCommonId() == null) {
             // Keep track of all channels with the same common identifier in a shared list.
             // We use this to migrate bookmarks across regions.
+            channel.setCommonId(commonId);
             ArrayList<String> list = commonIds.get(commonId);
             if (list != null) {
                 list.add(channel.getId());
@@ -953,16 +1052,14 @@ public class TvChannelCache extends ExternalMediaHandler {
             }
             channel.setOtherChannelsList(list);
         }
-        String region = parser.getAttributeValue(null, "region");
-        if (region == null || !regionMatch(region))
-            return null;
         int eventType = parser.next();
+        boolean hadNumbers = channel.getNumbers() != null;
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
                 String name = parser.getName();
                 if (name.equals("display-name")) {
                     channel.setName(Utils.getContents(parser, name));
-                } else if (name.equals("icon")) {
+                } else if (name.equals("icon") && channel.getIconResource() == 0 && channel.getIconSource() == null) {
                     String src = parser.getAttributeValue(null, "src");
                     if (src != null) {
                         int index = src.lastIndexOf('/');
@@ -973,20 +1070,22 @@ public class TvChannelCache extends ExternalMediaHandler {
                                 channel.setIconResource(resource);
                             } else if (iconCacheDir != null) {
                                 String iconFile = iconCacheDir + "/" + filename;
-                                File file = new File(iconFile);
-                                if (file.exists())
-                                    channel.setIconFile(iconFile);
-                                else
-                                    fetchIcon(channel, src, file); 
+                                channel.setIconFile(iconFile);
+                                channel.setIconSource(src);
                             }
                         }
                     }
-                } else if (name.equals("number")) {
+                } else if (name.equals("number") && !hadNumbers) {
                     String system = parser.getAttributeValue(null, "system");
                     String currentNumbers = channel.getNumbers();
                     if (!system.equals("digital")) {
-                        if (currentNumbers == null)
-                            return null;    // Ignore Pay TV only channels for now.
+                        if (currentNumbers == null) {
+                            // Hide Pay TV only channels for now.
+                            channel.setHiddenState(TvChannel.HIDDEN);
+                            String number = Utils.getContents(parser, name);
+                            channel.setNumbers(number);
+                            channel.setPrimaryChannelNumber(Integer.valueOf(number));
+                        }
                     } else {
                         String number = Utils.getContents(parser, name);
                         if (currentNumbers == null) {
@@ -1006,7 +1105,40 @@ public class TvChannelCache extends ExternalMediaHandler {
         baseUrls.add("http://www.oztivo.net/xmltv/");
         baseUrls.add("http://xml.oztivo.net/xmltv/");
         channel.setBaseUrls(baseUrls);
-        return channel;
+    }
+
+    /**
+     * Saves the hidden-vs-shown states of all channels to the SD card.
+     */
+    public void saveChannelHiddenStates() {
+        if (!isMediaUsable())
+            return;
+        File serviceDir = new File(getFilesDir(), serviceName);
+        serviceDir.mkdirs();
+        File file = new File(serviceDir, "channels.xml");
+        try {
+            FileOutputStream fileStream = new FileOutputStream(file);
+            XmlSerializer serializer = Xml.newSerializer();
+            serializer.setOutput(fileStream, "UTF-8");
+            serializer.startDocument(null, Boolean.valueOf(true));
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            serializer.startTag(null, "tv");
+            for (TvChannel channel: channels.values()) {
+                serializer.startTag(null, "channel");
+                serializer.attribute(null, "id", channel.getId());
+                if (channel.getHiddenState() == TvChannel.HIDDEN)
+                    serializer.attribute(null, "hidden-state", "hide");
+                else if (channel.getHiddenState() == TvChannel.NOT_HIDDEN)
+                    serializer.attribute(null, "hidden-state", "show");
+                else
+                    serializer.attribute(null, "hidden-state", "by-region");
+                serializer.endTag(null, "channel");
+            }
+            serializer.endTag(null, "tv");
+            serializer.endDocument();
+            fileStream.close();
+        } catch (IOException e) {
+        }
     }
     
     private boolean regionMatch(String r) {
