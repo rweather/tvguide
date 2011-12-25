@@ -38,6 +38,11 @@ public interface TvNetworkListener {
     public void setCurrentNetworkIconRequest(TvChannel channel);
     
     /**
+     * Sets the current network request to a fetch of the main channel list.
+     */
+    public void setCurrentNetworkListRequest();
+    
+    /**
      * Indicates that there are no more network requests pending.
      */
     public void endNetworkRequests();

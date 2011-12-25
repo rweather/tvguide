@@ -74,7 +74,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         super.onStart();
         channelListAdapter.attach();
         TvChannelCache.getInstance().addNetworkListener(this);
-        TvChannelCache.getInstance().addContext(this);
+        TvChannelCache.getInstance().addContext(this, true);
 
         // If no region selected yet, then populate the initial channel list with regions.
         if (channelListAdapter.getCount() == 0)
@@ -266,7 +266,6 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     }
 
     public void setCurrentNetworkIconRequest(TvChannel channel) {
-        System.out.println("icon fetch for: " + channel.getName());
         String message = channel.getName();
         if (progressDialog == null) {
             progressDialog = ProgressDialog.show
@@ -276,7 +275,17 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
             progressDialog.show();
         }
     }
-    
+
+    public void setCurrentNetworkListRequest() {
+        if (progressDialog == null) {
+            progressDialog = ProgressDialog.show
+                (this, "Fetching channel list", "", true);
+        } else {
+            progressDialog.setMessage("");
+            progressDialog.show();
+        }
+    }
+
     public void endNetworkRequests() {
         if (progressDialog != null)
             progressDialog.hide();

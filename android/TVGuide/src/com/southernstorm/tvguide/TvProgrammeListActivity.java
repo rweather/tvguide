@@ -193,6 +193,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
 
     @Override
     protected void onStop() {
+        channel.clearProgrammes();
         TvChannelCache.getInstance().removeContext(this);
         TvChannelCache.getInstance().removeNetworkListener(this);
         if (progressDialog != null) {
@@ -300,7 +301,17 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
             progressDialog.show();
         }
     }
-    
+
+    public void setCurrentNetworkListRequest() {
+        if (progressDialog == null) {
+            progressDialog = ProgressDialog.show
+                (this, "Fetching channel list", "", true);
+        } else {
+            progressDialog.setMessage("");
+            progressDialog.show();
+        }
+    }
+
     public void endNetworkRequests() {
         if (progressDialog != null)
             progressDialog.hide();

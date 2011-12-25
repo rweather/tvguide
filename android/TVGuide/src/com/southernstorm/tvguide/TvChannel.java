@@ -116,23 +116,26 @@ public class TvChannel implements Comparable<TvChannel> {
         dataForList.add(new DataFor(date, lastModified));
     }
     
+    private static boolean equalsDate(Calendar c1, Calendar c2) {
+        if (c1.get(Calendar.DAY_OF_MONTH) != c2.get(Calendar.DAY_OF_MONTH))
+            return false;
+        if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH))
+            return false;
+        return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR);
+    }
+    
     public boolean hasDataFor() { return !dataForList.isEmpty(); }
     public boolean hasDataFor(Calendar date) {
         for (int index = 0; index < dataForList.size(); ++index) {
-            if (dataForList.get(index).date.equals(date))
+            if (equalsDate(dataForList.get(index).date, date))
                 return true;
-        }
-        if (dataForList.isEmpty()) {
-            // We don't know the available dates from the server so return
-            // true to ask the server always.
-            return true;
         }
         return false;
     }
     
     public Calendar dayLastModified(Calendar date) {
         for (int index = 0; index < dataForList.size(); ++index) {
-            if (dataForList.get(index).date.equals(date))
+            if (equalsDate(dataForList.get(index).date, date))
                 return dataForList.get(index).lastModified;
         }
         return null;
@@ -209,6 +212,13 @@ public class TvChannel implements Comparable<TvChannel> {
         this.baseUrls.addAll(baseUrls);
     }
 
+    /**
+     * Clears all programmes that were cached for this channel, to save memory.
+     */
+    public void clearProgrammes() {
+        programmes.clear();
+    }
+    
     /**
      * Loads programme details from an XML input stream.
      *
@@ -298,15 +308,6 @@ public class TvChannel implements Comparable<TvChannel> {
     public Bundle toBundle() {
         Bundle bundle = new Bundle();
         bundle.putString("id", id);
-        bundle.putString("commonId", commonId);
-        bundle.putString("name", name);
-        bundle.putString("numbers", numbers);
-        bundle.putInt("primaryChannelNumber", primaryChannelNumber);
-        bundle.putInt("iconResource", iconResource);
-        bundle.putString("iconFile", iconFile);
-        bundle.putBoolean("convertTimezone", convertTimezone);
-        bundle.putStringArrayList("baseUrls", baseUrls);
-        bundle.putStringArrayList("otherChannelsList", otherChannelsList);
         return bundle;
     }
     
@@ -317,18 +318,7 @@ public class TvChannel implements Comparable<TvChannel> {
      * @return the channel object
      */
     public static TvChannel fromBundle(Bundle bundle) {
-        TvChannel channel = new TvChannel();
-        channel.setId(bundle.getString("id"));
-        channel.setCommonId(bundle.getString("commonId"));
-        channel.setName(bundle.getString("name"));
-        channel.setNumbers(bundle.getString("numbers"));
-        channel.setPrimaryChannelNumber(bundle.getInt("primaryChannelNumber"));
-        channel.setIconResource(bundle.getInt("iconResource"));
-        channel.setIconFile(bundle.getString("iconFile"));
-        channel.setConvertTimezone(bundle.getBoolean("convertTimezone"));
-        channel.setBaseUrls(bundle.getStringArrayList("baseUrls"));
-        channel.setOtherChannelsList(bundle.getStringArrayList("otherChannelsList"));
-        return channel;
+        return TvChannelCache.getInstance().getChannel(bundle.getString("id"));
     }
     
     /**

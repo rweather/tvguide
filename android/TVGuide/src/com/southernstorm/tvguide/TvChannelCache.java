@@ -68,6 +68,7 @@ import android.util.Xml;
 public class TvChannelCache extends ExternalMediaHandler {
 
     private String serviceName;
+    private String serviceUrl;
     private File httpCacheDir;
     private File iconCacheDir;
     private Random rand;
@@ -81,6 +82,9 @@ public class TvChannelCache extends ExternalMediaHandler {
     private List<TvChannelChangedListener> channelListeners;
     private boolean embeddedLoaded = false;
     private boolean sdLoaded = false;
+    private boolean mainListLoaded = false;
+    private boolean mainListFetching = false;
+    private boolean haveDataForDecls = false;
     private static TvChannelCache instance = null;
 
     private TvChannelCache() {
@@ -107,6 +111,7 @@ public class TvChannelCache extends ExternalMediaHandler {
         if (instance == null) {
             instance = new TvChannelCache();
             instance.setServiceName("OzTivo");
+            instance.setServiceUrl("http://xml.oztivo.net/xmltv/datalist.xml.gz");
             instance.setDebug(true);    // FIXME: remove before releasing
         }
         return instance;
@@ -153,6 +158,11 @@ public class TvChannelCache extends ExternalMediaHandler {
         if (channels.size() == 0 && region != null)
             loadChannels();
     }
+    
+    public void addContext(Context context, boolean forceMainListRefresh) {
+        mainListLoaded = false;
+        addContext(context);
+    }
 
     /**
      * Gets the list of active channels.
@@ -176,6 +186,8 @@ public class TvChannelCache extends ExternalMediaHandler {
                 if (region == null || !regionMatch(region))
                     continue;
             }
+            if (haveDataForDecls && !channel.hasDataFor())
+                continue;   // No data for the channel on the server, so block it.
             allChannels.add(channel);
         }
         Collections.sort(allChannels);
@@ -220,12 +232,30 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     /**
+     * Gets the main channel list URL for this service.
+     * 
+     * @return the url
+     */
+    public String getServiceUrl() {
+        return serviceUrl;
+    }
+    
+    /**
+     * Sets the main channel list URL for this service.
+     * 
+     * @param url the url
+     */
+    public void setServiceUrl(String url) {
+        this.serviceUrl = url;
+    }
+    
+    /**
      * Open the XMLTV data file in the cache for a specific channel and date.
      *
      * The data on the SD card is stored as gzip'ed XML.  The stream returned
      * by this function will unzip the data as it is read.
      *
-     * @param channel the channel
+     * @param channel the channel, or null for the main channel list file
      * @param date the date corresponding to the requested data
      * @return an input stream, or null if the data is not present
      */
@@ -249,7 +279,7 @@ public class TvChannelCache extends ExternalMediaHandler {
     /**
      * Gets the last-modified date for a specific channel and date combination.
      * 
-     * @param channel the channel
+     * @param channel the channel, or null for the main channel list file
      * @param date the date
      * @return the last-modified date, or null if the data is not in the cache
      */
@@ -285,7 +315,8 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
     
     /**
-     * Determine if data for a specific channel and date is available in the cache
+     * Determine if data for a specific channel and date is available in the cache,
+     * and is up to date with respect to the server.
      * 
      * @param channel the channel
      * @param date the date to look for
@@ -295,8 +326,27 @@ public class TvChannelCache extends ExternalMediaHandler {
         File file = dataFile(channel, date, ".xml.gz");
         if (file == null || !file.exists())
             return false;
-        else
+        Calendar dayLastMod = channel.dayLastModified(date);
+        if (dayLastMod == null || !isNetworkingAvailable())
+            return true;    // Assume the local copy is up to date.
+        Calendar fileLastMod = channelDataLastModified(channel, date);
+        if (fileLastMod == null)
             return true;
+        return sameTimeNoTimezone(dayLastMod, fileLastMod);
+    }
+    
+    private static boolean sameTimeNoTimezone(Calendar d1, Calendar d2) {
+        if (d1.get(Calendar.DAY_OF_MONTH) != d2.get(Calendar.DAY_OF_MONTH))
+            return false;
+        if (d1.get(Calendar.MONTH) != d2.get(Calendar.MONTH))
+            return false;
+        if (d1.get(Calendar.YEAR) != d2.get(Calendar.YEAR))
+            return false;
+        if (d1.get(Calendar.HOUR_OF_DAY) != d2.get(Calendar.HOUR_OF_DAY))
+            return false;
+        if (d1.get(Calendar.MINUTE) != d2.get(Calendar.MINUTE))
+            return false;
+        return d1.get(Calendar.SECOND) == d2.get(Calendar.SECOND);
     }
     
     /**
@@ -431,7 +481,7 @@ public class TvChannelCache extends ExternalMediaHandler {
      * Get the name of the data file corresponding to a particular
      * channel and date.
      *
-     * @param channel the channel
+     * @param channel the channel, or null for the main channel list file
      * @param date the date to fetch
      * @param extension the file extension, ".xml.gz" or ".cache"
      * @return the filename encapsulated in a File object, or null if no cache
@@ -439,6 +489,8 @@ public class TvChannelCache extends ExternalMediaHandler {
     private File dataFile(TvChannel channel, Calendar date, String extension) {
         if (httpCacheDir == null)
             return null;
+        else if (channel == null)
+            return new File(httpCacheDir, "channels" + extension);
         StringBuilder name = new StringBuilder();
         int year = date.get(Calendar.YEAR);
         int month = date.get(Calendar.MONTH) + 1;
@@ -482,6 +534,37 @@ public class TvChannelCache extends ExternalMediaHandler {
         public boolean success;
         public boolean notFound;
         public RequestInfo next;
+        
+        public boolean isChannelListFetch() {
+            return channel == null && date == null;
+        }
+        
+        public boolean isChannelDataFetch() {
+            return channel != null && date != null;
+        }
+        
+        public boolean isChannelIconFetch() {
+            return channel != null && date == null;
+        }
+        
+        public boolean isSameFetch(RequestInfo info) {
+            return isSameFetch(info.channel, info.date);
+        }
+        
+        public boolean isSameFetch(TvChannel channel, Calendar date) {
+            if (this.channel == null) {
+                if (channel != null)
+                    return false;
+            } else if (this.channel != channel) {
+                return false;
+            }
+            if (this.date == null)
+                return date == null;
+            else if (date == null)
+                return false;
+            else
+                return this.date.equals(date);
+        }
 
         public void updateFromResponse(HttpResponse response) {
             Header header = response.getFirstHeader("ETag");
@@ -703,7 +786,12 @@ public class TvChannelCache extends ExternalMediaHandler {
         // Bail out if the cache is unusable or there is no network.
         if (httpCacheDir == null || !isNetworkingAvailable())
             return;
-
+        
+        // If the channels use datafor declarations, then the date must be
+        // amongst the channel's allowable dates to proceed with the fetch.
+        if (haveDataForDecls && !channel.hasDataFor(date))
+            return;
+        
         // Determine the base URL to use.  OzTivo rules specify that a
         // url should be chosen randomly from the list of base urls.
         // http://www.oztivo.net/twiki/bin/view/TVGuide/StaticXMLGuideAPI
@@ -762,6 +850,35 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
 
     /**
+     * Fetches the main channel list from the server.
+     */
+    private void fetchChannelList() {
+        // Bail out if the cache is unusable or there is no network.
+        if (httpCacheDir == null || !isNetworkingAvailable())
+            return;
+
+        // Create the request info block.
+        RequestInfo info = new RequestInfo();
+        info.channel  = null;
+        info.date = null;
+        info.primaryDate = null;
+        try {
+            info.uri = new URI(serviceUrl);
+        } catch (URISyntaxException e) {
+            return;
+        }
+        info.cacheFile = dataFile(null, null, ".cache");
+        info.dataFile = dataFile(null, null, ".xml.gz");
+        info.etag = null;
+        info.lastModified = null;
+        info.userAgent = getContext().getResources().getString(R.string.user_agent);
+        info.success = false;
+
+        // Queue up the request to fetch the data from the network.
+        addRequestToQueue(info);
+    }
+
+    /**
      * Fetches a channel icon from the network.
      * 
      * @param channel the channel
@@ -808,8 +925,7 @@ public class TvChannelCache extends ExternalMediaHandler {
         RequestInfo current = requestQueue;
         RequestInfo prev = null;
         while (current != null) {
-            if (current.channel == info.channel && current.date != null &&
-                    info.date != null && current.date.equals(info.date)) {
+            if (current.isSameFetch(info) && current.isChannelDataFetch()) {
                 // Upgrade the existing request to a primary day request if necessary.
                 if (info.primaryDate.equals(info.date))
                     current.primaryDate = current.date;
@@ -818,8 +934,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             prev = current;
             current = current.next;
         }
-        if (currentRequestChannel == info.channel && info.date != null &&
-                currentRequestDate != null && currentRequestDate.equals(info.date)) {
+        if (info.isSameFetch(currentRequestChannel, currentRequestDate) && info.isChannelDataFetch()) {
             if (info.primaryDate.equals(info.date))
                 currentRequestPrimaryDate = currentRequestDate;
             return;
@@ -833,7 +948,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             requestQueue = info;
 
         // If we don't have a request currently in progress, then start it.
-        if (currentRequestChannel == null)
+        if (!requestsActive)
             startNextRequest();
     }
 
@@ -856,7 +971,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             }
             requestQueue = info.next;
             info.next = null;
-            if (info.date != null && hasChannelData(info.channel, info.date)) {
+            if (info.isChannelDataFetch() && hasChannelData(info.channel, info.date)) {
                 // A previous request on the queue already fetched this data.
                 for (TvNetworkListener listener: networkListeners)
                     listener.dataAvailable(info.channel, info.date, info.primaryDate);
@@ -869,8 +984,10 @@ public class TvChannelCache extends ExternalMediaHandler {
                 System.out.println("fetching " + info.uri.toString());
             requestsActive = true;
             for (TvNetworkListener listener: networkListeners) {
-                if (info.date != null)
+                if (info.isChannelDataFetch())
                     listener.setCurrentNetworkRequest(info.channel, info.date, info.primaryDate);
+                else if (info.isChannelListFetch())
+                    listener.setCurrentNetworkListRequest();
                 else
                     listener.setCurrentNetworkIconRequest(info.channel);
             }
@@ -888,10 +1005,15 @@ public class TvChannelCache extends ExternalMediaHandler {
             else
                 listener.requestFailed(info.channel, info.date, currentRequestPrimaryDate);
         }
-        if (info.date == null && info.success) {
+        if (info.isChannelIconFetch() && info.success) {
             info.channel.setIconFile(info.dataFile.getPath());
             for (TvChannelChangedListener channelListener: channelListeners)
                 channelListener.channelsChanged();
+        } else if (info.isChannelListFetch()) {
+            // Main channel list has been fetched - reload the channels.
+            mainListFetching = false;
+            if (info.success)
+                loadChannels();
         }
     }
 
@@ -947,6 +1069,35 @@ public class TvChannelCache extends ExternalMediaHandler {
             }
             sdLoaded = true;
         }
+        
+        // Load the server's channel list to refresh data-for declarations.
+        if (!mainListLoaded) {
+            InputStream inputStream = null;
+            Calendar lastmod = channelDataLastModified(null, null);
+            Calendar now = new GregorianCalendar();
+            if (lastmod == null || (now.getTimeInMillis() - lastmod.getTimeInMillis()) < (24 * 60 * 60 * 1000))
+                inputStream = openChannelData(null, null); // Reuse previous list if less than 24 hours old
+            if (inputStream != null) {
+                try {
+                    try {
+                        XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                        XmlPullParser parser = factory.newPullParser();
+                        parser.setInput(inputStream, null);
+                        loadChannelsFromXml(parser);
+                    } catch (XmlPullParserException e) {
+                        // Ignore - just stop parsing at the first error.
+                    } finally {
+                        inputStream.close();
+                    }
+                } catch (IOException e) {
+                }
+                mainListLoaded = true;
+            } else if (!mainListFetching && isNetworkingAvailable()) {
+                // Fetch the channel list for the first time.
+                mainListFetching = true;
+                fetchChannelList();
+            }
+        }
 
         // Rebuild the active channel list.
         activeChannels.clear();
@@ -958,6 +1109,8 @@ public class TvChannelCache extends ExternalMediaHandler {
             } else if (channel.getHiddenState() == TvChannel.HIDDEN) {
                 continue;
             }
+            if (haveDataForDecls && !channel.hasDataFor())
+                continue;   // No data for the channel on the server, so block it.
             activeChannels.add(channel);
             if (channel.iconNeedsFetching())
                 fetchIcon(channel, channel.getIconSource(), new File(channel.getIconFile()));
@@ -1054,6 +1207,7 @@ public class TvChannelCache extends ExternalMediaHandler {
         }
         int eventType = parser.next();
         boolean hadNumbers = channel.getNumbers() != null;
+        boolean hadDataFor = channel.hasDataFor();
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
                 String name = parser.getName();
@@ -1094,6 +1248,23 @@ public class TvChannelCache extends ExternalMediaHandler {
                         } else {
                             channel.setNumbers(currentNumbers + ", " + number);
                         }
+                    }
+                } else if (name.equals("datafor")) {
+                    if (hadDataFor) {
+                        // Loading new datafor declarations to replace previous list.
+                        channel.clearDataFor();
+                        hadDataFor = false;
+                    }
+                    String lastmod = parser.getAttributeValue(null, "lastmodified");
+                    String dateStr = Utils.getContents(parser, name);
+                    if (lastmod != null && dateStr != null) {
+                        // Parse the date in the format YYYY-MM-DD.
+                        int year = Utils.parseField(dateStr, 0, 4);
+                        int month = Utils.parseField(dateStr, 5, 2);
+                        int day = Utils.parseField(dateStr, 8, 2);
+                        Calendar date = new GregorianCalendar(year, month - 1, day);
+                        channel.addDataFor(date, Utils.parseDateTime(lastmod, false));
+                        haveDataForDecls = true;
                     }
                 }
             } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals("channel")) {
