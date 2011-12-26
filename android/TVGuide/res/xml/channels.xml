@@ -178,7 +178,6 @@
   <channel id="7CEN" common-id="Seven">
     <display-name lang="en">Seven Central</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
-    <number system="digital">7</number>
   </channel>
 
   <channel id="7TWO-ACT" region="act" common-id="7TWO">
