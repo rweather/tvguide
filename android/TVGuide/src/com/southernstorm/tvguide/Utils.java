@@ -139,6 +139,30 @@ public class Utils {
         return new GregorianCalendar(year, month - 1, day, hour, minute, second);
     }
 
+    /**
+     * Parses a date/time string from within an XMLTV stream.  Only the local
+     * time part of the value is parsed. Timezone specifications are ignored.
+     * 
+     * @param str the string
+     * @param convertTimezone true to convert date/time values to local time
+     * @return the date/time value as a FastCalendar object
+     */
+    public static FastCalendar parseDateTimeFast(String str, boolean convertTimezone) {
+        // Format looks like: 20111209060000 +1100
+        if (str == null)
+            return null;
+        int year = parseField(str, 0, 4);
+        int month = parseField(str, 4, 2);
+        int day = parseField(str, 6, 2);
+        int hour = parseField(str, 8, 2);
+        int minute = parseField(str, 10, 2);
+        int second = parseField(str, 12, 2);
+        if (convertTimezone) {
+            // TODO
+        }
+        return new FastCalendar(year, month - 1, day, hour, minute, second);
+    }
+
     private static void appendField(StringBuilder builder, int value, int digits) {
         int divider = 1;
         while (digits-- > 1)

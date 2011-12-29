@@ -37,10 +37,10 @@ import android.os.Bundle;
 public class TvChannel implements Comparable<TvChannel> {
 
     private class DataFor {
-        public Calendar date;
-        public Calendar lastModified;
+        public FastCalendar date;
+        public FastCalendar lastModified;
         
-        public DataFor(Calendar date, Calendar lastModified) {
+        public DataFor(FastCalendar date, FastCalendar lastModified) {
             this.date = date;
             this.lastModified = lastModified;
         }
@@ -112,16 +112,16 @@ public class TvChannel implements Comparable<TvChannel> {
     public void setIconSource(String iconSource) { this.iconSource = iconSource; }
     
     public void clearDataFor() { dataForList.clear(); }
-    public void addDataFor(Calendar date, Calendar lastModified) {
+    public void addDataFor(FastCalendar date, FastCalendar lastModified) {
         dataForList.add(new DataFor(date, lastModified));
     }
     
-    private static boolean equalsDate(Calendar c1, Calendar c2) {
-        if (c1.get(Calendar.DAY_OF_MONTH) != c2.get(Calendar.DAY_OF_MONTH))
+    private static boolean equalsDate(FastCalendar c1, Calendar c2) {
+        if (c1.day != c2.get(Calendar.DAY_OF_MONTH))
             return false;
-        if (c1.get(Calendar.MONTH) != c2.get(Calendar.MONTH))
+        if (c1.month != c2.get(Calendar.MONTH))
             return false;
-        return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR);
+        return c1.year == c2.get(Calendar.YEAR);
     }
     
     public boolean hasDataFor() { return !dataForList.isEmpty(); }
@@ -136,7 +136,7 @@ public class TvChannel implements Comparable<TvChannel> {
     public Calendar dayLastModified(Calendar date) {
         for (int index = 0; index < dataForList.size(); ++index) {
             if (equalsDate(dataForList.get(index).date, date))
-                return dataForList.get(index).lastModified;
+                return dataForList.get(index).lastModified.toCalendar();
         }
         return null;
     }

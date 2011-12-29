@@ -1041,10 +1041,15 @@ public class TvChannelCache extends ExternalMediaHandler {
         if (!embeddedLoaded) {
             if (region == null || getContext() == null)
                 return;
+            Calendar start = new GregorianCalendar();
             XmlResourceParser parser = getContext().getResources().getXml(R.xml.channels);
             loadChannelsFromXml(parser);
             parser.close();
             embeddedLoaded = true;
+            if (debug) {
+                double time = ((new GregorianCalendar()).getTimeInMillis() - start.getTimeInMillis()) / 1000.0;
+                System.out.println("time to parse embedded channel list: " + time);
+            }
         }
         
         // Load the hidden-vs-shown state from the SD card.
@@ -1052,6 +1057,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             File serviceDir = new File(getFilesDir(), serviceName);
             File file = new File(serviceDir, "channels.xml");
             if (file.exists()) {
+                Calendar start = new GregorianCalendar();
                 try {
                     FileInputStream fileStream = new FileInputStream(file);
                     try {
@@ -1066,6 +1072,10 @@ public class TvChannelCache extends ExternalMediaHandler {
                     }
                 } catch (IOException e) {
                 }
+                if (debug) {
+                    double time = ((new GregorianCalendar()).getTimeInMillis() - start.getTimeInMillis()) / 1000.0;
+                    System.out.println("time to parse SD config channel list: " + time);
+                }
             }
             sdLoaded = true;
         }
@@ -1078,6 +1088,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             if (lastmod == null || (now.getTimeInMillis() - lastmod.getTimeInMillis()) < (24 * 60 * 60 * 1000))
                 inputStream = openChannelData(null, null); // Reuse previous list if less than 24 hours old
             if (inputStream != null) {
+                Calendar start = new GregorianCalendar();
                 try {
                     try {
                         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
@@ -1092,6 +1103,10 @@ public class TvChannelCache extends ExternalMediaHandler {
                 } catch (IOException e) {
                 }
                 mainListLoaded = true;
+                if (debug) {
+                    double time = ((new GregorianCalendar()).getTimeInMillis() - start.getTimeInMillis()) / 1000.0;
+                    System.out.println("time to parse network channel list: " + time);
+                }
             } else if (!mainListFetching && isNetworkingAvailable()) {
                 // Fetch the channel list for the first time.
                 mainListFetching = true;
@@ -1137,24 +1152,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
                     String name = parser.getName();
-                    if (name.equals("region")) {
-                        // Parse the contents of a <region> element.
-                        id = parser.getAttributeValue(null, "id");
-                        parent = parser.getAttributeValue(null, "parent");
-                        if (id != null && parent != null) {
-                            if (!regionTree.containsKey(id))
-                                regionTree.put(id, new ArrayList<String>());
-                            if (!regionTree.get(id).contains(parent))
-                                regionTree.get(id).add(parent);
-                        }
-                    } else if (name.equals("other-parent")) {
-                        // Secondary parent for the current region.
-                        parent = Utils.getContents(parser, name);
-                        if (!regionTree.containsKey(id))
-                            regionTree.put(id, new ArrayList<String>());
-                        if (!regionTree.get(id).contains(parent))
-                            regionTree.get(id).add(parent);
-                    } else if (name.equals("channel")) {
+                    if (name.equals("channel")) {
                         // Parse the contents of a <channel> element.
                         id = parser.getAttributeValue(null, "id");
                         TvChannel channel = channels.get(id);
@@ -1179,6 +1177,23 @@ public class TvChannelCache extends ExternalMediaHandler {
                         }
                         loadChannel(channel, parser);
                         channels.put(id, channel);
+                    } else if (name.equals("region")) {
+                        // Parse the contents of a <region> element.
+                        id = parser.getAttributeValue(null, "id");
+                        parent = parser.getAttributeValue(null, "parent");
+                        if (id != null && parent != null) {
+                            if (!regionTree.containsKey(id))
+                                regionTree.put(id, new ArrayList<String>());
+                            if (!regionTree.get(id).contains(parent))
+                                regionTree.get(id).add(parent);
+                        }
+                    } else if (name.equals("other-parent")) {
+                        // Secondary parent for the current region.
+                        parent = Utils.getContents(parser, name);
+                        if (!regionTree.containsKey(id))
+                            regionTree.put(id, new ArrayList<String>());
+                        if (!regionTree.get(id).contains(parent))
+                            regionTree.get(id).add(parent);
                     }
                 }
                 eventType = parser.next();
@@ -1211,7 +1226,26 @@ public class TvChannelCache extends ExternalMediaHandler {
         while (eventType != XmlPullParser.END_DOCUMENT) {
             if (eventType == XmlPullParser.START_TAG) {
                 String name = parser.getName();
-                if (name.equals("display-name")) {
+                if (name.equals("datafor")) {
+                    if (hadDataFor) {
+                        // Loading new datafor declarations to replace previous list.
+                        channel.clearDataFor();
+                        hadDataFor = false;
+                    }
+                    String lastmod = parser.getAttributeValue(null, "lastmodified");
+                    String dateStr = Utils.getContents(parser, name);
+                    if (lastmod != null && dateStr != null) {
+                        // Parse the date in the format YYYY-MM-DD.
+                        int year = Utils.parseField(dateStr, 0, 4);
+                        int month = Utils.parseField(dateStr, 5, 2);
+                        int day = Utils.parseField(dateStr, 8, 2);
+                        FastCalendar date = new FastCalendar(year, month - 1, day);
+                        channel.addDataFor(date, Utils.parseDateTimeFast(lastmod, false));
+                        haveDataForDecls = true;
+                    }
+                } else if (name.equals("base-url")) {
+                    // Ignored for now.
+                } else if (name.equals("display-name")) {
                     channel.setName(Utils.getContents(parser, name));
                 } else if (name.equals("icon") && channel.getIconResource() == 0 && channel.getIconSource() == null) {
                     String src = parser.getAttributeValue(null, "src");
@@ -1248,23 +1282,6 @@ public class TvChannelCache extends ExternalMediaHandler {
                         } else {
                             channel.setNumbers(currentNumbers + ", " + number);
                         }
-                    }
-                } else if (name.equals("datafor")) {
-                    if (hadDataFor) {
-                        // Loading new datafor declarations to replace previous list.
-                        channel.clearDataFor();
-                        hadDataFor = false;
-                    }
-                    String lastmod = parser.getAttributeValue(null, "lastmodified");
-                    String dateStr = Utils.getContents(parser, name);
-                    if (lastmod != null && dateStr != null) {
-                        // Parse the date in the format YYYY-MM-DD.
-                        int year = Utils.parseField(dateStr, 0, 4);
-                        int month = Utils.parseField(dateStr, 5, 2);
-                        int day = Utils.parseField(dateStr, 8, 2);
-                        Calendar date = new GregorianCalendar(year, month - 1, day);
-                        channel.addDataFor(date, Utils.parseDateTime(lastmod, false));
-                        haveDataForDecls = true;
                     }
                 }
             } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals("channel")) {
