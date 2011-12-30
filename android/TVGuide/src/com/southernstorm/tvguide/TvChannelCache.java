@@ -747,8 +747,8 @@ public class TvChannelCache extends ExternalMediaHandler {
     public boolean bulkFetch(int numDays) {
         boolean fetched = false;
         Calendar today = new GregorianCalendar();
-        for (int index = 0; index < channels.size(); ++index) {
-            TvChannel channel = channels.get(index);
+        for (int index = 0; index < activeChannels.size(); ++index) {
+            TvChannel channel = activeChannels.get(index);
             for (int day = 0; day < numDays; ++day) {
                 Calendar date = (Calendar)today.clone();
                 date.add(Calendar.DAY_OF_MONTH, day);
