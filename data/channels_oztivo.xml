@@ -286,6 +286,7 @@
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/abc-news-24.png"/>
     <number system="digital">24</number>
     <number system="foxtel">202</number>
+    <convert-timezone/>
   </channel>
 
   <channel id="ABC-Qld" region="qld" common-id="ABC">

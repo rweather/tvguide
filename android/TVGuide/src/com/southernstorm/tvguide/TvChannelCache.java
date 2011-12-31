@@ -1240,7 +1240,7 @@ public class TvChannelCache extends ExternalMediaHandler {
                         int month = Utils.parseField(dateStr, 5, 2);
                         int day = Utils.parseField(dateStr, 8, 2);
                         FastCalendar date = new FastCalendar(year, month - 1, day);
-                        channel.addDataFor(date, Utils.parseDateTimeFast(lastmod, false));
+                        channel.addDataFor(date, Utils.parseDateTimeFast(lastmod));
                         haveDataForDecls = true;
                     }
                 } else if (name.equals("base-url")) {
@@ -1268,8 +1268,10 @@ public class TvChannelCache extends ExternalMediaHandler {
                     String currentNumbers = channel.getNumbers();
                     if (!system.equals("digital")) {
                         if (currentNumbers == null) {
-                            // Hide Pay TV only channels for now.
+                            // Hide Pay TV only channels for now, and mark them to convert
+                            // programmes into the local timezone.
                             channel.setHiddenState(TvChannel.HIDDEN);
+                            channel.setConvertTimezone(true);
                             String number = Utils.getContents(parser, name);
                             channel.setNumbers(number);
                             channel.setPrimaryChannelNumber(Integer.valueOf(number));
@@ -1283,6 +1285,8 @@ public class TvChannelCache extends ExternalMediaHandler {
                             channel.setNumbers(currentNumbers + ", " + number);
                         }
                     }
+                } else if (name.equals("convert-timezone")) {
+                    channel.setConvertTimezone(true);
                 }
             } else if (eventType == XmlPullParser.END_TAG && parser.getName().equals("channel")) {
                 break;

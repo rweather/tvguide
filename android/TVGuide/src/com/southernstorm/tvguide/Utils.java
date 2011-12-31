@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -115,6 +116,33 @@ public class Utils {
         return value;
     }
 
+    private static TimeZone cachedTimeZone = null;
+    private static int cachedOffset = 0;
+    
+    private static int parseTZField(String str, int posn) {
+        while (posn < str.length() && str.charAt(posn) == ' ') {
+            ++posn;
+        }
+        if (posn >= str.length())
+            return cachedOffset;
+        boolean positive;
+        if (str.charAt(posn) == '+') {
+            positive = true;
+            ++posn;
+        } else if (str.charAt(posn) == '-') {
+            positive = false;
+            ++posn;
+        } else {
+            return cachedOffset;
+        }
+        int raw = parseField(str, posn, 4);
+        int value = ((raw / 100) * 60 + (raw % 100)) * (60 * 1000);
+        if (positive)
+            return value;
+        else
+            return -value;
+    }
+    
     /**
      * Parses a date/time string from within an XMLTV stream.  Only the local
      * time part of the value is parsed. Timezone specifications are ignored.
@@ -134,9 +162,22 @@ public class Utils {
         int minute = parseField(str, 10, 2);
         int second = parseField(str, 12, 2);
         if (convertTimezone) {
-            // TODO
+            if (cachedTimeZone == null) {
+                cachedTimeZone = TimeZone.getDefault();
+                cachedOffset = cachedTimeZone.getOffset(System.currentTimeMillis());
+            }
+            int tz = parseTZField(str, 14);
+            if (tz != cachedOffset) {
+                Calendar calendar = new GregorianCalendar(year, month - 1, day, hour, minute, second);
+                calendar.add(Calendar.MILLISECOND, cachedOffset - tz);
+                return calendar;
+            }
         }
         return new GregorianCalendar(year, month - 1, day, hour, minute, second);
+    }
+
+    public static void clearTimeZone() {
+        cachedTimeZone = null;
     }
 
     /**
@@ -144,10 +185,9 @@ public class Utils {
      * time part of the value is parsed. Timezone specifications are ignored.
      * 
      * @param str the string
-     * @param convertTimezone true to convert date/time values to local time
      * @return the date/time value as a FastCalendar object
      */
-    public static FastCalendar parseDateTimeFast(String str, boolean convertTimezone) {
+    public static FastCalendar parseDateTimeFast(String str) {
         // Format looks like: 20111209060000 +1100
         if (str == null)
             return null;
@@ -157,9 +197,6 @@ public class Utils {
         int hour = parseField(str, 8, 2);
         int minute = parseField(str, 10, 2);
         int second = parseField(str, 12, 2);
-        if (convertTimezone) {
-            // TODO
-        }
         return new FastCalendar(year, month - 1, day, hour, minute, second);
     }
 

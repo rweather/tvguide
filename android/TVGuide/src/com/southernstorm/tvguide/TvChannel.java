@@ -227,6 +227,7 @@ public class TvChannel implements Comparable<TvChannel> {
      */
     public void loadProgrammesFromXml(Calendar date, InputStream stream) {
         List<TvProgramme> progs = new ArrayList<TvProgramme>();
+        Utils.clearTimeZone(); // Force the local timezone to be reloaded between XML files just in case.
         try {
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             XmlPullParser parser = factory.newPullParser();
@@ -268,8 +269,15 @@ public class TvChannel implements Comparable<TvChannel> {
             int start = 0;
             while (start < dayProgs.size()) {
                 TvProgramme prog = dayProgs.get(start);
-                if (prog.getStart().get(Calendar.HOUR_OF_DAY) >= 6)
-                    break;
+                Calendar startTime = prog.getStart();
+                if (startTime.get(Calendar.HOUR_OF_DAY) >= 6) {
+                    // It is possible that timezone adjustment has pushed some of the early
+                    // morning programmes into the previous day.
+                    if (startTime.get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH))
+                        break;
+                    ++start;
+                    continue;
+                }
                 if (prog.getStop().get(Calendar.HOUR_OF_DAY) > 6)
                     break;
                 if (prog.getStop().get(Calendar.HOUR_OF_DAY) == 6 && prog.getStop().get(Calendar.MINUTE) > 0)
@@ -285,8 +293,12 @@ public class TvChannel implements Comparable<TvChannel> {
             int end = 0;
             while (end < nextDayProgs.size()) {
                 TvProgramme prog = nextDayProgs.get(end);
-                if (prog.getStart().get(Calendar.HOUR_OF_DAY) >= 6)
-                    break;
+                if (prog.getStart().get(Calendar.HOUR_OF_DAY) >= 6) {
+                    // It is possible that timezone adjustment has pushed some of the early
+                    // morning programmes into the previous day.
+                    if (prog.getStart().get(Calendar.DAY_OF_MONTH) != date.get(Calendar.DAY_OF_MONTH))
+                        break;
+                }
                 ++end;
             }
             if (end > 0) {

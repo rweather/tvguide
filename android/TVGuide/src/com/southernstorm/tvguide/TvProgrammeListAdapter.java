@@ -194,9 +194,7 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
     private boolean crossesSixAM(TvProgramme prog) {
         if (prog.getStart().get(Calendar.HOUR_OF_DAY) >= 6)
             return false;
-        if (prog.getStop().get(Calendar.HOUR_OF_DAY) == 6)
-            return true;
-        if (prog.getStop().get(Calendar.HOUR_OF_DAY) > 6 && prog.getStop().get(Calendar.MINUTE) > 0)
+        if (prog.getStop().get(Calendar.HOUR_OF_DAY) >= 6)
             return true;
         return false;
     }
