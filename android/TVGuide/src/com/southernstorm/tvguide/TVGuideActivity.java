@@ -35,12 +35,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ListView;
+import android.widget.GridView;
 import android.widget.Toast;
 
 public class TVGuideActivity extends Activity implements TvNetworkListener {
 
-    private ListView channelListView;
+    private GridView channelListView;
     private TvChannelListAdapter channelListAdapter;
     private TvRegionListAdapter regionListAdapter;
     private ProgressDialog progressDialog;
@@ -51,7 +51,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.channel_list);
 
-        channelListView = (ListView)findViewById(R.id.channelList);
+        channelListView = (GridView)findViewById(R.id.channelList);
         channelListAdapter = new TvChannelListAdapter(this);
         
         regionListAdapter = new TvRegionListAdapter(this);
