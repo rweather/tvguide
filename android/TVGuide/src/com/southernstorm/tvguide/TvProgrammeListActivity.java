@@ -111,6 +111,9 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
 
         // Show the channel name in the title bar.
         setTitle(channel.getName());
+        
+        // Remember the channel selection for when we go back to the channel list view.
+        TvChannelCache.getInstance().setLastSelectedChannel(channel.getId());
 
         // Determine the initial portrait-vs-landscape orientation.
         Configuration config = getResources().getConfiguration();

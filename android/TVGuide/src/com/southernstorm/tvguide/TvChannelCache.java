@@ -85,6 +85,7 @@ public class TvChannelCache extends ExternalMediaHandler {
     private boolean mainListLoaded = false;
     private boolean mainListFetching = false;
     private boolean haveDataForDecls = false;
+    private String lastSelectedChannel;
     private static TvChannelCache instance = null;
 
     private TvChannelCache() {
@@ -248,7 +249,27 @@ public class TvChannelCache extends ExternalMediaHandler {
     public void setServiceUrl(String url) {
         this.serviceUrl = url;
     }
-    
+
+    /**
+     * Gets the channel identifier of the last channel that was selected in
+     * the programme view.
+     * 
+     * @return the channel id
+     */
+    public String getLastSelectedChannel() {
+        return lastSelectedChannel;
+    }
+
+    /**
+     * Sets the channel identifier of the last channel that was selected in
+     * the programme view.
+     * 
+     * @param channelId the channel id
+     */
+    public void setLastSelectedChannel(String channelId) {
+        lastSelectedChannel = channelId;
+    }
+
     /**
      * Open the XMLTV data file in the cache for a specific channel and date.
      *

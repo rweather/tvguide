@@ -4,4 +4,5 @@
     <drawable name="time_color_morning">#ff00c040</drawable>
     <drawable name="time_color_afternoon">#ffc0c040</drawable>
     <drawable name="time_color_night">#ffffff00</drawable>
+    <drawable name="channel_selected">#ffffff00</drawable>
 </resources>

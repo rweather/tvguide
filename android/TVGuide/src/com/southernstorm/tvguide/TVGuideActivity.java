@@ -30,6 +30,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,13 +46,35 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     private TvChannelListAdapter channelListAdapter;
     private TvRegionListAdapter regionListAdapter;
     private ProgressDialog progressDialog;
+    private ClearChannelHandler clearChannelHandler;
 
+    private class ClearChannelHandler extends Handler {
+        private String clearId;
+        
+        @Override
+        public void handleMessage(Message msg) {
+            String last = TvChannelCache.getInstance().getLastSelectedChannel();
+            if (last != null && last.equals(clearId)) {
+                TvChannelCache.getInstance().setLastSelectedChannel(null);
+                channelListAdapter.forceUpdate();
+            }
+        }
+
+        public void clearAfterDelay(long ms) {
+            clearId = TvChannelCache.getInstance().getLastSelectedChannel();
+            this.removeMessages(0);
+            sendMessageDelayed(obtainMessage(0), ms);
+        }
+    };
+    
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.channel_list);
 
+        clearChannelHandler = new ClearChannelHandler();
+        
         channelListView = (GridView)findViewById(R.id.channelList);
         channelListAdapter = new TvChannelListAdapter(this);
         
@@ -81,6 +105,9 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
             channelListView.setAdapter(regionListAdapter);
         else
             channelListView.setAdapter(channelListAdapter);
+
+        if (TvChannelCache.getInstance().getLastSelectedChannel() != null)
+            clearChannelHandler.clearAfterDelay(3000);
     }
 
     @Override
@@ -120,6 +147,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
                 return;
             }
         }
+        TvChannelCache.getInstance().setLastSelectedChannel(null);
         super.onBackPressed();
     }
 

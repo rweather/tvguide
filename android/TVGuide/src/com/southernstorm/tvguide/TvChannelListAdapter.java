@@ -38,12 +38,14 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
     private List<TvChannel> channels;
     private List<DataSetObserver> observers;
     private LayoutInflater inflater;
+    private boolean indicateCurrent;
     
     public TvChannelListAdapter(Context context) {
         this.channels = new ArrayList<TvChannel>();
         this.channels.addAll(TvChannelCache.getInstance().getActiveChannels());
         this.observers = new ArrayList<DataSetObserver>();
         this.inflater = LayoutInflater.from(context);
+        this.indicateCurrent = true;
     }
 
     public void attach() {
@@ -59,6 +61,7 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
         channel.setName("Any channel");
         channel.setId("");
         channels.add(0, channel);
+        this.indicateCurrent = false;
     }
     
     public int addOtherChannel(String channelId) {
@@ -66,6 +69,7 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
         channel.setName(channelId);
         channel.setId(channelId);
         channels.add(channel);
+        this.indicateCurrent = false;
         return channels.size() - 1;
     }
 
@@ -128,6 +132,13 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
         if (numbers == null)
         	numbers = "";
         view.numbers.setText(numbers);
+        if (indicateCurrent) {
+            String lastSelectedChannel = TvChannelCache.getInstance().getLastSelectedChannel();
+            if (lastSelectedChannel != null && lastSelectedChannel.equals(channel.getId()))
+                convertView.setBackgroundResource(R.drawable.channel_selected);
+            else
+                convertView.setBackgroundDrawable(null);
+        }
         return convertView;
     }
 
@@ -166,6 +177,11 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
     public void channelsChanged() {
         channels.clear();
         this.channels.addAll(TvChannelCache.getInstance().getActiveChannels());
+        for (DataSetObserver observer: observers)
+            observer.onChanged();
+    }
+    
+    public void forceUpdate() {
         for (DataSetObserver observer: observers)
             observer.onChanged();
     }
