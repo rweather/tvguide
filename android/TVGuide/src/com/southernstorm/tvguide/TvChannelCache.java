@@ -1195,6 +1195,7 @@ public class TvChannelCache extends ExternalMediaHandler {
                         if (region != null) {
                             channel.setRegion(region);
                             channel.setHiddenState(TvChannel.HIDDEN_BY_REGION);
+                            channel.setDefaultHiddenState(TvChannel.HIDDEN_BY_REGION);
                         }
                         loadChannel(channel, parser);
                         channels.put(id, channel);
@@ -1292,6 +1293,7 @@ public class TvChannelCache extends ExternalMediaHandler {
                             // Hide Pay TV only channels for now, and mark them to convert
                             // programmes into the local timezone.
                             channel.setHiddenState(TvChannel.HIDDEN);
+                            channel.setDefaultHiddenState(TvChannel.HIDDEN);
                             channel.setConvertTimezone(true);
                             String number = Utils.getContents(parser, name);
                             channel.setNumbers(number);
@@ -1337,6 +1339,8 @@ public class TvChannelCache extends ExternalMediaHandler {
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serializer.startTag(null, "tv");
             for (TvChannel channel: channels.values()) {
+                if (channel.getHiddenState() == channel.getDefaultHiddenState())
+                    continue;   // Don't save channels that have their default hidden state.
                 serializer.startTag(null, "channel");
                 serializer.attribute(null, "id", channel.getId());
                 if (channel.getHiddenState() == TvChannel.HIDDEN)

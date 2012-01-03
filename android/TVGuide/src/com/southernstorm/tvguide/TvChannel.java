@@ -54,6 +54,7 @@ public class TvChannel implements Comparable<TvChannel> {
     private String numbers;
     private int primaryChannelNumber;
     private int hiddenState;
+    private int defaultHiddenState;
     private int iconResource;
     private String iconFile;
     private String iconSource;
@@ -71,6 +72,7 @@ public class TvChannel implements Comparable<TvChannel> {
     public TvChannel() {
         this.primaryChannelNumber = TvChannel.NO_NUMBER;
         this.hiddenState = HIDDEN;
+        this.defaultHiddenState = HIDDEN;
         this.iconResource = 0;
         this.baseUrls = new ArrayList<String>();
         this.programmes = new TreeMap< Calendar, List<TvProgramme> >();
@@ -101,6 +103,9 @@ public class TvChannel implements Comparable<TvChannel> {
     
     public int getHiddenState() { return hiddenState; }
     public void setHiddenState(int hiddenState) { this.hiddenState = hiddenState; }
+    
+    public int getDefaultHiddenState() { return defaultHiddenState; }
+    public void setDefaultHiddenState(int hiddenState) { this.defaultHiddenState = hiddenState; }
     
     public int getIconResource() { return iconResource; }
     public void setIconResource(int id) { this.iconResource = id; }
