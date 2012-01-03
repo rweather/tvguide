@@ -543,7 +543,7 @@ public class TvBookmark implements Comparable<TvBookmark> {
             result = TvBookmarkMatch.ShouldMatch;
         } else {
             if (channelId != null && !programme.getChannel().isSameChannel(channelId))
-                return TvBookmarkMatch.TitleMatch;
+                result = TvBookmarkMatch.TitleMatch;
         }
     
         // Check that start and stop times are within the expected range.
