@@ -346,10 +346,24 @@ public class TvChannel implements Comparable<TvChannel> {
      * @return true if the same channel, false if not
      */
     public boolean isSameChannel(String id) {
+        if (id == null)
+            return false;
         if (this.id != null && this.id.equals(id))
             return true;
         if (this.commonId == null)
             return false;
         return otherChannelsList.contains(id);
+    }
+    
+    /**
+     * Determine if there are on-air bookmarks for this channel on a specific day.
+     * 
+     * Note: bookmarks for "any time" or "any channel" are ignored.
+     * 
+     * @param weekday the weekday to check
+     * @return true if there are bookmarks, false otherwise
+     */
+    public boolean haveBookmarksForDay(int weekday) {
+        return TvBookmarkManager.getInstance().haveBookmarksForDay(this, weekday);
     }
 }

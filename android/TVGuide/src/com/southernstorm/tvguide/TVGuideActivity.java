@@ -40,7 +40,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
-public class TVGuideActivity extends Activity implements TvNetworkListener {
+public class TVGuideActivity extends Activity implements TvNetworkListener, TvBookmarkChangedListener {
 
     private GridView channelListView;
     private TvChannelListAdapter channelListAdapter;
@@ -100,6 +100,9 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         TvChannelCache.getInstance().addNetworkListener(this);
         TvChannelCache.getInstance().addContext(this, true);
 
+        TvBookmarkManager.getInstance().addContext(this);
+        TvBookmarkManager.getInstance().addChangedListener(this);
+
         // If no region selected yet, then populate the initial channel list with regions.
         if (channelListAdapter.getCount() == 0)
             channelListView.setAdapter(regionListAdapter);
@@ -115,6 +118,8 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
         TvChannelCache.getInstance().removeContext(this);
         TvChannelCache.getInstance().removeNetworkListener(this);
         channelListAdapter.detach();
+        TvBookmarkManager.getInstance().removeContext(this);
+        TvBookmarkManager.getInstance().removeChangedListener(this);
         if (progressDialog != null) {
             progressDialog.dismiss();
             progressDialog = null;
@@ -323,5 +328,9 @@ public class TVGuideActivity extends Activity implements TvNetworkListener {
     }
 
     public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate) {
+    }
+    
+    public void bookmarksChanged() {
+        channelListAdapter.forceUpdate();
     }
 }

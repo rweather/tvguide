@@ -18,6 +18,8 @@
 package com.southernstorm.tvguide;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.content.Context;
@@ -138,6 +140,13 @@ public class TvChannelListAdapter implements ListAdapter, SpinnerAdapter, TvChan
                 convertView.setBackgroundResource(R.drawable.channel_selected);
             else
                 convertView.setBackgroundDrawable(null);
+            
+            // Highlight channels that have bookmarked programmes for today in red.
+            int weekday = (new GregorianCalendar()).get(Calendar.DAY_OF_WEEK);
+            if (channel.haveBookmarksForDay(weekday))
+                view.name.setTextColor(0xFFFF0000);
+            else
+                view.name.setTextColor(0xFF000000);
         }
         return convertView;
     }

@@ -347,4 +347,32 @@ public class TvBookmarkManager extends ExternalMediaHandler {
         for (TvProgramme prog: programmes)
             matchProgramme(prog);
     }
+    
+    /**
+     * Determine if there are on-air bookmarks for a specific channel and day.
+     * 
+     * Note: bookmarks for "any time" or "any channel" are ignored.
+     * 
+     * @param channel the channel to check
+     * @param weekday the weekday to check
+     * @return true if there are bookmarks, false otherwise
+     */
+    public boolean haveBookmarksForDay(TvChannel channel, int weekday) {
+        int maskToday = TvBookmark.getMaskForDay(weekday);
+        int maskTomorrow = TvBookmark.getMaskForDay((weekday == Calendar.SATURDAY ? Calendar.SUNDAY : weekday + 1));
+        for (TvBookmark bookmark: bookmarks) {
+            if (!channel.isSameChannel(bookmark.getChannelId()))
+                continue;
+            if (bookmark.getAnyTime())
+                continue;
+            int hour = bookmark.getStartTime() / (60 * 60);
+            if (hour < 6 && (bookmark.getDayOfWeekMask() & maskTomorrow) == 0)
+                continue;
+            else if (hour >= 6 && (bookmark.getDayOfWeekMask() & maskToday) == 0)
+                continue;
+            if (bookmark.isOnAir())
+                return true;
+        }
+        return false;
+    }
 }
