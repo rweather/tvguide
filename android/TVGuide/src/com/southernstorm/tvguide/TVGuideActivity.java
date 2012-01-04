@@ -293,6 +293,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
             progressDialog = ProgressDialog.show
                 (this, "Fetching guide data", message, true);
         } else {
+            progressDialog.setTitle("Fetching guide data");
             progressDialog.setMessage(message);
             progressDialog.show();
         }
@@ -304,6 +305,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
             progressDialog = ProgressDialog.show
                 (this, "Fetching channel icon", message, true);
         } else {
+            progressDialog.setTitle("Fetching channel icon");
             progressDialog.setMessage(message);
             progressDialog.show();
         }
@@ -314,6 +316,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
             progressDialog = ProgressDialog.show
                 (this, "Fetching channel list", "", true);
         } else {
+            progressDialog.setTitle("Fetching channel list");
             progressDialog.setMessage("");
             progressDialog.show();
         }
