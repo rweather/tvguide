@@ -22,6 +22,11 @@ import java.util.Calendar;
 public interface TvNetworkListener {
 
     /**
+     * Tell the listener that the current request queue can be cancelled.
+     */
+    public void setCancelable();
+
+    /**
      * Sets the current network request channel and date.
      *
      * @param channel the channel that is being fetched

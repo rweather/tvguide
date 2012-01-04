@@ -767,7 +767,10 @@ public class TvChannelCache extends ExternalMediaHandler {
      */
     public boolean bulkFetch(int numDays) {
         boolean fetched = false;
+        boolean requestsWereActive = requestsActive;
         Calendar today = new GregorianCalendar();
+        for (TvNetworkListener listener: networkListeners)
+            listener.setCancelable();
         for (int index = 0; index < activeChannels.size(); ++index) {
             TvChannel channel = activeChannels.get(index);
             for (int day = 0; day < numDays; ++day) {
@@ -778,6 +781,10 @@ public class TvChannelCache extends ExternalMediaHandler {
                     fetched = true;
                 }
             }
+        }
+        if (!fetched && !requestsWereActive) {
+            for (TvNetworkListener listener: networkListeners)
+                listener.endNetworkRequests();
         }
         return fetched;
     }
@@ -1054,6 +1061,13 @@ public class TvChannelCache extends ExternalMediaHandler {
         channelListeners.remove(listener);
     }
 
+    /**
+     * Cancels all pending requests.
+     */
+    public void cancelRequests() {
+        requestQueue = null;
+    }
+    
     /**
      * Loads or reloads channel information.
      */

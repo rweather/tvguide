@@ -283,6 +283,10 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         fetch(channel, tomorrow, date);
     }
 
+    public void setCancelable() {
+        // Nothing to do here.
+    }
+
     public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate) {
         String message = channel.getName(); // + " " + DateFormat.format("E, MMM dd", primaryDate);
         if (progressDialog == null) {

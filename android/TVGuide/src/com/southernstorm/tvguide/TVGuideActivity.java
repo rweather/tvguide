@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -40,17 +41,20 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.Toast;
 
-public class TVGuideActivity extends Activity implements TvNetworkListener, TvBookmarkChangedListener {
+public class TVGuideActivity extends Activity implements TvNetworkListener,
+        TvBookmarkChangedListener {
 
     private GridView channelListView;
     private TvChannelListAdapter channelListAdapter;
     private TvRegionListAdapter regionListAdapter;
     private ProgressDialog progressDialog;
     private ClearChannelHandler clearChannelHandler;
+    private boolean wantCancelable;
+    private boolean isCancelable;
 
     private class ClearChannelHandler extends Handler {
         private String clearId;
-        
+
         @Override
         public void handleMessage(Message msg) {
             String last = TvChannelCache.getInstance().getLastSelectedChannel();
@@ -66,7 +70,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
             sendMessageDelayed(obtainMessage(0), ms);
         }
     };
-    
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,14 +78,15 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
         setContentView(R.layout.channel_list);
 
         clearChannelHandler = new ClearChannelHandler();
-        
-        channelListView = (GridView)findViewById(R.id.channelList);
+
+        channelListView = (GridView) findViewById(R.id.channelList);
         channelListAdapter = new TvChannelListAdapter(this);
-        
+
         regionListAdapter = new TvRegionListAdapter(this);
 
         channelListView.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View v,
+                    int position, long id) {
                 if (parent.getAdapter() instanceof TvChannelListAdapter) {
                     TvChannel channel = channelListAdapter.getChannel(position);
                     selectChannel(channel);
@@ -103,7 +108,8 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
         TvBookmarkManager.getInstance().addContext(this);
         TvBookmarkManager.getInstance().addChangedListener(this);
 
-        // If no region selected yet, then populate the initial channel list with regions.
+        // If no region selected yet, then populate the initial channel list
+        // with regions.
         if (channelListAdapter.getCount() == 0)
             channelListView.setAdapter(regionListAdapter);
         else
@@ -144,8 +150,10 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
     @Override
     public void onBackPressed() {
         if (channelListView.getAdapter() == regionListAdapter) {
-            // Currently showing the region list.  If we already have a region then
-            // assume that the user is pressing Back from "Change Region" and just
+            // Currently showing the region list. If we already have a region
+            // then
+            // assume that the user is pressing Back from "Change Region" and
+            // just
             // return to the channel list.
             if (channelListAdapter.getCount() != 0) {
                 channelListView.setAdapter(channelListAdapter);
@@ -159,7 +167,8 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
     /**
      * Select a specific channel and display the programmes for today.
      * 
-     * @param channel the channel that was selected
+     * @param channel
+     *            the channel that was selected
      */
     private void selectChannel(TvChannel channel) {
         Calendar date = new GregorianCalendar();
@@ -170,11 +179,12 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
         intent.putExtra("channel", channel.toBundle());
         startActivity(intent);
     }
-    
+
     /**
      * Select a specific region and switch to the channels for that region.
      * 
-     * @param regionId the region identifier
+     * @param regionId
+     *            the region identifier
      */
     private void selectRegion(String regionId) {
         TvChannelCache.getInstance().setRegion(regionId);
@@ -184,7 +194,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
         editor.putString("region", regionId);
         editor.commit();
     }
-    
+
     private static final int ITEM_CHANGE_REGION = 1;
     private static final int ITEM_ORGANIZE_BOOKMARKS = 2;
     private static final int ITEM_BULK_DOWNLOAD = 3;
@@ -193,7 +203,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
 
     private static final int DIALOG_BULK_DOWNLOAD = 1;
     private static final int DIALOG_ADD_REMOVE_CHANNELS = 2;
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         if (channelListView.getAdapter() == channelListAdapter) {
@@ -227,8 +237,9 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
         return super.onOptionsItemSelected(item);
     }
 
-    private static final String[] bulkDownloadItems = {"1 day", "2 days", "3 days", "4 days", "5 days"};
-    
+    private static final String[] bulkDownloadItems = { "1 day", "2 days",
+            "3 days", "4 days", "5 days" };
+
     @Override
     public Dialog onCreateDialog(int id, Bundle bundle) {
         AlertDialog.Builder builder;
@@ -237,23 +248,28 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
             final Context context = this;
             builder = new AlertDialog.Builder(this);
             builder.setTitle("Bulk Download");
-            builder.setItems(bulkDownloadItems, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int item) {
-                    // Extra day for 12:00am to 6:00am
-                    if (!TvChannelCache.getInstance().bulkFetch(item + 2)) {
-                        Toast toast = Toast.makeText(context, "Cache is up to date", Toast.LENGTH_SHORT);
-                        toast.show();
-                    }
-                    dialog.dismiss();
-                }
-            });
+            builder.setItems(bulkDownloadItems,
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int item) {
+                            // Extra day for 12:00am to 6:00am
+                            if (!TvChannelCache.getInstance().bulkFetch(
+                                    item + 2)) {
+                                Toast toast = Toast.makeText(context,
+                                        "Cache is up to date",
+                                        Toast.LENGTH_SHORT);
+                                toast.show();
+                            }
+                            dialog.dismiss();
+                        }
+                    });
             return builder.create();
         case DIALOG_ADD_REMOVE_CHANNELS:
             builder = new AlertDialog.Builder(this);
             builder.setTitle("Add/Remove Channels");
-            final List<TvChannel> allChannels = TvChannelCache.getInstance().getAllChannelsInRegion();
-            String[] names = new String [allChannels.size()];
-            boolean[] checked = new boolean [allChannels.size()];
+            final List<TvChannel> allChannels = TvChannelCache.getInstance()
+                    .getAllChannelsInRegion();
+            String[] names = new String[allChannels.size()];
+            boolean[] checked = new boolean[allChannels.size()];
             for (int index = 0; index < allChannels.size(); ++index) {
                 TvChannel channel = allChannels.get(index);
                 names[index] = channel.getName();
@@ -261,19 +277,21 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
                     names[index] += "\n" + channel.getNumbers();
                 checked[index] = channel.getHiddenState() != TvChannel.HIDDEN;
             }
-            builder.setMultiChoiceItems(names, checked, new DialogInterface.OnMultiChoiceClickListener() {
-                public void onClick(DialogInterface dialog, int item, boolean isChecked) {
-                    TvChannel channel = allChannels.get(item);
-                    if (isChecked) {
-                        if (channel.getRegion() != null)
-                            channel.setHiddenState(TvChannel.HIDDEN_BY_REGION);
-                        else
-                            channel.setHiddenState(TvChannel.NOT_HIDDEN);
-                    } else {
-                        channel.setHiddenState(TvChannel.HIDDEN);
-                    }
-                }
-            });
+            builder.setMultiChoiceItems(names, checked,
+                    new DialogInterface.OnMultiChoiceClickListener() {
+                        public void onClick(DialogInterface dialog, int item,
+                                boolean isChecked) {
+                            TvChannel channel = allChannels.get(item);
+                            if (isChecked) {
+                                if (channel.getRegion() != null)
+                                    channel.setHiddenState(TvChannel.HIDDEN_BY_REGION);
+                                else
+                                    channel.setHiddenState(TvChannel.NOT_HIDDEN);
+                            } else {
+                                channel.setHiddenState(TvChannel.HIDDEN);
+                            }
+                        }
+                    });
             AlertDialog dialog = builder.create();
             dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                 public void onDismiss(DialogInterface dialog) {
@@ -282,57 +300,69 @@ public class TVGuideActivity extends Activity implements TvNetworkListener, TvBo
                 }
             });
             return dialog;
-        default: break;
+        default:
+            break;
         }
         return null;
     }
 
-    public void setCurrentNetworkRequest(TvChannel channel, Calendar date, Calendar primaryDate) {
-        String message = channel.getName(); // + " " + DateFormat.format("E, MMM dd", primaryDate);
+    public void setCancelable() {
+        this.wantCancelable = true;
+    }
+
+    private void showProgressDialog(String title, String message) {
+        if (wantCancelable != isCancelable) {
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+                progressDialog = null;
+            }
+        }
         if (progressDialog == null) {
-            progressDialog = ProgressDialog.show
-                (this, "Fetching guide data", message, true);
+            progressDialog = ProgressDialog.show(this, title, message, true,
+                    wantCancelable, new OnCancelListener() {
+                        public void onCancel(DialogInterface dialog) {
+                            TvChannelCache.getInstance().cancelRequests();
+                        }
+                    });
+            isCancelable = wantCancelable;
         } else {
-            progressDialog.setTitle("Fetching guide data");
+            progressDialog.setTitle(title);
             progressDialog.setMessage(message);
             progressDialog.show();
         }
+    }
+
+    public void setCurrentNetworkRequest(TvChannel channel, Calendar date,
+            Calendar primaryDate) {
+        String message = channel.getName(); // + " " +
+                                            // DateFormat.format("E, MMM dd",
+                                            // primaryDate);
+        showProgressDialog("Fetching guide data", message);
     }
 
     public void setCurrentNetworkIconRequest(TvChannel channel) {
         String message = channel.getName();
-        if (progressDialog == null) {
-            progressDialog = ProgressDialog.show
-                (this, "Fetching channel icon", message, true);
-        } else {
-            progressDialog.setTitle("Fetching channel icon");
-            progressDialog.setMessage(message);
-            progressDialog.show();
-        }
+        showProgressDialog("Fetching channel icon", message);
     }
 
     public void setCurrentNetworkListRequest() {
-        if (progressDialog == null) {
-            progressDialog = ProgressDialog.show
-                (this, "Fetching channel list", "", true);
-        } else {
-            progressDialog.setTitle("Fetching channel list");
-            progressDialog.setMessage("");
-            progressDialog.show();
-        }
+        showProgressDialog("Fetching channel list", "");
     }
 
     public void endNetworkRequests() {
         if (progressDialog != null)
             progressDialog.hide();
+        wantCancelable = false;
     }
 
-    public void dataAvailable(TvChannel channel, Calendar date, Calendar primaryDate) {
+    public void dataAvailable(TvChannel channel, Calendar date,
+            Calendar primaryDate) {
     }
 
-    public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate) {
+    public void requestFailed(TvChannel channel, Calendar date,
+            Calendar primaryDate) {
     }
-    
+
     public void bookmarksChanged() {
         channelListAdapter.forceUpdate();
     }
