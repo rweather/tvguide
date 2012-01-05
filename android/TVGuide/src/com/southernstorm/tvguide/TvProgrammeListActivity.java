@@ -394,17 +394,17 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
                 menu.add(ITEM_EDIT_BOOKMARK, 0, 0, "Edit Bookmark");
             else
                 menu.add(ITEM_ADD_BOOKMARK, 0, 0, "Add Bookmark");
-            if (prog.getBookmarkMatch() == TvBookmarkMatch.TickMatch)
+            /* if (prog.getBookmarkMatch() == TvBookmarkMatch.TickMatch)
                 menu.add(ITEM_UNTICK, 0, 0, "Untick Show");
             else
-                menu.add(ITEM_TICK, 0, 0, "Tick Show");
+                menu.add(ITEM_TICK, 0, 0, "Tick Show"); */
         }
+        menu.add(ITEM_ADD_REMINDER, 0, 0, "Add Reminder");
         SubMenu searchMenu = menu.addSubMenu("Web Search");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_GOOGLE, 0, "Google");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_IMDB, 0, "IMDb");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_EPGUIDES, 0, "epguides");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_WIKIPEDIA, 0, "Wikipedia");
-        menu.add(ITEM_ADD_REMINDER, 0, 0, "Add Reminder");
         savedMenuInfo = menuInfo;
     }
     
