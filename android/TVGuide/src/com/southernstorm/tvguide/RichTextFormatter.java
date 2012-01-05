@@ -29,6 +29,7 @@ import android.text.style.ImageSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.UnderlineSpan;
+import android.text.style.URLSpan;
 
 public class RichTextFormatter {
 
@@ -38,6 +39,7 @@ public class RichTextFormatter {
         int start;
         int end;
         int resourceId;
+        String url;
     };
 
     private Context context;
@@ -200,6 +202,26 @@ public class RichTextFormatter {
     }
 
     /**
+     * Adds a URL link to the output at this position.
+     * 
+     * @param url the url for the link
+     * @param text the text for the link
+     */
+    public void addLink(String url, String text) {
+        flushStyle();
+        builder.append(text);
+        int length = builder.length();
+        Style style = new Style();
+        style.textStyle = 0;
+        style.color = 0;
+        style.start = startSpan;
+        style.end = length;
+        style.url = url;
+        styles.add(style);
+        startSpan = length;
+    }
+    
+    /**
      * Converts this formatter to a SpannableString suitable for
      * setting on a TextView.
      *
@@ -213,6 +235,9 @@ public class RichTextFormatter {
                 Drawable drawable = context.getResources().getDrawable(style.resourceId);
                 drawable.setBounds(0, 0, 16, 16);
                 str.setSpan(new ImageSpan(drawable, ImageSpan.ALIGN_BASELINE), style.start, style.end, 0);
+                continue;
+            } else if (style.url != null) {
+                str.setSpan(new URLSpan(style.url), style.start, style.end, 0);
                 continue;
             }
             int textStyle = style.textStyle;

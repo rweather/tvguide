@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <RelativeLayout android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <ImageView android:id="@+id/about_icon"
+	        android:layout_width="48dp"
+	        android:layout_height="48dp"
+	        android:layout_alignParentLeft="true"
+	        android:layout_alignParentTop="true"
+	        android:layout_marginLeft="8dp"
+	        android:layout_marginRight="8dp"
+	        android:layout_marginTop="2dp"
+	        android:layout_marginBottom="2dp"
+	        android:src="@drawable/icon" />
+
+	    <LinearLayout android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_toRightOf="@+id/about_icon"
+	        android:orientation="vertical" >
+
+            <TextView android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/app_name"
+	            android:textStyle="bold" />
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal" >
+    
+	            <TextView android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Version "
+                    android:textStyle="bold" />
+    
+	            <TextView android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:text="@string/app_version"
+	                android:textStyle="bold" />
+	            
+            </LinearLayout>
+            
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Copyright &#169; 2011,2012 Southern Storm Software, Pty Ltd
+" />
+
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="This program comes with ABSOLUTELY NO WARRANTY.  This is free software, and you are welcome to redistribute it under the conditions of the GNU General Public License version 3 or later.
+" />
+
+            <TextView android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Guide data for Australian TV channels is provided by the OzTivo community TV guide under a Creative Commons license.  Please consider joining the OzTivo community to help improve the guide data.
+" />
+
+            <TextView android:id="@+id/about_links"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Links: [[Home Page][http://southern-storm.blogspot.com/]], [[Source Code][https://github.com/rweather/tvguide]], [[Reporting Bugs][https://github.com/rweather/tvguide/issues]], [[GPLv3 License][http://www.gnu.org/licenses/gpl-3.0-standalone.html]], [[OzTivo Community][http://www.oztivo.net/twiki/bin/view/TVGuide/WebHome]]
+" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</ScrollView>

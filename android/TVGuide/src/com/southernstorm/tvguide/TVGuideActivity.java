@@ -200,9 +200,11 @@ public class TVGuideActivity extends Activity implements TvNetworkListener,
     private static final int ITEM_BULK_DOWNLOAD = 3;
     private static final int ITEM_CLEAR_CACHE = 4;
     private static final int ITEM_ADD_REMOVE_CHANNELS = 5;
+    private static final int ITEM_ABOUT = 6;
 
     private static final int DIALOG_BULK_DOWNLOAD = 1;
     private static final int DIALOG_ADD_REMOVE_CHANNELS = 2;
+    private static final int DIALOG_ABOUT = 3;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -214,6 +216,7 @@ public class TVGuideActivity extends Activity implements TvNetworkListener,
         if (TvChannelCache.getInstance().isNetworkingAvailable())
             menu.add(ITEM_BULK_DOWNLOAD, 0, 0, "Bulk Download");
         menu.add(ITEM_CLEAR_CACHE, 0, 0, "Clear Cache");
+        menu.add(ITEM_ABOUT, 0, 0, "About");
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -233,6 +236,8 @@ public class TVGuideActivity extends Activity implements TvNetworkListener,
         } else if (item.getGroupId() == ITEM_ADD_REMOVE_CHANNELS) {
             removeDialog(DIALOG_ADD_REMOVE_CHANNELS);
             showDialog(DIALOG_ADD_REMOVE_CHANNELS);
+        } else if (item.getGroupId() == ITEM_ABOUT) {
+            showDialog(DIALOG_ABOUT);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -300,6 +305,9 @@ public class TVGuideActivity extends Activity implements TvNetworkListener,
                 }
             });
             return dialog;
+        case DIALOG_ABOUT:
+            AboutDialog about = new AboutDialog(this);
+            return about;
         default:
             break;
         }
