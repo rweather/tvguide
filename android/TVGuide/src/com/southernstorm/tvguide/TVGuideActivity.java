@@ -208,36 +208,49 @@ public class TVGuideActivity extends Activity implements TvNetworkListener,
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (channelListView.getAdapter() == channelListAdapter) {
-            menu.add(ITEM_CHANGE_REGION, 0, 0, "Change Region");
-            menu.add(ITEM_ADD_REMOVE_CHANNELS, 0, 0, "Add/Remove Channels");
-        }
-        menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks");
-        if (TvChannelCache.getInstance().isNetworkingAvailable())
-            menu.add(ITEM_BULK_DOWNLOAD, 0, 0, "Bulk Download");
-        menu.add(ITEM_CLEAR_CACHE, 0, 0, "Clear Cache");
-        menu.add(ITEM_ABOUT, 0, 0, "About");
+        menu.add(0, ITEM_CHANGE_REGION, 0, "Change Region");
+        menu.add(0, ITEM_ADD_REMOVE_CHANNELS, 0, "Add/Remove Channels");
+        menu.add(0, ITEM_ORGANIZE_BOOKMARKS, 0, "Organize Bookmarks");
+        menu.add(0, ITEM_BULK_DOWNLOAD, 0, "Bulk Download");
+        menu.add(0, ITEM_CLEAR_CACHE, 0, "Clear Cache");
+        menu.add(0, ITEM_ABOUT, 0, "About");
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isChannelList = (channelListView.getAdapter() == channelListAdapter);
+        menu.findItem(ITEM_CHANGE_REGION).setVisible(isChannelList);
+        menu.findItem(ITEM_ADD_REMOVE_CHANNELS).setVisible(isChannelList);
+        menu.findItem(ITEM_ORGANIZE_BOOKMARKS).setVisible(isChannelList);
+        menu.findItem(ITEM_BULK_DOWNLOAD).setVisible(isChannelList && TvChannelCache.getInstance().isNetworkingAvailable());
+        menu.findItem(ITEM_CLEAR_CACHE).setVisible(isChannelList);
+        return super.onPrepareOptionsMenu(menu);
+    }
+    
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getGroupId() == ITEM_CHANGE_REGION) {
+        switch (item.getItemId()) {
+        case ITEM_CHANGE_REGION:
             channelListView.setAdapter(regionListAdapter);
             return true;
-        } else if (item.getGroupId() == ITEM_ORGANIZE_BOOKMARKS) {
+        case ITEM_ORGANIZE_BOOKMARKS:
             Intent intent = new Intent(this, TvBookmarkListActivity.class);
             startActivity(intent);
             return true;
-        } else if (item.getGroupId() == ITEM_BULK_DOWNLOAD) {
+        case ITEM_BULK_DOWNLOAD:
             showDialog(DIALOG_BULK_DOWNLOAD);
-        } else if (item.getGroupId() == ITEM_CLEAR_CACHE) {
+            return true;
+        case ITEM_CLEAR_CACHE:
             TvChannelCache.getInstance().clear();
-        } else if (item.getGroupId() == ITEM_ADD_REMOVE_CHANNELS) {
+            return true;
+        case ITEM_ADD_REMOVE_CHANNELS:
             removeDialog(DIALOG_ADD_REMOVE_CHANNELS);
             showDialog(DIALOG_ADD_REMOVE_CHANNELS);
-        } else if (item.getGroupId() == ITEM_ABOUT) {
+            return true;
+        case ITEM_ABOUT:
             showDialog(DIALOG_ABOUT);
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
