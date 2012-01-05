@@ -56,6 +56,10 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.XmlResourceParser;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -73,6 +77,7 @@ public class TvChannelCache extends ExternalMediaHandler {
     private File iconCacheDir;
     private Random rand;
     private boolean debug;
+    private boolean debugLoaded;
     private List<TvChannel> activeChannels;
     private Map<String, TvChannel> channels;
     private String region;
@@ -99,10 +104,6 @@ public class TvChannelCache extends ExternalMediaHandler {
         this.channelListeners = new ArrayList<TvChannelChangedListener>();
     }
 
-    void setDebug(boolean value) {
-        debug = value;
-    }
-
     /**
      * Gets the global instance of the channel cache.
      * 
@@ -113,7 +114,6 @@ public class TvChannelCache extends ExternalMediaHandler {
             instance = new TvChannelCache();
             instance.setServiceName("OzTivo");
             instance.setServiceUrl("http://xml.oztivo.net/xmltv/datalist.xml.gz");
-            instance.setDebug(true);    // FIXME: remove before releasing
         }
         return instance;
     }
@@ -156,6 +156,21 @@ public class TvChannelCache extends ExternalMediaHandler {
             if (region != null && region.equals(""))
                 region = null;
         }
+
+        // Determine if the application was built as debug or release to set the debug flag.
+        if (!debugLoaded) {
+            debugLoaded = true;
+            debug = false;
+            PackageManager manager = context.getPackageManager();
+            try {
+                PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
+                if ((info.applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0)
+                    debug = true;
+            } catch (NameNotFoundException e) {
+            }
+        }
+
+        // Load the channels.
         if (channels.size() == 0 && region != null)
             loadChannels();
     }
