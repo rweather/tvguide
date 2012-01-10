@@ -212,9 +212,6 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     @Override
     protected void onResume() {
         super.onResume();
-
-        //SharedPreferences prefs = getPreferences(0);
-        // TODO
     }
 
     /** Save preferences when the activity is paused */
@@ -226,10 +223,6 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         }
 
         super.onPause();
-
-        SharedPreferences.Editor editor = getPreferences(0).edit();
-        // TODO
-        editor.commit();
     }
 
     @Override
@@ -360,7 +353,6 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
     }
 
     public void requestFailed(TvChannel channel, Calendar date, Calendar primaryDate) {
-        // TODO
     }
 
     private static final int ITEM_WEB_SEARCH = 1;
