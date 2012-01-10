@@ -27,6 +27,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.graphics.Color;
+
 public class Utils {
 
     /**
@@ -313,5 +315,31 @@ public class Utils {
             return c1 == c2;
         else
             return c1.equals(c2);
+    }
+    
+    /**
+     * Lighten a color by a specific factor.
+     * 
+     * @param color the color to lighten
+     * @param factor the factor to apply; e.g. 150 makes the color 50% brighter, 50
+     * makes the color 50% darker, 100 makes no change.
+     * 
+     * @return the lightened version of the color
+     */
+    public static int lightenColor(int color, int factor) {
+        float[] hsv = new float [3];
+        Color.colorToHSV(color, hsv);
+        float s = hsv[1];
+        float v = hsv[2] * factor / 100.0f;
+        if (v > 1.0f) {
+            // Value has overflowed, so adjust the saturation instead.
+            s -= v - 1.0f;
+            if (s < 0)
+                s = 0;
+            v = 1.0f;
+        }
+        hsv[1] = s;
+        hsv[2] = v;
+        return Color.HSVToColor(hsv);
     }
 }

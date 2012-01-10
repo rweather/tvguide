@@ -343,7 +343,7 @@ public class TvProgramme {
             break;
         case Overrun:
         case Underrun:
-            formatter.setColor(bookmark.getColor()); // TODO: make the color lighter
+            formatter.setColor(Utils.lightenColor(bookmark.getColor(), 150));
             formatter.setBold(true);
             break;
         case TitleMatch:
