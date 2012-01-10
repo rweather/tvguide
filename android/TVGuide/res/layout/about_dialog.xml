@@ -65,7 +65,7 @@
             <TextView android:id="@+id/about_links"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Links: [[Home Page][http://southern-storm.blogspot.com/]], [[Source Code][https://github.com/rweather/tvguide]], [[Reporting Bugs][https://github.com/rweather/tvguide/issues]], [[GPLv3 License][http://www.gnu.org/licenses/gpl-3.0-standalone.html]], [[OzTivo Community][http://www.oztivo.net/twiki/bin/view/TVGuide/WebHome]]
+                android:text="Links: [[Home Page][http://southern-storm.blogspot.com/search/label/tvguide]], [[Source Code][https://github.com/rweather/tvguide]], [[Reporting Bugs][https://github.com/rweather/tvguide/issues]], [[GPLv3 License][http://www.gnu.org/licenses/gpl-3.0-standalone.html]], [[OzTivo Community][http://www.oztivo.net/twiki/bin/view/TVGuide/WebHome]]
 " />
 
         </LinearLayout>
