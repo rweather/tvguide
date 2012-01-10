@@ -199,6 +199,45 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
         return false;
     }
 
+    private TvBookmarkMatch getDisplayMatch(int index) {
+        TvProgramme prog = programmes.get(index);
+        TvProgramme prev = (index > 0 ? programmes.get(index - 1) : null);
+        TvProgramme next = (index < (programmes.size() - 1) ? programmes.get(index + 1) : null);
+        TvBookmarkMatch result = prog.getBookmarkMatch();
+        TvBookmark bookmark = prog.getBookmark();
+
+        if (result == TvBookmarkMatch.ShouldMatch) {
+            // Suppress failed matches either side of a successful match,
+            // and remove redundant failed matches.
+            if (prev != null && prev.getBookmark() == bookmark) {
+                if (prev.getBookmarkMatch() != TvBookmarkMatch.NoMatch &&
+                        prev.getBookmarkMatch() != TvBookmarkMatch.TickMatch)
+                    result = TvBookmarkMatch.NoMatch;
+            } else if (next != null && next.getBookmark() == bookmark) {
+                if (next.getBookmarkMatch() != TvBookmarkMatch.ShouldMatch &&
+                        next.getBookmarkMatch() != TvBookmarkMatch.NoMatch &&
+                        next.getBookmarkMatch() != TvBookmarkMatch.TickMatch)
+                    result = TvBookmarkMatch.NoMatch;
+            }
+        } else if (result == TvBookmarkMatch.TitleMatch) {
+            // Partial match immediately before or after a full
+            // match is labelled as an underrun or overrun.
+            // Probably a double episode where one of the episodes
+            // falls outside the normal bookmark range.
+            if (prev != null && prev.getStop().equals(prog.getStart()) &&
+                    prev.getBookmarkMatch() == TvBookmarkMatch.FullMatch &&
+                    prev.getBookmark() == bookmark) {
+                result = TvBookmarkMatch.Overrun;
+            } else if (next != null && next.getStart().equals(prog.getStop()) &&
+                       next.getBookmarkMatch() == TvBookmarkMatch.FullMatch &&
+                       next.getBookmark() == bookmark) {
+                result = TvBookmarkMatch.Underrun;
+            }
+        }
+
+        return result;
+    }
+
     public View getGroupView(int position, boolean isExpanded, View convertView, ViewGroup parent) {
         GroupViewDetails view = null;
         if (convertView != null) {
@@ -240,7 +279,7 @@ public class TvProgrammeListAdapter implements ExpandableListAdapter {
                 view.time.setBackgroundResource(timeColorNight);
             view.time.setText(Utils.formatTimeProgrammeList(timeval));
         }
-        view.short_desc.setText(prog.getShortDescription(context));
+        view.short_desc.setText(prog.getShortDescription(context, getDisplayMatch(position)));
         if (isExpanded)
             view.long_desc.setText(prog.getLongDescription(context));
         return convertView;

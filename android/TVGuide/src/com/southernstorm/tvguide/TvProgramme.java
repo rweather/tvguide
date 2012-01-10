@@ -133,16 +133,6 @@ public class TvProgramme {
     }
     
     /**
-     * Gets the match type to display.  This may be slightly different than the
-     * actual match based on the programmes before and after this one.
-     * 
-     * @return the type of match to display the programme with
-     */
-    private TvBookmarkMatch getDisplayMatch() {
-        return match;
-    }
-
-    /**
      * Loads the programme details from an XML input stream.
      *
      * When this method exits, the parser will be positioned just after
@@ -330,11 +320,13 @@ public class TvProgramme {
      * Returns the short description of the programme to display in two lines.
      * 
      * @param context the application context for resolving images
+     * @param match match type to use to render the programme, which may be different
+     * than the actual match based on the next or previous programme.
+     *
      * @return the short description as a formatted SpannableString
      */
-    public SpannableString getShortDescription(Context context) {
+    public SpannableString getShortDescription(Context context, TvBookmarkMatch match) {
         RichTextFormatter formatter = new RichTextFormatter(context);
-        TvBookmarkMatch match = getDisplayMatch();
         if (match == TvBookmarkMatch.TickMatch)
             formatter.addImage(R.drawable.tick);
         else if (bookmark != null && !bookmark.isOnAir() && match != TvBookmarkMatch.ShouldMatch)
