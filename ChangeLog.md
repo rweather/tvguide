@@ -1,5 +1,25 @@
 ## Change log
 
+### 0.1.6
+
+#### Desktop version
+
+* Restrict bookmark colors to a smaller set to make selection quicker.
+* Migrate bookmarks between regions (e.g. setting a bookmark on
+  ABC-Qld will also match shows on ABC-Can).
+* Export/import of bookmarks in XML format.
+* Add "Movies Only" checkbox to advanced search.
+
+#### Android version
+
+* First usuable version for Android 2.2+, incorporating a channel
+  list and 5-day programme view.
+* Bookmark matching equivalent to desktop version.
+* Bulk download for fetching up to 5 days of XMLTV data when connected
+  to cheap carriers, or for offline use.
+* Programmes can be added to the device's main calendar application
+  as a "reminder".
+
 ### 0.1.5
 
 * Fix a crash that sometimes happened for bookmarked shows
