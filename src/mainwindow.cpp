@@ -647,12 +647,36 @@ void MainWindow::searchFilterChanged(const QString &text)
     selectView();
 }
 
+static void addCreditOrCategory(QLineEdit *edit, const QString &text)
+{
+    QString prev = edit->text();
+    if (prev.isEmpty()) {
+        edit->setText(text);
+    } else {
+        QString newText = prev + QLatin1Char(',') + text;
+        QStringList list = TvProgrammeFilter::splitAndTrim(newText);
+        qSort(list);
+        for (int index = 0; index < list.size() - 1; ) {
+            if (list.at(index) == list.at(index + 1))
+                list.removeAt(index);
+            else
+                ++index;
+        }
+        if (list.isEmpty())
+            edit->setText(QString());
+        else if (list.size() == 1)
+            edit->setText(list.at(0));
+        else
+            edit->setText(list.join(QLatin1String(",")));
+    }
+}
+
 void MainWindow::selectSearchCategory()
 {
     CategorySelector selector(this);
     selector.setCategories(m_channelList->categories());
     if (selector.exec() == QDialog::Accepted)
-        categoryEdit->setText(selector.selectedCategory());
+        addCreditOrCategory(categoryEdit, selector.selectedCategory());
 }
 
 void MainWindow::selectSearchCredit()
@@ -661,7 +685,7 @@ void MainWindow::selectSearchCredit()
     selector.setWindowTitle(tr("Select Credit"));
     selector.setCategories(m_channelList->credits());
     if (selector.exec() == QDialog::Accepted)
-        creditEdit->setText(selector.selectedCategory());
+        addCreditOrCategory(creditEdit, selector.selectedCategory());
 }
 
 void MainWindow::toggleAdvancedSearch(bool value)

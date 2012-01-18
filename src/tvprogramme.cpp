@@ -804,6 +804,15 @@ bool TvProgramme::containsSearchString(const QString &str, SearchType type) cons
     return false;
 }
 
+bool TvProgramme::containsSearchString(const QStringList &list, SearchType type) const
+{
+    for (int index = 0; index < list.size(); ++index) {
+        if (containsSearchString(list.at(index), type))
+            return true;
+    }
+    return false;
+}
+
 bool TvProgramme::containsSearch(const QString &str, const QStringList &within) const
 {
     for (int index = 0; index < within.size(); ++index) {

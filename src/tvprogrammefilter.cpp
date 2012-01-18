@@ -37,12 +37,12 @@ bool TvProgrammeFilter::match(const TvProgramme *prog) const
         matchDescription = prog->containsSearchString(m_description, TvProgramme::SearchDescription);
         haveCriteria = true;
     }
-    if (!m_credit.isEmpty()) {
-        matchCredit = prog->containsSearchString(m_credit, TvProgramme::SearchCredits);
+    if (!m_credits.isEmpty()) {
+        matchCredit = prog->containsSearchString(m_credits, TvProgramme::SearchCredits);
         haveCriteria = true;
     }
-    if (!m_category.isEmpty()) {
-        matchCategory = prog->containsSearchString(m_category, TvProgramme::SearchCategories);
+    if (!m_categories.isEmpty()) {
+        matchCategory = prog->containsSearchString(m_categories, TvProgramme::SearchCategories);
         haveCriteria = true;
     }
     if (m_moviesOnly) {
@@ -71,7 +71,31 @@ bool TvProgrammeFilter::isDefault() const
     return m_title.isEmpty() &&
            m_episodeName.isEmpty() &&
            m_description.isEmpty() &&
-           m_credit.isEmpty() &&
-           m_category.isEmpty() &&
+           m_credits.isEmpty() &&
+           m_categories.isEmpty() &&
            !m_moviesOnly;
+}
+
+QStringList TvProgrammeFilter::splitAndTrim(const QString &str)
+{
+    QStringList list = str.split(QLatin1Char(','));
+    QStringList list2;
+    foreach (QString s, list) {
+        QString s2 = s.trimmed();
+        if (!s2.isEmpty())
+            list2.append(s2);
+    }
+    return list2;
+}
+
+void TvProgrammeFilter::setCredit(const QString &credit)
+{
+    m_credit = credit;
+    m_credits = splitAndTrim(credit);
+}
+
+void TvProgrammeFilter::setCategory(const QString &category)
+{
+    m_category = category;
+    m_categories = splitAndTrim(category);
 }

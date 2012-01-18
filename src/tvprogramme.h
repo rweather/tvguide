@@ -117,6 +117,7 @@ public:
     };
 
     bool containsSearchString(const QString &str, SearchType type) const;
+    bool containsSearchString(const QStringList &list, SearchType type) const;
 
     void updateCategorySet(QSet<QString> &set) const;
     void updateCreditSet(QSet<QString> &set) const;

@@ -42,10 +42,10 @@ public:
     void setDescription(const QString &description) { m_description = description; }
 
     QString credit() const { return m_credit; }
-    void setCredit(const QString &credit) { m_credit = credit; }
+    void setCredit(const QString &credit);
 
     QString category() const { return m_category; }
-    void setCategory(const QString &category) { m_category = category; }
+    void setCategory(const QString &category);
 
     CombineMode combineMode() const { return m_combineMode; }
     void setCombineMode(CombineMode combineMode) { m_combineMode = combineMode; }
@@ -57,12 +57,16 @@ public:
 
     bool isDefault() const;
 
+    static QStringList splitAndTrim(const QString &str);
+
 private:
     QString m_title;
     QString m_episodeName;
     QString m_description;
     QString m_credit;
+    QStringList m_credits;
     QString m_category;
+    QStringList m_categories;
     CombineMode m_combineMode;
     bool m_moviesOnly;
 };
