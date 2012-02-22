@@ -175,9 +175,10 @@
     <number system="digital">44</number>
   </channel>
 
-  <channel id="7CEN" common-id="Seven">
+  <channel id="7CEN" region="regional-nt" common-id="Seven">
     <display-name lang="en">Seven Central</display-name>
     <icon src="http://barstool.ash.ms/tv-channel-icons/icons-plain-plain/png/seven.png"/>
+    <number system="digital">6</number>
   </channel>
 
   <channel id="7TWO-ACT" region="act" common-id="7TWO">
@@ -244,6 +245,12 @@
     <number system="digital">60</number>
     <number system="digital">70</number>
     <number system="foxtel">207</number>
+  </channel>
+
+  <channel id="A&amp;E">
+    <display-name lang="en">A&amp;E</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/607.png"/>
+    <number system="foxtel">607</number>
   </channel>
 
   <channel id="A-PAC">
@@ -659,7 +666,8 @@
 
   <channel id="ESNEWS">
     <display-name lang="en">European Sports News</display-name>
-    <todo/>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/514.png"/>
+    <number system="foxtel">514</number>
   </channel>
 
   <channel id="ESPN">
@@ -839,6 +847,42 @@
     <todo/>
   </channel>
 
+  <channel id="FFC">
+    <display-name lang="en">Fox Footy Channel</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/504.png"/>
+    <number system="foxtel">504</number>
+  </channel>
+
+  <channel id="FFC-NSW">
+    <display-name lang="en">Fox Footy Channel NSW</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/504.png"/>
+    <number system="foxtel">504</number>
+  </channel>
+
+  <channel id="FFC-Qld">
+    <display-name lang="en">Fox Footy Channel Qld</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/504.png"/>
+    <number system="foxtel">504</number>
+  </channel>
+
+  <channel id="FFC-SA">
+    <display-name lang="en">Fox Footy Channel SA</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/504.png"/>
+    <number system="foxtel">504</number>
+  </channel>
+
+  <channel id="FFC-Vic">
+    <display-name lang="en">Fox Footy Channel Victoria ACT NT</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/504.png"/>
+    <number system="foxtel">504</number>
+  </channel>
+
+  <channel id="FFC-WA">
+    <display-name lang="en">Fox Footy Channel WA</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/504.png"/>
+    <number system="foxtel">504</number>
+  </channel>
+
   <channel id="FMC">
     <display-name lang="en">Family Movie Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/413.png"/>
@@ -907,6 +951,12 @@
     <display-name lang="en">Fuel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/516.png"/>
     <number system="foxtel">516</number>
+  </channel>
+
+  <channel id="FX">
+    <display-name lang="en">FX</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/123.png"/>
+    <number system="foxtel">123</number>
   </channel>
 
   <channel id="GEM-ACT" region="act" common-id="GEM">
@@ -983,9 +1033,10 @@
     <todo/>
   </channel>
 
-  <channel id="GWN-WA">
+  <channel id="GWN-WA" region="regional-wa" common-id="Seven">
     <display-name lang="en">Golden West Network</display-name>
-    <todo/>
+    <icon src="http://upload.wikimedia.org/wikipedia/commons/thumb/3/38/GWN7_logo.svg/200px-GWN7_logo.svg.png"/>
+    <number system="digital">6</number>
   </channel>
 
   <channel id="H&amp;L">
@@ -1204,7 +1255,7 @@
   </channel>
 
   <channel id="NGEO+2">
-    <display-name lang="en">National Geographic Channel</display-name>
+    <display-name lang="en">National Geographic Channel +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/622.png"/>
     <number system="foxtel">622</number>
   </channel>
@@ -1851,14 +1902,16 @@
     <number system="foxtel">522</number>
   </channel>
 
-  <channel id="TVS">
+  <channel id="TVS" region="sydney">
     <display-name lang="en">TVS Sydney</display-name>
-    <todo/>
+    <icon src="http://upload.wikimedia.org/wikipedia/commons/thumb/d/df/TVS_Logo.svg/200px-TVS_Logo.svg.png"/>
+    <number system="digital">44</number>
   </channel>
 
   <channel id="TVSN">
     <display-name lang="en">Television Shopping Network</display-name>
-    <todo/>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/176.png"/>
+    <number system="foxtel">176</number>
   </channel>
 
   <channel id="TWC">
@@ -1965,7 +2018,7 @@
   </channel>
 
   <channel id="W+2">
-    <display-name lang="en">W for Women</display-name>
+    <display-name lang="en">W for Women +2</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/155.png"/>
     <number system="foxtel">155</number>
   </channel>
