@@ -383,16 +383,16 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         TvProgramme prog = programmeForMenuItem(info, groupId);
         if (prog != null) {
             if (prog.getBookmark() != null)
-                menu.add(ITEM_EDIT_BOOKMARK, 0, 0, "Edit Bookmark");
+                menu.add(ITEM_EDIT_BOOKMARK, 0, 0, "Edit Bookmark").setIcon(R.drawable.menu_add_bookmark);
             else
-                menu.add(ITEM_ADD_BOOKMARK, 0, 0, "Add Bookmark");
+                menu.add(ITEM_ADD_BOOKMARK, 0, 0, "Add Bookmark").setIcon(R.drawable.menu_add_bookmark);
             /* if (prog.getBookmarkMatch() == TvBookmarkMatch.TickMatch)
-                menu.add(ITEM_UNTICK, 0, 0, "Untick Show");
+                menu.add(ITEM_UNTICK, 0, 0, "Untick Show").setIcon(R.drawable.menu_add_tick);
             else
-                menu.add(ITEM_TICK, 0, 0, "Tick Show"); */
+                menu.add(ITEM_TICK, 0, 0, "Tick Show").setIcon(R.drawable.menu_add_tick); */
         }
-        menu.add(ITEM_ADD_REMINDER, 0, 0, "Add Reminder");
-        SubMenu searchMenu = menu.addSubMenu("Web Search");
+        menu.add(ITEM_ADD_REMINDER, 0, 0, "Add Reminder").setIcon(R.drawable.menu_add_reminder);
+        SubMenu searchMenu = menu.addSubMenu("Web Search").setIcon(R.drawable.menu_web_search);
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_GOOGLE, 0, "Google");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_IMDB, 0, "IMDb");
         searchMenu.add(ITEM_WEB_SEARCH, ITEM_WEB_SEARCH_EPGUIDES, 0, "epguides");
@@ -591,12 +591,12 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks");
-        menu.add(ITEM_SCROLL_TO_NOW, 0, 0, "Now");
-        menu.add(ITEM_SCROLL_TO_MORNING, 0, 0, "Morning");
-        menu.add(ITEM_SCROLL_TO_AFTERNOON, 0, 0, "Afternoon");
-        menu.add(ITEM_SCROLL_TO_NIGHT, 0, 0, "Night");
-        menu.add(ITEM_SCROLL_TO_LATE_NIGHT, 0, 0, "Late Night");
+        menu.add(ITEM_ORGANIZE_BOOKMARKS, 0, 0, "Organize Bookmarks").setIcon(R.drawable.menu_organize_bookmarks);
+        menu.add(ITEM_SCROLL_TO_NOW, 0, 0, "Now").setIcon(R.drawable.menu_now);
+        menu.add(ITEM_SCROLL_TO_MORNING, 0, 0, "Morning").setIcon(R.drawable.menu_morning);
+        menu.add(ITEM_SCROLL_TO_AFTERNOON, 0, 0, "Afternoon").setIcon(R.drawable.menu_afternoon);
+        menu.add(ITEM_SCROLL_TO_NIGHT, 0, 0, "Night").setIcon(R.drawable.menu_night);
+        menu.add(ITEM_SCROLL_TO_LATE_NIGHT, 0, 0, "Late Night").setIcon(R.drawable.menu_late_night);
         return super.onCreateOptionsMenu(menu);
     }
 

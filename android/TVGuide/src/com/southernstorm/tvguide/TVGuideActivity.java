@@ -208,12 +208,12 @@ public class TVGuideActivity extends Activity implements TvNetworkListener,
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(0, ITEM_CHANGE_REGION, 0, "Change Region");
-        menu.add(0, ITEM_ADD_REMOVE_CHANNELS, 0, "Add/Remove Channels");
-        menu.add(0, ITEM_ORGANIZE_BOOKMARKS, 0, "Organize Bookmarks");
-        menu.add(0, ITEM_BULK_DOWNLOAD, 0, "Bulk Download");
-        menu.add(0, ITEM_CLEAR_CACHE, 0, "Clear Cache");
-        menu.add(0, ITEM_ABOUT, 0, "About");
+        menu.add(0, ITEM_CHANGE_REGION, 0, "Change Region").setIcon(R.drawable.menu_change_region);
+        menu.add(0, ITEM_ADD_REMOVE_CHANNELS, 0, "Add/Remove Channels").setIcon(R.drawable.menu_add_remove_or_edit);
+        menu.add(0, ITEM_ORGANIZE_BOOKMARKS, 0, "Organize Bookmarks").setIcon(R.drawable.menu_organize_bookmarks);
+        menu.add(0, ITEM_BULK_DOWNLOAD, 0, "Bulk Download").setIcon(R.drawable.menu_bulk_download);
+        menu.add(0, ITEM_CLEAR_CACHE, 0, "Clear Cache").setIcon(R.drawable.menu_clear_cache);
+        menu.add(0, ITEM_ABOUT, 0, "About").setIcon(R.drawable.menu_about);
         return super.onCreateOptionsMenu(menu);
     }
 

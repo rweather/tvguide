@@ -79,14 +79,17 @@ public class TvBookmarkListActivity extends Activity {
     private static final int ITEM_NEW_BOOKMARK = 1;
     private static final int ITEM_EDIT_BOOKMARK = 2;
     private static final int ITEM_DELETE_BOOKMARK = 3;
+    private static final int ITEM_ABOUT = 4;
 
     private static final int DIALOG_NEW_BOOKMARK = 10;
     private static final int DIALOG_EDIT_BOOKMARK = 11;
     private static final int DIALOG_DELETE_BOOKMARK = 12;
+    private static final int DIALOG_ABOUT = 13;
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.add(ITEM_NEW_BOOKMARK, 0, 0, "New Bookmark");
+        menu.add(ITEM_NEW_BOOKMARK, 0, 0, "New Bookmark").setIcon(R.drawable.menu_add_bookmark);
+        menu.add(ITEM_ABOUT, 0, 0, "About").setIcon(R.drawable.menu_about);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -94,6 +97,9 @@ public class TvBookmarkListActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getGroupId() == ITEM_NEW_BOOKMARK) {
             newBookmark();
+            return true;
+        } else if (item.getGroupId() == ITEM_ABOUT) {
+            showDialog(DIALOG_ABOUT);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -145,7 +151,9 @@ public class TvBookmarkListActivity extends Activity {
 
     @Override
     public Dialog onCreateDialog(int id, Bundle bundle) {
-        long bookmarkId = bundle.getLong("bookmark_id", -1L);
+        long bookmarkId = 0;
+        if (bundle != null)
+            bookmarkId = bundle.getLong("bookmark_id", -1L);
         final TvBookmark bookmark = TvBookmarkManager.getInstance().findBookmarkById(bookmarkId);
         EditBookmarkDialog dialog;
         switch (id) {
@@ -192,6 +200,9 @@ public class TvBookmarkListActivity extends Activity {
                        }
                    });
             return builder.create();
+        case DIALOG_ABOUT:
+            AboutDialog about = new AboutDialog(this);
+            return about;
         default: break;
         }
         return null;
