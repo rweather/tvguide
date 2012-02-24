@@ -89,9 +89,11 @@ public class TvChannelCache extends ExternalMediaHandler {
     private boolean sdLoaded = false;
     private boolean mainListLoaded = false;
     private boolean mainListFetching = false;
+    private boolean mainListUnchanged = false;
     private boolean haveDataForDecls = false;
     private String lastSelectedChannel;
     private static TvChannelCache instance = null;
+    private Calendar mainListLastMod = null;
 
     private TvChannelCache() {
         this.serviceName = "";
@@ -1055,8 +1057,12 @@ public class TvChannelCache extends ExternalMediaHandler {
         } else if (info.isChannelListFetch()) {
             // Main channel list has been fetched - reload the channels.
             mainListFetching = false;
-            if (info.success)
+            if (info.success) {
+                Calendar lastmod = channelDataLastModified(null, null);
+                if (lastmod != null && mainListLastMod != null && lastmod.equals(mainListLastMod))
+                    mainListUnchanged = true;   // Break infinite loop: don't try to fetch again.
                 loadChannels();
+            }
         }
     }
 
@@ -1135,8 +1141,9 @@ public class TvChannelCache extends ExternalMediaHandler {
             InputStream inputStream = null;
             Calendar lastmod = channelDataLastModified(null, null);
             Calendar now = new GregorianCalendar();
-            if (lastmod == null || (now.getTimeInMillis() - lastmod.getTimeInMillis()) < (24 * 60 * 60 * 1000))
+            if (mainListUnchanged || lastmod == null || (now.getTimeInMillis() - lastmod.getTimeInMillis()) < (24 * 60 * 60 * 1000))
                 inputStream = openChannelData(null, null); // Reuse previous list if less than 24 hours old
+            mainListUnchanged = false;
             if (inputStream != null) {
                 Calendar start = new GregorianCalendar();
                 try {
@@ -1160,6 +1167,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             } else if (!mainListFetching && isNetworkingAvailable()) {
                 // Fetch the channel list for the first time.
                 mainListFetching = true;
+                mainListLastMod = lastmod;
                 fetchChannelList();
             }
         }
