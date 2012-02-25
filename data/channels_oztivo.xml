@@ -955,7 +955,7 @@
 
   <channel id="FX">
     <display-name lang="en">FX</display-name>
-    <icon src="http://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/FX_International_logo.svg/200px-FX_International_logo.svg.png"/>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/123.png"/>
     <number system="foxtel">123</number>
   </channel>
 
