@@ -2,8 +2,8 @@
 <resources>
     <!-- Note: also update versionCode and versionName in the manifest -->
     <string name="app_name">Southern Storm TV</string>
-    <string name="app_version">0.1.7</string>
-    <string name="user_agent">qtvguide_android/0.1.7</string>
+    <string name="app_version">0.1.8</string>
+    <string name="user_agent">qtvguide_android/0.1.8</string>
 
     <string name="organize_bookmarks">Organize Bookmarks</string>
         
