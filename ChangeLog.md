@@ -1,5 +1,24 @@
 ## Change log
 
+### 0.1.7
+
+#### Desktop version
+
+* Comma-separated OR lists of categories and credits in searches.
+
+#### Android version
+
+* New graphic art for menu icons.
+* Prevent an infinite loop when fetching the channel list when it
+  hasn't changed on the server.
+* Make sure that the channel list is refreshed when the app is
+  restarted after running in the background.
+
+#### Both versions
+
+* Add details for new Australian TV channels.
+* New graphic art for application icon.
+
 ### 0.1.6
 
 #### Desktop version
