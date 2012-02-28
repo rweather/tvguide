@@ -94,6 +94,7 @@ public class TvChannelCache extends ExternalMediaHandler {
     private String lastSelectedChannel;
     private static TvChannelCache instance = null;
     private Calendar mainListLastMod = null;
+    private Calendar mainListLastFetched = null;
 
     private TvChannelCache() {
         this.serviceName = "";
@@ -178,8 +179,15 @@ public class TvChannelCache extends ExternalMediaHandler {
     }
     
     public void addContext(Context context, boolean forceMainListRefresh) {
-        mainListLoaded = false;
         addContext(context);
+        if (forceMainListRefresh && mainListLoaded && !mainListFetching && mainListLastFetched != null) {
+            Calendar now = new GregorianCalendar();
+            long diff = now.getTimeInMillis() - mainListLastFetched.getTimeInMillis();
+            if (diff > (60 * 60 * 1000)) {      // 1 hour
+                mainListLoaded = false;
+                loadChannels();
+            }
+        }
     }
 
     /**
@@ -1141,6 +1149,7 @@ public class TvChannelCache extends ExternalMediaHandler {
             InputStream inputStream = null;
             Calendar lastmod = channelDataLastModified(null, null);
             Calendar now = new GregorianCalendar();
+            mainListLastFetched = now;
             if (mainListUnchanged || lastmod == null || (now.getTimeInMillis() - lastmod.getTimeInMillis()) < (24 * 60 * 60 * 1000))
                 inputStream = openChannelData(null, null); // Reuse previous list if less than 24 hours old
             mainListUnchanged = false;
@@ -1430,5 +1439,21 @@ public class TvChannelCache extends ExternalMediaHandler {
         if (info == null)
             return false;
         return info.isAvailable() && info.isConnected();
+    }
+
+    public enum LastActivity {
+        DefaultActivity,
+        ProgrammeListActivity,
+        BookmarkListActivity
+    }
+
+    private LastActivity lastActivity = LastActivity.DefaultActivity;
+
+    public LastActivity getLastActivity() {
+        return lastActivity;
+    }
+
+    public void setLastActivity(LastActivity activity) {
+        lastActivity = activity;
     }
 }

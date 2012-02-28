@@ -71,6 +71,7 @@ public class TvBookmarkListActivity extends Activity {
     @Override
     protected void onStop() {
         TvChannelCache.getInstance().removeContext(this);
+        TvChannelCache.getInstance().setLastActivity(TvChannelCache.LastActivity.BookmarkListActivity);
         TvBookmarkManager.getInstance().removeContext(this);
         bookmarkListAdapter.detach();
         super.onStop();

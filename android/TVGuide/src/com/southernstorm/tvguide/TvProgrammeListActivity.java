@@ -199,6 +199,7 @@ public class TvProgrammeListActivity extends TabActivity implements TvNetworkLis
         channel.clearProgrammes();
         TvChannelCache.getInstance().removeContext(this);
         TvChannelCache.getInstance().removeNetworkListener(this);
+        TvChannelCache.getInstance().setLastActivity(TvChannelCache.LastActivity.ProgrammeListActivity);
         if (progressDialog != null) {
             progressDialog.dismiss();
             progressDialog = null;

@@ -103,7 +103,16 @@ public class TVGuideActivity extends Activity implements TvNetworkListener,
         super.onStart();
         channelListAdapter.attach();
         TvChannelCache.getInstance().addNetworkListener(this);
-        TvChannelCache.getInstance().addContext(this, true);
+
+        TvChannelCache.LastActivity lastActivity = TvChannelCache.getInstance().getLastActivity();
+        TvChannelCache.getInstance().setLastActivity(TvChannelCache.LastActivity.DefaultActivity);
+        boolean forceMainListRefresh = false;
+        if (lastActivity == TvChannelCache.LastActivity.DefaultActivity) {
+            // The application exited via the first screen and then was restarted.
+            // Force a new channel list fetch if it has been at least an hour since the last one.
+            forceMainListRefresh = true;
+        }
+        TvChannelCache.getInstance().addContext(this, forceMainListRefresh);
 
         TvBookmarkManager.getInstance().addContext(this);
         TvBookmarkManager.getInstance().addChangedListener(this);
