@@ -368,6 +368,12 @@
     <number system="foxtel">629</number>
   </channel>
 
+  <channel id="ALJA">
+    <display-name lang="en">Al Jazeera</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/651.png"/>
+    <number system="foxtel">651</number>
+  </channel>
+
   <channel id="ANIMAL">
     <display-name lang="en">Animal Planet</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/615.png"/>
@@ -454,7 +460,8 @@
 
   <channel id="CCTV9">
     <display-name lang="en">CCTV International English</display-name>
-    <todo/>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/653.png"/>
+    <number system="foxtel">653</number>
   </channel>
 
   <channel id="CLAS">
@@ -883,10 +890,58 @@
     <number system="foxtel">504</number>
   </channel>
 
+  <channel id="FMACT">
+    <display-name lang="en">Foxtel Movies Action/Adventure</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/406.png"/>
+    <number system="foxtel">406</number>
+  </channel>
+
   <channel id="FMC">
     <display-name lang="en">Family Movie Channel</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/413.png"/>
     <number system="foxtel">413</number>
+  </channel>
+
+  <channel id="FMCOM">
+    <display-name lang="en">Foxtel Movies Comedy</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/407.png"/>
+    <number system="foxtel">407</number>
+  </channel>
+
+  <channel id="FMCRIM">
+    <display-name lang="en">Foxtel Movies Thriller/Crime</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/409.png"/>
+    <number system="foxtel">409</number>
+  </channel>
+
+  <channel id="FMDRA">
+    <display-name lang="en">Foxtel Movies Drama/Romance</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/408.png"/>
+    <number system="foxtel">408</number>
+  </channel>
+
+  <channel id="FMFAM">
+    <display-name lang="en">Foxtel Movies Family</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/405.png"/>
+    <number system="foxtel">405</number>
+  </channel>
+
+  <channel id="FMMAST">
+    <display-name lang="en">Foxtel Movies Masterpiece</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/410.png"/>
+    <number system="foxtel">410</number>
+  </channel>
+
+  <channel id="FMPREM">
+    <display-name lang="en">Foxtel Movies Premiere</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/401.png"/>
+    <number system="foxtel">401</number>
+  </channel>
+
+  <channel id="FMPREM+2">
+    <display-name lang="en">Foxtel Movies Premiere+2</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/402.png"/>
+    <number system="foxtel">402</number>
   </channel>
 
   <channel id="FOOD">
@@ -957,6 +1012,12 @@
     <display-name lang="en">FX</display-name>
     <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/123.png"/>
     <number system="foxtel">123</number>
+  </channel>
+
+  <channel id="FX+2">
+    <display-name lang="en">FX+2</display-name>
+    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/629.png"/>
+    <number system="foxtel">629</number>
   </channel>
 
   <channel id="GEM-ACT" region="act" common-id="GEM">
@@ -1279,9 +1340,10 @@
     <number system="foxtel">703</number>
   </channel>
 
-  <channel id="NITV">
+  <channel id="NITV" region="au">
     <display-name lang="en">National Indigenous TV</display-name>
-    <icon src="http://www.foxtel.com.au/cms/fragments/fragment_epgflash/logos/180.png"/>
+    <icon src="http://upload.wikimedia.org/wikipedia/en/4/40/NITVLOGO2012.jpg"/>
+    <number system="digital">34</number>
     <number system="foxtel">180</number>
   </channel>
 
