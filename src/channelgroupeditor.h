@@ -18,7 +18,7 @@
 #ifndef _CHANNELGROUPEDITOR_H
 #define _CHANNELGROUPEDITOR_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include "ui_channelgroupeditor.h"
 #include "tvchanneleditmodel.h"
 #include "tvchannelgroup.h"

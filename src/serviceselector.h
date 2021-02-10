@@ -18,7 +18,7 @@
 #ifndef _SERVICESELECTOR_H
 #define _SERVICESELECTOR_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include "ui_serviceselector.h"
 
 class ServiceSelector : public QDialog, private Ui::ServiceSelector

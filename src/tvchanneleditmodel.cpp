@@ -201,5 +201,6 @@ void TvChannelEditModel::refreshChannels()
         m_channels = m_channelList->hiddenChannels();
     else
         m_channels = m_channelList->visibleChannels();
-    reset();
+    beginResetModel();
+    endResetModel();
 }

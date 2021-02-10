@@ -21,9 +21,9 @@
 #include "helpbrowser.h"
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
-#include <QtGui/qapplication.h>
-#include <QtGui/qstyle.h>
-#include <QtGui/qstyleoption.h>
+#include <QtWidgets/qapplication.h>
+#include <QtWidgets/qstyle.h>
+#include <QtWidgets/qstyleoption.h>
 
 BookmarkListEditor::BookmarkListEditor(TvChannelList *channelList, QWidget *parent)
     : QDialog(parent)

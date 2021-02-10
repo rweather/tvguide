@@ -18,7 +18,7 @@
 #ifndef _BOOKMARKITEMEDITOR_H
 #define _BOOKMARKITEMEDITOR_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include "ui_bookmarkitemeditor.h"
 
 class TvChannelList;

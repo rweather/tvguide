@@ -32,6 +32,10 @@ Once you have checked out the sources from the repository,
 you can build it from the command-line as follows:
 
     $ qmake tvguide.pro
+    $ for filepath in $(ls src/*.ui);
+      do
+        uic "$filepath" > "src/ui_$(basename -s .ui "$filepath").h";
+      done
     $ make
 
 Qt Creator can also be used to build the application by

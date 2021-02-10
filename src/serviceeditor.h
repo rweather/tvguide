@@ -18,7 +18,7 @@
 #ifndef _SERVICEEDITOR_H
 #define _SERVICEEDITOR_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include "ui_serviceeditor.h"
 
 class ServiceEditor : public QDialog, private Ui::ServiceEditor

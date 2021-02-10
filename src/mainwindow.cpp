@@ -28,13 +28,13 @@
 #include "websearchdialog.h"
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
-#include <QtGui/qitemselectionmodel.h>
-#include <QtGui/qmessagebox.h>
+#include <QtCore/qitemselectionmodel.h>
+#include <QtWidgets/qmessagebox.h>
 #include <QtGui/qdesktopservices.h>
 #include <QtGui/qevent.h>
-#include <QtGui/qtoolbutton.h>
+#include <QtWidgets/qtoolbutton.h>
 #include <QtGui/qtexttable.h>
-#include <QtGui/qfiledialog.h>
+#include <QtWidgets/qfiledialog.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

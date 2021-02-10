@@ -18,11 +18,11 @@
 #ifndef _MAINWINDOW_H
 #define _MAINWINDOW_H
 
-#include <QtGui/qmainwindow.h>
-#include <QtGui/qprogressbar.h>
-#include <QtGui/qlineedit.h>
-#include <QtGui/qactiongroup.h>
-#include <QtGui/qtoolbutton.h>
+#include <QtWidgets/qmainwindow.h>
+#include <QtWidgets/qprogressbar.h>
+#include <QtWidgets/qlineedit.h>
+#include <QtWidgets/qactiongroup.h>
+#include <QtWidgets/qtoolbutton.h>
 #include "ui_mainwindow.h"
 #include "tvchannellist.h"
 #include "tvchannelmodel.h"

@@ -17,7 +17,7 @@
 
 #include "websearchdialog.h"
 #include "helpbrowser.h"
-#include <QtGui/qpushbutton.h>
+#include <QtWidgets/qpushbutton.h>
 #include <QtCore/qsettings.h>
 
 WebSearchDialog::WebSearchDialog(QWidget *parent)

@@ -18,8 +18,8 @@
 #ifndef _PROGRAMMEVIEW_H
 #define _PROGRAMMEVIEW_H
 
-#include <QtGui/qabstractscrollarea.h>
-#include <QtGui/qstyleoption.h>
+#include <QtWidgets/qabstractscrollarea.h>
+#include <QtWidgets/qstyleoption.h>
 #include <QtCore/qvector.h>
 #include "tvprogramme.h"
 #include "tvprogrammefilter.h"

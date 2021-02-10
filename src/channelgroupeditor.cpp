@@ -17,8 +17,8 @@
 
 #include "channelgroupeditor.h"
 #include "helpbrowser.h"
-#include <QtGui/qinputdialog.h>
-#include <QtGui/qmessagebox.h>
+#include <QtWidgets/qinputdialog.h>
+#include <QtWidgets/qmessagebox.h>
 #include <QtCore/qdebug.h>
 
 ChannelGroupEditor::ChannelGroupEditor(TvChannelList *channelList, QWidget *parent)

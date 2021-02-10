@@ -18,7 +18,7 @@
 #include "channeleditor.h"
 #include "tvchannellist.h"
 #include "helpbrowser.h"
-#include <QtGui/qfiledialog.h>
+#include <QtWidgets/qfiledialog.h>
 #include <QtCore/qfile.h>
 #include <QtCore/qxmlstream.h>
 #include <QtCore/qdebug.h>

@@ -18,7 +18,7 @@
 #ifndef _DAYSELECTIONDIALOG_H
 #define _DAYSELECTIONDIALOG_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include "ui_dayselectiondialog.h"
 
 class DaySelectionDialog : public QDialog, private Ui::DaySelectionDialog

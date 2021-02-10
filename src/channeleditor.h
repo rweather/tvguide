@@ -18,7 +18,7 @@
 #ifndef _CHANNELEDITOR2_H
 #define _CHANNELEDITOR2_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include <QtCore/qmap.h>
 #include <QtCore/qxmlstream.h>
 #include "ui_channeleditor.h"
