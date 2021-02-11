@@ -21,10 +21,7 @@ license can be found in the COPYING file within the sources.
 
 ## Dependencies
 
-It is recommended to use Qt 4.7 or later.  It may build with
-Qt 4.6, but this has not been tested.  It definitely will not
-work with Qt 4.5 and earlier due to missing features in Qt that
-the application relies upon.
+It is recommended to use Qt 5.9.4 or later.
 
 ## Building
 
@@ -32,10 +29,6 @@ Once you have checked out the sources from the repository,
 you can build it from the command-line as follows:
 
     $ qmake tvguide.pro
-    $ for filepath in $(ls src/*.ui);
-      do
-        uic "$filepath" > "src/ui_$(basename -s .ui "$filepath").h";
-      done
     $ make
 
 Qt Creator can also be used to build the application by
