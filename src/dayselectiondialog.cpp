@@ -16,7 +16,7 @@
  */
 
 #include "dayselectiondialog.h"
-#include <QtGui/qpushbutton.h>
+#include <QtWidgets/qpushbutton.h>
 
 DaySelectionDialog::DaySelectionDialog(QWidget *parent)
     : QDialog(parent)

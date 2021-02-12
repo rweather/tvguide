@@ -21,7 +21,7 @@
 #include "tvchannellist.h"
 #include <QtCore/qabstractitemmodel.h>
 #include <QtGui/qicon.h>
-#include <QtGui/qsortfilterproxymodel.h>
+#include <QtCore/qsortfilterproxymodel.h>
 
 class TvChannelEditable
 {

@@ -17,7 +17,7 @@
 
 #include "serviceeditor.h"
 #include "helpbrowser.h"
-#include <QtGui/qpushbutton.h>
+#include <QtWidgets/qpushbutton.h>
 
 ServiceEditor::ServiceEditor(QWidget *parent)
     : QDialog(parent)

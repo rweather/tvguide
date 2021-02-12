@@ -19,7 +19,7 @@
 #include "tvchannellist.h"
 #include "dayselectiondialog.h"
 #include "helpbrowser.h"
-#include <QtGui/qcolordialog.h>
+#include <QtWidgets/qcolordialog.h>
 #include <QtGui/qpixmap.h>
 #include <QtGui/qicon.h>
 

@@ -18,7 +18,7 @@
 #ifndef _WEBSEARCHDIALOG_H
 #define _WEBSEARCHDIALOG_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include <QtCore/qurl.h>
 #include "ui_websearchdialog.h"
 

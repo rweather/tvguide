@@ -19,7 +19,7 @@
 #include "tvchannellist.h"
 #include <QtGui/qbrush.h>
 #include <QtGui/qpalette.h>
-#include <QtGui/qwidget.h>
+#include <QtWidgets/qwidget.h>
 #include <QtCore/qdebug.h>
 
 TvBookmarkModel::TvBookmarkModel(TvChannelList *channelList, QObject *parent)

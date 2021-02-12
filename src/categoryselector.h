@@ -18,7 +18,7 @@
 #ifndef _CATEGORYSELECTOR_H
 #define _CATEGORYSELECTOR_H
 
-#include <QtGui/qdialog.h>
+#include <QtWidgets/qdialog.h>
 #include <QtCore/qset.h>
 #include "ui_categoryselector.h"
 

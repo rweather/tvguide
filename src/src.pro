@@ -1,3 +1,5 @@
+QT += core gui widgets
+
 TARGET = tvguide
 
 SOURCES += \

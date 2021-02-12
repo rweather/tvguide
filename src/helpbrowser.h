@@ -18,7 +18,7 @@
 #ifndef _HELPBROWSER_H
 #define _HELPBROWSER_H
 
-#include <QtGui/qmainwindow.h>
+#include <QtWidgets/qmainwindow.h>
 #include "ui_helpbrowser.h"
 
 class HelpBrowser : public QMainWindow, private Ui::HelpBrowser

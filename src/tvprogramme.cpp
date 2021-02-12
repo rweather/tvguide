@@ -414,58 +414,58 @@ QString TvProgramme::longDescription() const
         return m_longDescription;
     TvBookmark::Match match = displayMatch();
     QString desc = QLatin1String("<qt><p><i>");
-    desc += Qt::escape(m_description) + QLatin1String("</i></p>");
+    desc += m_description.toHtmlEscaped() + QLatin1String("</i></p>");
     desc += QObject::tr("<p><b>Duration:</b> %1 minutes, %2 to %3</p>")
                 .arg(QString::number(m_start.secsTo(m_stop) / 60))
                 .arg(m_start.time().toString(Qt::LocaleDate))
                 .arg(m_stop.time().toString(Qt::LocaleDate));
     if (!m_date.isEmpty() && m_date != QLatin1String("0")) {
         desc += QObject::tr("<p><b>Year:</b> %1</p>")
-            .arg(Qt::escape(m_date));
+            .arg(m_date.toHtmlEscaped());
     }
     if (m_categories.size() > 1) {
         desc += QObject::tr("<p><b>Categories:</b> %1</p>")
-            .arg(Qt::escape(m_categories.join(QLatin1String(", "))));
+            .arg(m_categories.join(QLatin1String(", ")).toHtmlEscaped());
     }
     if (!m_actors.isEmpty()) {
         desc += QObject::tr("<p><b>Starring:</b> %1</p>")
-            .arg(Qt::escape(m_actors.join(QLatin1String(", "))));
+            .arg(m_actors.join(QLatin1String(", ")).toHtmlEscaped());
     }
     if (!m_presenters.isEmpty()) {
         desc += QObject::tr("<p><b>Presenter:</b> %1</p>")
-            .arg(Qt::escape(m_presenters.join(QLatin1String(", "))));
+            .arg(m_presenters.join(QLatin1String(", ")).toHtmlEscaped());
     }
     if (!m_otherCredits.isEmpty()) {
         QMap<QString, QStringList>::ConstIterator it;
         for (it = m_otherCredits.constBegin();
                 it != m_otherCredits.constEnd(); ++it) {
             desc += QString(QLatin1String("<p><b>%1:</b> %2</p>"))
-                .arg(Qt::escape(it.key()))
-                .arg(Qt::escape(it.value().join(QLatin1String(", "))));
+                .arg(it.key().toHtmlEscaped())
+                .arg(it.value().join(QLatin1String(", ")).toHtmlEscaped());
         }
     }
     if (!m_directors.isEmpty()) {
         desc += QObject::tr("<p><b>Director:</b> %1</p>")
-            .arg(Qt::escape(m_directors.join(QLatin1String(", "))));
+            .arg(m_directors.join(QLatin1String(", ")).toHtmlEscaped());
     }
     if (!m_language.isEmpty() && !m_originalLanguage.isEmpty() &&
             m_language != m_originalLanguage) {
         desc += QObject::tr("<p><b>Language:</b> %1 (original in %2)</p>")
-            .arg(Qt::escape(m_language), Qt::escape(m_originalLanguage));
+            .arg(m_language.toHtmlEscaped(), m_originalLanguage.toHtmlEscaped());
     } else if (!m_language.isEmpty()) {
         desc += QObject::tr("<p><b>Language:</b> %1</p>")
-            .arg(Qt::escape(m_language));
+            .arg(m_language.toHtmlEscaped());
     } else if (!m_originalLanguage.isEmpty()) {
         desc += QObject::tr("<p><b>Original Language:</b> %1</p>")
-            .arg(Qt::escape(m_originalLanguage));
+            .arg(m_originalLanguage.toHtmlEscaped());
     }
     if (!m_country.isEmpty()) {
         desc += QObject::tr("<p><b>Country:</b> %1</p>")
-            .arg(Qt::escape(m_country));
+            .arg(m_country.toHtmlEscaped());
     }
     if (!m_aspectRatio.isEmpty()) {
         desc += QObject::tr("<p><b>Aspect ratio:</b> %1</p>")
-            .arg(Qt::escape(m_aspectRatio));
+            .arg(m_aspectRatio.toHtmlEscaped());
     }
     if (match == TvBookmark::ShouldMatch) {
         QList<TvProgramme *> others = m_bookmark->m_matchingProgrammes;
@@ -491,7 +491,7 @@ QString TvProgramme::longDescription() const
                     desc += QObject::tr("<p><b><s>%1</s> may have moved to:</b><ul><li>").arg(title);
                     needComma = true;
                 }
-                desc += Qt::escape(other->channel()->name());
+                desc += other->channel()->name().toHtmlEscaped();
                 desc += other->start().date().toString(QLatin1String(" dddd, MMMM d, "));
                 desc += other->start().time().toString(Qt::LocaleDate);
             }
@@ -506,7 +506,7 @@ QString TvProgramme::longDescription() const
         QString otherShowings = formatOtherShowings();
         if (!otherShowings.isEmpty()) {
             desc += QObject::tr("<p><b>Other showings:</b> %1</p>")
-                .arg(Qt::escape(otherShowings));
+                .arg(otherShowings.toHtmlEscaped());
         }
     }
     desc += QLatin1String("</qt>");

@@ -1,5 +1,6 @@
+QT += testlib
 TARGET = tst_tvbookmark
-CONFIG += qtestlib
+CONFIG += testlib
 SOURCES += tst_tvbookmark.cpp
 include(../../src/library.pri)
 

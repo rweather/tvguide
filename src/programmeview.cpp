@@ -21,10 +21,10 @@
 #include <QtGui/qtextdocument.h>
 #include <QtGui/qtexttable.h>
 #include <QtGui/qabstracttextdocumentlayout.h>
-#include <QtGui/qscrollbar.h>
+#include <QtWidgets/qscrollbar.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qevent.h>
-#include <QtGui/qtooltip.h>
+#include <QtWidgets/qtooltip.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/qsettings.h>
 
@@ -122,7 +122,7 @@ void ProgrammeView::setProgrammes(const QDate &date, const QList<TvProgramme *> 
         ColumnInfo *column = new ColumnInfo();
         for (int index = 0; index < programmes.size(); ++index) {
             ProgInfo info(programmes.at(index));
-            info.dayNumber = qMax(date.daysTo(info.prog->start().date()), 0);
+            info.dayNumber = qMax(int(date.daysTo(info.prog->start().date())), 0);
             column->programmes.append(info);
         }
         writeColumn(column, 0);
@@ -158,7 +158,7 @@ void ProgrammeView::setMultiChannelProgrammes(const QDate &date, const QList<TvP
         ColumnInfo *column = new ColumnInfo();
         for (int index = start; index < end; ++index) {
             ProgInfo info(programmes.at(index));
-            info.dayNumber = qMax(date.daysTo(info.prog->start().date()), 0);
+            info.dayNumber = qMax(int(date.daysTo(info.prog->start().date())), 0);
             column->programmes.append(info);
         }
         writeColumn(column, m_columns.size());

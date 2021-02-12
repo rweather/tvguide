@@ -209,12 +209,14 @@ QModelIndexList TvChannelModel::itemListFromIds(const QStringList &ids) const
 void TvChannelModel::channelsChanged()
 {
     loadVisibleChannels();
-    reset();
+    beginResetModel();
+    endResetModel();
 }
 
 void TvChannelModel::channelIconsChanged()
 {
-    reset();
+    beginResetModel();
+    endResetModel();
 }
 
 static bool sortGroups(TvChannelGroup *g1, TvChannelGroup *g2)

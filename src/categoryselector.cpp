@@ -16,7 +16,7 @@
  */
 
 #include "categoryselector.h"
-#include <QtGui/qpushbutton.h>
+#include <QtWidgets/qpushbutton.h>
 
 CategorySelector::CategorySelector(QWidget *parent)
     : QDialog(parent)

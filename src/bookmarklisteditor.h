@@ -18,8 +18,8 @@
 #ifndef _BOOKMARKLISTEDITOR_H
 #define _BOOKMARKLISTEDITOR_H
 
-#include <QtGui/qdialog.h>
-#include <QtGui/qsortfilterproxymodel.h>
+#include <QtWidgets/qdialog.h>
+#include <QtCore/qsortfilterproxymodel.h>
 #include "ui_bookmarklisteditor.h"
 #include "tvbookmarkmodel.h"
 
